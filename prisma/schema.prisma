@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  INVESTOR
+  RESIDENT
+}
+
+enum ResidentStatus {
+  ACTIVE
+  INACTIVE
+  MOVED_OUT
+  TRANSFERRED
+}
+
+enum UnitStatus {
+  VACANT
+  OCCUPIED
+}
+
+enum InvoiceStatus {
+  ISSUED
+  PAID
+  PARTIALLY_PAID
+  OVERDUE
+}
+
+enum PaymentChannel {
+  MOBILE_MONEY
+  CARD
+  BANK
+}
+
+enum PaymentProvider {
+  MTN
+  AIRTEL
+  FLUTTERWAVE
+  ONAFRIQ
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum LedgerType {
+  DEBIT
+  CREDIT
+}
+
+enum RentCycle {
+  MONTHLY
+}
+
+model User {
+  id       String  @id @default(uuid())
+  name     String?
+  email    String? @unique
+  phone    String? @unique
+  password String
+  role     Role    @default(RESIDENT)
+
+  residentProfile  Resident?    @relation("ResidentUser")
+  createdResidents Resident[]   @relation("ResidentCreator")
+  investments      Investment[]
+  properties       Property[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Property {
+  id        String  @id @default(uuid())
+  title     String
+  location  String?
+  managerId String?
+
+  manager     User?        @relation(fields: [managerId], references: [id])
+  units       Unit[]
+  investments Investment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Unit {
+  id         String     @id @default(uuid())
+  number     String
+  rentAmount Int
+  rentCycle  RentCycle  @default(MONTHLY)
+  status     UnitStatus @default(VACANT)
+  propertyId String
+
+  property  Property       @relation(fields: [propertyId], references: [id])
+  contracts RentContract[]
+  residents Resident[]
+  invoices  RentInvoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Resident {
+  id          String         @id @default(uuid())
+  userId      String         @unique
+  unitId      String?
+  status      ResidentStatus @default(ACTIVE)
+  moveOutDate DateTime?
+  createdById String?
+
+  user      User  @relation("ResidentUser", fields: [userId], references: [id])
+  createdBy User? @relation("ResidentCreator", fields: [createdById], references: [id])
+  unit      Unit? @relation(fields: [unitId], references: [id])
+
+  contracts RentContract[]
+  invoices  RentInvoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RentContract {
+  id                String   @id @default(uuid())
+  unitId            String
+  residentId        String
+  rentAmount        Int
+  depositAmount     Int
+  initialTermMonths Int
+  startDate         DateTime
+  billingAnchorDay  Int
+  nextBillableDate  DateTime
+  isActive          Boolean  @default(true)
+
+  unit     Unit     @relation(fields: [unitId], references: [id])
+  resident Resident @relation(fields: [residentId], references: [id])
+
+  invoices RentInvoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RentInvoice {
+  id             String        @id @default(uuid())
+  rentContractId String
+  residentId     String
+  unitId         String
+  period         String
+  amountDue      Int
+  status         InvoiceStatus @default(ISSUED)
+  dueDate        DateTime
+
+  rentContract RentContract @relation(fields: [rentContractId], references: [id])
+  resident     Resident     @relation(fields: [residentId], references: [id])
+  unit         Unit         @relation(fields: [unitId], references: [id])
+
+  payments Payment[]
+  ledger   LedgerEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([rentContractId, period])
+}
+
+model Payment {
+  id          String          @id @default(uuid())
+  invoiceId   String
+  amount      Int
+  channel     PaymentChannel
+  provider    PaymentProvider
+  providerRef String          @unique
+  status      PaymentStatus
+
+  invoice RentInvoice   @relation(fields: [invoiceId], references: [id])
+  ledger  LedgerEntry[]
+
+  createdAt DateTime @default(now())
+}
+
+model LedgerEntry {
+  id        String     @id @default(uuid())
+  invoiceId String?
+  paymentId String?
+  amount    Int
+  type      LedgerType
+  note      String?
+
+  invoice RentInvoice? @relation(fields: [invoiceId], references: [id])
+  payment Payment?     @relation(fields: [paymentId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Investment {
+  id         String @id @default(uuid())
+  propertyId String
+  investorId String
+  amount     Int
+
+  property Property @relation(fields: [propertyId], references: [id])
+  investor User     @relation(fields: [investorId], references: [id])
+
+  createdAt DateTime @default(now())
+}
