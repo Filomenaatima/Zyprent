@@ -1,0 +1,633 @@
+.provider-payouts-page-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  width: 100%;
+}
+
+.provider-payouts-hero {
+  min-height: 164px;
+  border-radius: 28px;
+  padding: 22px 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.7fr);
+  gap: 16px;
+  align-items: center;
+  background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 58%, #38bdf8 100%);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  box-shadow:
+    0 18px 36px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.provider-payouts-hero-copy {
+  min-width: 0;
+}
+
+.provider-payouts-eyebrow {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(191, 219, 254, 0.92);
+}
+
+.provider-payouts-title {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  color: #f8fafc;
+}
+
+.provider-payouts-text {
+  margin: 12px 0 0;
+  max-width: 760px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.provider-payouts-hero-side {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.provider-payouts-mini-stat {
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+}
+
+.provider-payouts-mini-stat span {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(219, 234, 254, 0.92);
+}
+
+.provider-payouts-mini-stat strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.provider-payouts-feedback {
+  border-radius: 18px;
+  padding: 13px 16px;
+  font-size: 13px;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+
+.provider-payouts-feedback.success {
+  background: #ecfdf5;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.provider-payouts-feedback.error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.provider-payouts-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 16px;
+}
+
+.payouts-balance-card,
+.payouts-highlight-card {
+  border-radius: 28px;
+  padding: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border: 1px solid #e7edf5;
+  box-shadow:
+    0 8px 22px rgba(15, 23, 42, 0.05),
+    0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+.payouts-balance-card {
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 24%),
+    linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+}
+
+.payouts-balance-label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #94a3b8;
+}
+
+.payouts-balance-value {
+  margin: 12px 0 0;
+  font-size: 42px;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.payouts-balance-subtext {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.payouts-balance-strip {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.payouts-balance-strip div {
+  border-radius: 18px;
+  padding: 14px;
+  background: #f8fbff;
+  border: 1px solid #e8eef6;
+}
+
+.payouts-balance-strip span,
+.highlight-amount-block span,
+.highlight-meta-grid span,
+.provider-payouts-stat-card p,
+.payout-ledger-box span {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #94a3b8;
+}
+
+.payouts-balance-strip strong,
+.highlight-amount-block strong,
+.highlight-meta-grid strong,
+.payout-ledger-box strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.payouts-balance-actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.payout-action-btn,
+.payout-ledger-btn,
+.withdraw-btn {
+  min-width: 150px;
+  height: 46px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.payout-action-btn:hover,
+.payout-ledger-btn:hover,
+.withdraw-btn:hover {
+  transform: translateY(-1px);
+}
+
+.payout-action-btn.primary,
+.payout-ledger-btn.primary,
+.withdraw-btn.primary {
+  border: none;
+  color: #ffffff;
+  background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.16);
+}
+
+.payout-action-btn.secondary,
+.payout-ledger-btn.secondary,
+.withdraw-btn.secondary {
+  background: #ffffff;
+  border: 1px solid #dbe4ef;
+  color: #0f172a;
+}
+
+.payouts-highlight-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.payouts-highlight-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.payouts-highlight-header p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.payout-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.payout-status-pill.paid {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.payout-status-pill.pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.payout-status-pill.failed {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.payout-status-pill.neutral {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.payouts-highlight-content {
+  margin-top: 16px;
+}
+
+.highlight-amount-block {
+  border-radius: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);
+}
+
+.highlight-amount-block span {
+  color: rgba(219, 234, 254, 0.92);
+}
+
+.highlight-amount-block strong {
+  color: #ffffff;
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+
+.highlight-meta-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.highlight-meta-grid div {
+  border-radius: 16px;
+  padding: 14px;
+  background: #f8fbff;
+  border: 1px solid #e8eef6;
+}
+
+.payouts-empty-mini {
+  margin-top: 16px;
+  border-radius: 18px;
+  padding: 18px;
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  background: #f8fbff;
+  border: 1px dashed #d7e3f1;
+}
+
+.provider-payouts-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid #dbe7f5;
+  box-shadow:
+    0 8px 20px rgba(15, 23, 42, 0.05),
+    0 2px 6px rgba(15, 23, 42, 0.03);
+}
+
+.provider-payouts-search,
+.provider-payouts-select,
+.withdraw-field input {
+  height: 48px;
+  border-radius: 14px;
+  border: 1px solid #dbeafe;
+  background: #ffffff;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #0f172a;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.provider-payouts-search:focus,
+.provider-payouts-select:focus,
+.withdraw-field input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.14);
+}
+
+.provider-payouts-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.provider-payouts-stat-card {
+  border-radius: 20px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e7edf5;
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.03),
+    0 1px 2px rgba(15, 23, 42, 0.02);
+}
+
+.provider-payouts-stat-card h3 {
+  margin: 10px 0 0;
+  font-size: 24px;
+  line-height: 1.15;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.provider-payouts-empty-wrap {
+  display: flex;
+}
+
+.provider-payouts-empty-card {
+  width: 100%;
+  border-radius: 22px;
+  padding: 24px 18px;
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px dashed #d7e3f1;
+}
+
+.provider-payouts-ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.payout-ledger-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: stretch;
+  border-radius: 26px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 24%),
+    linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border: 1px solid #e7edf5;
+  box-shadow:
+    0 8px 22px rgba(15, 23, 42, 0.05),
+    0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+.payout-ledger-main {
+  min-width: 0;
+}
+
+.payout-ledger-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.payout-ledger-copy h3 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.1;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.payout-ledger-copy p {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.payout-ledger-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.payout-ledger-box {
+  border-radius: 18px;
+  padding: 14px;
+  background: #f8fbff;
+  border: 1px solid #e8eef6;
+}
+
+.payout-ledger-box.net {
+  background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);
+}
+
+.payout-ledger-box.net span,
+.payout-ledger-box.net strong {
+  color: #ffffff;
+}
+
+.payout-ledger-side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+
+.withdraw-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1000;
+}
+
+.withdraw-modal {
+  width: min(520px, 100%);
+  border-radius: 26px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid #dbe7f5;
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.2),
+    0 10px 24px rgba(15, 23, 42, 0.08);
+  padding: 22px;
+}
+
+.withdraw-modal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.withdraw-modal-eyebrow {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #2563eb;
+}
+
+.withdraw-modal-title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.08;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #0f172a;
+}
+
+.withdraw-modal-subtitle {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.withdraw-modal-close {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid #dbe4ef;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.withdraw-modal-body {
+  margin-top: 18px;
+}
+
+.withdraw-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.withdraw-field span {
+  font-size: 11px;
+  font-weight: 800;
+  color: #334155;
+}
+
+.withdraw-modal-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 1200px) {
+  .provider-payouts-overview-grid,
+  .provider-payouts-stats-grid,
+  .payout-ledger-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .payout-ledger-row {
+    grid-template-columns: 1fr;
+  }
+
+  .payout-ledger-side {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 980px) {
+  .provider-payouts-hero,
+  .provider-payouts-toolbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .provider-payouts-overview-grid,
+  .provider-payouts-stats-grid,
+  .highlight-meta-grid,
+  .payout-ledger-grid,
+  .payouts-balance-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .payout-ledger-top,
+  .withdraw-modal-header,
+  .withdraw-modal-actions {
+    flex-direction: column;
+  }
+
+  .provider-payouts-title {
+    font-size: 28px;
+  }
+
+  .payouts-balance-value {
+    font-size: 32px;
+  }
+
+  .payout-ledger-btn,
+  .withdraw-btn,
+  .payout-action-btn {
+    width: 100%;
+  }
+
+  .payout-ledger-side,
+  .payouts-balance-actions {
+    flex-direction: column;
+  }
+
+  .withdraw-modal-title {
+    font-size: 24px;
+  }
+}
