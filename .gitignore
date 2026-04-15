@@ -1,9 +1,14 @@
-# compiled output
+# ========================
+# Build / Compiled Output
+# ========================
 /dist
-/node_modules
 /build
+/node_modules
+.next/
 
+# ========================
 # Logs
+# ========================
 logs
 *.log
 npm-debug.log*
@@ -12,15 +17,27 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# ========================
 # OS
+# ========================
 .DS_Store
 
-# Tests
+# ========================
+# Testing
+# ========================
 /coverage
 /.nyc_output
 
-# IDEs and editors
-/.idea
+# ========================
+# IDEs / Editors
+# ========================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+.idea
 .project
 .classpath
 .c9/
@@ -28,31 +45,50 @@ lerna-debug.log*
 .settings/
 *.sublime-workspace
 
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# dotenv environment variable files
+# ========================
+# Environment Files
+# ========================
 .env
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
 .env.local
 
-# temp directory
+# ========================
+# Temp Files
+# ========================
 .temp
 .tmp
 
-# Runtime data
+# ========================
+# Runtime / Process Files
+# ========================
 pids
 *.pid
 *.seed
 *.pid.lock
 
-# Diagnostic reports (https://nodejs.org/api/report.html)
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+# ========================
+# Reports
+# ========================
+report.*.json
 
-/generated/prisma
+# ========================
+# Database Files (CRITICAL)
+# ========================
+*.sqlite
+*.db
+
+# ========================
+# Prisma (CRITICAL FIX)
+# ========================
+prisma/generated/
+generated/prisma/
+
+# ========================
+# Backend (ignore for now)
+# ========================
+rental-saas-backend/
+
+# ========================
+# Misc
+# ========================
+.DS_Store
