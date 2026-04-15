@@ -235,11 +235,11 @@ a {
 
 .hero-copy h1 {
   margin: 0;
-  max-width: 760px;
+  max-width: 620px;
   color: var(--landing-text);
-  font-size: clamp(52px, 7vw, 88px);
-  line-height: 0.95;
-  letter-spacing: -0.065em;
+  font-size: clamp(32px, 4.2vw, 58px);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
   font-weight: 900;
 }
 
@@ -1017,8 +1017,9 @@ a {
   }
 
   .hero-copy h1 {
-    font-size: 46px;
-  }
+  font-size: 34px;
+  line-height: 1.06;
+}
 
   .hero-text,
   .section-heading p:not(.section-eyebrow),
