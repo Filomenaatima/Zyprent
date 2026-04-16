@@ -213,10 +213,10 @@ a {
 
 .hero-section {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
-  gap: 42px;
-  padding-top: 44px;
+  gap: 36px; 
+  padding-top: 32px; 
 }
 
 .hero-copy,
@@ -235,20 +235,21 @@ a {
 
 .hero-copy h1 {
   margin: 0;
-  max-width: 620px;
+  max-width: 640px;
   color: var(--landing-text);
-  font-size: clamp(32px, 4.2vw, 58px);
-  line-height: 1.02;
-  letter-spacing: -0.045em;
-  font-weight: 900;
+
+  font-size: clamp(28px, 2.8vw, 42px); 
+  line-height: 1.15;                 
+  letter-spacing: -0.02em;          
+  font-weight: 700;               
 }
 
 .hero-text {
-  max-width: 720px;
-  margin: 22px 0 0;
+  max-width: 600px;
+  margin: 18px 0 0;
   color: var(--landing-text-soft);
-  font-size: 19px;
-  line-height: 1.75;
+  font-size: 16px;     
+  line-height: 1.6;
 }
 
 .hero-actions {
