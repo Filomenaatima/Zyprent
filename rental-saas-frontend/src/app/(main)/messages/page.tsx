@@ -368,7 +368,7 @@ export default function MessagesPage() {
           </h1>
           <p className="messages-text">
             Keep a permanent record of your investment communication with verified
-            Zyrent-connected contacts. Use this space for portfolio questions,
+            Zyprent-connected contacts. Use this space for portfolio questions,
             distribution follow-up, property updates, and manager support.
           </p>
 
@@ -550,7 +550,7 @@ export default function MessagesPage() {
             <div className="messages-thread-empty">
               <h3>No active conversation</h3>
               <p>
-                Open a secure thread from the left panel. Only verified Zyrent-connected
+                Open a secure thread from the left panel. Only verified Zyprent-connected
                 contacts can be messaged here.
               </p>
             </div>

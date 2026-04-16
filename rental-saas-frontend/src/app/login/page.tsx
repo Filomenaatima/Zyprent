@@ -40,7 +40,7 @@ export default function LoginPage() {
     <div className="flex h-screen items-center justify-center bg-[#F8FAFC]">
       <div className="bg-white p-10 rounded-2xl shadow-md w-[350px]">
         <h2 className="text-xl font-bold mb-6 text-center text-[#06152B]">
-          Zyrent Login
+          Zyprent Login
         </h2>
 
         <input

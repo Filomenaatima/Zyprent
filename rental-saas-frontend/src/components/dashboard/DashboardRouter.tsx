@@ -1320,7 +1320,7 @@ export default function DashboardRouter() {
           <p className="admin-hero-eyebrow">Platform command center</p>
           <h1 className="admin-hero-title">Admin overview</h1>
           <p className="admin-hero-text">
-            Control the full Zyrent system across users, asset operations,
+            Control the full Zyprent system across users, asset operations,
             financial oversight, compliance, and platform growth.
           </p>
 
