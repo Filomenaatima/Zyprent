@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import axios from "@/lib/axios";
+import { api } from "@/services/api";
 import "@/styles/providers.css";
 
 type ProviderVerificationStatus = "PENDING" | "VERIFIED" | "REJECTED" | string;
@@ -99,8 +99,8 @@ export default function ProvidersPage() {
       }
 
       const [providersRes, summaryRes] = await Promise.all([
-        axios.get("/service-providers", { params }),
-        axios.get("/service-providers/summary"),
+        api.get("/service-providers", { params }),
+        api.get("/service-providers/summary"),
       ]);
 
       const rows: Provider[] = providersRes.data ?? [];
@@ -208,33 +208,32 @@ export default function ProvidersPage() {
   }, [providers]);
 
   const verifyProvider = async (id: string) => {
-    try {
-      setBusyId(id);
-      await axios.patch(`/service-providers/${id}/verify`);
-      await fetchProviders();
-    } catch (err) {
-      console.error("Failed to verify provider", err);
-    } finally {
-      setBusyId(null);
-    }
-  };
+  try {
+    setBusyId(id);
+    await api.patch(`/service-providers/${id}/verify`);
+    await fetchProviders();
+  } catch (err) {
+    console.error("Failed to verify provider", err);
+  } finally {
+    setBusyId(null);
+  }
+};
 
-  const toggleActive = async (provider: Provider) => {
-    try {
-      setBusyId(provider.id);
-      if (provider.isActive) {
-        await axios.patch(`/service-providers/${provider.id}/deactivate`);
-      } else {
-        await axios.patch(`/service-providers/${provider.id}/reactivate`);
-      }
-      await fetchProviders();
-    } catch (err) {
-      console.error("Failed to update provider status", err);
-    } finally {
-      setBusyId(null);
+const toggleActive = async (provider: Provider) => {
+  try {
+    setBusyId(provider.id);
+    if (provider.isActive) {
+      await api.patch(`/service-providers/${provider.id}/deactivate`);
+    } else {
+      await api.patch(`/service-providers/${provider.id}/reactivate`);
     }
-  };
-
+    await fetchProviders();
+  } catch (err) {
+    console.error("Failed to update provider status", err);
+  } finally {
+    setBusyId(null);
+  }
+};
   return (
     <div className="providers-page-shell">
       <section className="providers-hero">

@@ -4,6 +4,7 @@ import "@/styles/properties.css";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { api } from "@/services/api";
+import { useAuthStore } from "@/store/auth";
 
 type PropertySummary = {
   totalProperties: number;
@@ -24,34 +25,34 @@ type PropertyItem = {
   id: string;
   title: string;
   location: string | null;
-  owner: {
+  owner?: {
     id: string;
     name: string | null;
     email: string | null;
     phone: string | null;
   } | null;
-  manager: {
+  manager?: {
     id: string;
     name: string | null;
     email: string | null;
     phone: string | null;
   } | null;
-  serviceChargeAmount: number;
-  garbageFeeAmount: number;
-  accountBalance: number;
-  marketValue: number;
-  marketPricePerShare: number;
-  valuationCapRate: number;
-  valuationUpdatedAt: string | null;
-  valuationUpdatedBy: string | null;
-  investmentOffer: {
+  serviceChargeAmount?: number;
+  garbageFeeAmount?: number;
+  accountBalance?: number;
+  marketValue?: number;
+  marketPricePerShare?: number;
+  valuationCapRate?: number;
+  valuationUpdatedAt?: string | null;
+  valuationUpdatedBy?: string | null;
+  investmentOffer?: {
     id: string;
     totalShares: number;
     pricePerShare: number;
     sharesSold: number;
     isActive: boolean;
   } | null;
-  metrics: {
+  metrics?: {
     totalUnits: number;
     occupiedUnits: number;
     vacantUnits: number;
@@ -67,11 +68,18 @@ type PropertyItem = {
     sharesSold: number;
     offerUtilization: number;
   };
+  totalUnits?: number;
+  occupiedUnits?: number;
+  vacantUnits?: number;
+  occupancyRate?: number;
+  monthlyRentPotential?: number;
+  pendingInvoices?: number;
+  activeMaintenanceCount?: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 };
 
-type PropertiesResponse = {
+type AdminPropertiesResponse = {
   summary: PropertySummary;
   properties: PropertyItem[];
 };
@@ -84,68 +92,78 @@ function formatPercent(value: number) {
   return `${Number(value || 0).toFixed(1)}%`;
 }
 
-function formatDate(value?: string | null) {
-  if (!value) return "—";
-  return new Date(value).toLocaleDateString("en-UG", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+function formatUnitCount(value: number) {
+  return `${value} ${value === 1 ? "unit" : "units"}`;
 }
 
-function getPropertyStatusTone(property: PropertyItem) {
-  if (!property.manager) return "warn";
-  if (property.metrics.activeMaintenanceCount > 0) return "issue";
-  if (property.metrics.pendingInvoices > 0) return "warn";
+function buildMetrics(property: PropertyItem) {
+  return {
+    totalUnits: Number(property.metrics?.totalUnits ?? property.totalUnits ?? 0),
+    occupiedUnits: Number(
+      property.metrics?.occupiedUnits ?? property.occupiedUnits ?? 0,
+    ),
+    vacantUnits: Number(property.metrics?.vacantUnits ?? property.vacantUnits ?? 0),
+    occupancyRate: Number(
+      property.metrics?.occupancyRate ?? property.occupancyRate ?? 0,
+    ),
+    monthlyRentPotential: Number(
+      property.metrics?.monthlyRentPotential ??
+        property.monthlyRentPotential ??
+        0,
+    ),
+    pendingInvoices: Number(
+      property.metrics?.pendingInvoices ?? property.pendingInvoices ?? 0,
+    ),
+    invoiceExposure: Number(property.metrics?.invoiceExposure ?? 0),
+    activeMaintenanceCount: Number(
+      property.metrics?.activeMaintenanceCount ??
+        property.activeMaintenanceCount ??
+        0,
+    ),
+    totalExpenses: Number(property.metrics?.totalExpenses ?? 0),
+    totalInvestments: Number(property.metrics?.totalInvestments ?? 0),
+    totalDistributedProfit: Number(property.metrics?.totalDistributedProfit ?? 0),
+    sharesIssued: Number(property.metrics?.sharesIssued ?? 0),
+    sharesSold: Number(property.metrics?.sharesSold ?? 0),
+    offerUtilization: Number(property.metrics?.offerUtilization ?? 0),
+  };
+}
+
+function getPropertyStatusTone(property: PropertyItem, isManager: boolean) {
+  const metrics = buildMetrics(property);
+
+  if (metrics.totalUnits === 0) return "warn";
+  if (!isManager && !property.manager) return "warn";
+  if (metrics.activeMaintenanceCount > 0) return "issue";
+  if (metrics.pendingInvoices > 0) return "warn";
+  if (metrics.vacantUnits > 0) return "warn";
+
   return "clear";
 }
 
-function getPropertyStatusLabel(property: PropertyItem) {
-  if (!property.manager) return "Needs manager";
-  if (property.metrics.activeMaintenanceCount > 0) {
-    return `${property.metrics.activeMaintenanceCount} active issues`;
+function getPropertyStatusLabel(property: PropertyItem, isManager: boolean) {
+  const metrics = buildMetrics(property);
+
+  if (metrics.totalUnits === 0) return "No units added";
+  if (!isManager && !property.manager) return "Needs manager";
+
+  if (metrics.activeMaintenanceCount > 0) {
+    return `${metrics.activeMaintenanceCount} active issues`;
   }
-  if (property.metrics.pendingInvoices > 0) {
-    return `${property.metrics.pendingInvoices} pending invoices`;
+
+  if (metrics.pendingInvoices > 0) {
+    return `${metrics.pendingInvoices} pending invoices`;
   }
+
+  if (metrics.vacantUnits > 0) {
+    return `${metrics.vacantUnits} vacant`;
+  }
+
   return "Stable";
 }
 
-export default function PropertiesPage() {
-  const [data, setData] = useState<PropertiesResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [query, setQuery] = useState("");
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadProperties() {
-      try {
-        setLoading(true);
-        setError("");
-
-        const res = await api.get<PropertiesResponse>("/properties");
-
-        if (!mounted) return;
-        setData(res.data);
-      } catch (error) {
-        console.error("Failed to load admin properties", error);
-        if (!mounted) return;
-        setError("We couldn’t load platform properties right now.");
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
-
-    loadProperties();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const summary = data?.summary ?? {
+function emptySummary(): PropertySummary {
+  return {
     totalProperties: 0,
     withManagers: 0,
     withoutManagers: 0,
@@ -159,8 +177,148 @@ export default function PropertiesPage() {
     activeMaintenanceCount: 0,
     totalMarketValue: 0,
   };
+}
 
-  const properties = data?.properties ?? [];
+function buildManagerSummary(properties: PropertyItem[]): PropertySummary {
+  const normalized = properties.map((property) => ({
+    ...property,
+    metrics: buildMetrics(property),
+  }));
+
+  const totalProperties = normalized.length;
+  const totalUnits = normalized.reduce(
+    (sum, property) => sum + property.metrics.totalUnits,
+    0,
+  );
+  const occupiedUnits = normalized.reduce(
+    (sum, property) => sum + property.metrics.occupiedUnits,
+    0,
+  );
+  const vacantUnits = normalized.reduce(
+    (sum, property) => sum + property.metrics.vacantUnits,
+    0,
+  );
+  const totalMonthlyRentPotential = normalized.reduce(
+    (sum, property) => sum + property.metrics.monthlyRentPotential,
+    0,
+  );
+  const totalInvoiceExposure = normalized.reduce(
+    (sum, property) => sum + property.metrics.invoiceExposure,
+    0,
+  );
+  const activeMaintenanceCount = normalized.reduce(
+    (sum, property) => sum + property.metrics.activeMaintenanceCount,
+    0,
+  );
+  const totalAccountBalance = normalized.reduce(
+    (sum, property) => sum + Number(property.accountBalance ?? 0),
+    0,
+  );
+  const totalMarketValue = normalized.reduce(
+    (sum, property) => sum + Number(property.marketValue ?? 0),
+    0,
+  );
+
+  return {
+    totalProperties,
+    withManagers: totalProperties,
+    withoutManagers: 0,
+    totalUnits,
+    occupiedUnits,
+    vacantUnits,
+    averageOccupancyRate:
+      totalUnits > 0
+        ? Number(((occupiedUnits / totalUnits) * 100).toFixed(1))
+        : 0,
+    totalAccountBalance,
+    totalMonthlyRentPotential,
+    totalInvoiceExposure,
+    activeMaintenanceCount,
+    totalMarketValue,
+  };
+}
+
+export default function PropertiesPage() {
+  const { user, hydrateAuth } = useAuthStore();
+
+  const [properties, setProperties] = useState<PropertyItem[]>([]);
+  const [summary, setSummary] = useState<PropertySummary>(emptySummary());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
+
+  const isManager = user?.role === "MANAGER";
+
+  useEffect(() => {
+    hydrateAuth();
+  }, [hydrateAuth]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadProperties() {
+      if (!user?.role) return;
+
+      try {
+        setLoading(true);
+        setError("");
+
+        if (user.role === "MANAGER") {
+          const res = await api.get<PropertyItem[]>("/properties/manager/me");
+
+          if (!mounted) return;
+
+          const managerProperties = (res.data ?? []).map((property) => ({
+            ...property,
+            manager: {
+              id: user.id,
+              name: user.name ?? "Assigned manager",
+              email: user.email ?? null,
+              phone: null,
+            },
+            metrics: buildMetrics(property),
+          }));
+
+          setProperties(managerProperties);
+          setSummary(buildManagerSummary(managerProperties));
+          return;
+        }
+
+        if (user.role === "ADMIN") {
+          const res = await api.get<AdminPropertiesResponse>("/properties");
+
+          if (!mounted) return;
+
+          setProperties(
+            (res.data?.properties ?? []).map((property) => ({
+              ...property,
+              metrics: buildMetrics(property),
+            })),
+          );
+          setSummary(res.data?.summary ?? emptySummary());
+          return;
+        }
+
+        setProperties([]);
+        setSummary(emptySummary());
+        setError("This properties page is only available to admins and managers.");
+      } catch (error) {
+        console.error("Failed to load properties", error);
+        if (!mounted) return;
+        setProperties([]);
+        setSummary(emptySummary());
+        setError("We couldn’t load properties right now.");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    loadProperties();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.role, user?.id, user?.name, user?.email]);
 
   const filteredProperties = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -168,6 +326,8 @@ export default function PropertiesPage() {
     if (!normalized) return properties;
 
     return properties.filter((property) => {
+      const metrics = buildMetrics(property);
+
       const searchable = [
         property.title,
         property.location || "",
@@ -175,6 +335,8 @@ export default function PropertiesPage() {
         property.owner?.email || "",
         property.manager?.name || "",
         property.manager?.email || "",
+        String(metrics.totalUnits),
+        `${metrics.totalUnits} units`,
       ]
         .join(" ")
         .toLowerCase();
@@ -186,40 +348,54 @@ export default function PropertiesPage() {
   const topAttention = useMemo(() => {
     return [...filteredProperties]
       .sort((a, b) => {
+        const aMetrics = buildMetrics(a);
+        const bMetrics = buildMetrics(b);
+
         const aScore =
-          (a.manager ? 0 : 3) +
-          (a.metrics.activeMaintenanceCount > 0 ? 2 : 0) +
-          (a.metrics.pendingInvoices > 0 ? 1 : 0);
+          (aMetrics.totalUnits === 0 ? 4 : 0) +
+          (!isManager && !a.manager ? 3 : 0) +
+          (aMetrics.activeMaintenanceCount > 0 ? 2 : 0) +
+          (aMetrics.pendingInvoices > 0 ? 1 : 0) +
+          (aMetrics.vacantUnits > 0 ? 1 : 0);
 
         const bScore =
-          (b.manager ? 0 : 3) +
-          (b.metrics.activeMaintenanceCount > 0 ? 2 : 0) +
-          (b.metrics.pendingInvoices > 0 ? 1 : 0);
+          (bMetrics.totalUnits === 0 ? 4 : 0) +
+          (!isManager && !b.manager ? 3 : 0) +
+          (bMetrics.activeMaintenanceCount > 0 ? 2 : 0) +
+          (bMetrics.pendingInvoices > 0 ? 1 : 0) +
+          (bMetrics.vacantUnits > 0 ? 1 : 0);
 
         return bScore - aScore;
       })
       .slice(0, 4);
-  }, [filteredProperties]);
+  }, [filteredProperties, isManager]);
+
+  const pageEyebrow = isManager
+    ? "Manager properties"
+    : "Admin properties control";
+
+  const pageTitle = isManager
+    ? "Monitor assigned properties, unit count, occupancy, rent potential, and operational pressure"
+    : "Oversee property performance, unit count, ownership, management coverage, valuation, and operational pressure";
+
+  const pageText = isManager
+    ? "Every onboarded property must show its total number of units so vacant and occupied spaces can be tracked accurately."
+    : "Every property must show its building unit count, occupied units, vacant units, occupancy exposure, and manager coverage from one command center.";
 
   return (
     <div className="properties-overview-shell">
       <section className="properties-hero">
         <div className="properties-hero-copy">
-          <p className="properties-eyebrow">Admin properties control</p>
-          <h1 className="properties-title">
-            Oversee property performance, ownership, management coverage, valuation,
-            and operational pressure across the full platform
-          </h1>
-          <p className="properties-text">
-            View every property in one command center, monitor occupancy and invoice
-            exposure, and see where admin action is needed across managers, assets,
-            and portfolio value.
-          </p>
+          <p className="properties-eyebrow">{pageEyebrow}</p>
+          <h1 className="properties-title">{pageTitle}</h1>
+          <p className="properties-text">{pageText}</p>
 
           <div className="properties-tags">
-            <span className="properties-tag">Platform-wide visibility</span>
-            <span className="properties-tag">Occupancy control</span>
-            <span className="properties-tag">Valuation awareness</span>
+            <span className="properties-tag">
+              {isManager ? "Assigned portfolio" : "Platform-wide visibility"}
+            </span>
+            <span className="properties-tag">Building unit count</span>
+            <span className="properties-tag">Vacant vs occupied</span>
             <span className="properties-tag">Operations oversight</span>
           </div>
         </div>
@@ -233,23 +409,23 @@ export default function PropertiesPage() {
           </div>
 
           <div className="properties-stat-card">
-            <p className="properties-stat-label">Occupancy</p>
+            <p className="properties-stat-label">Total Building Units</p>
             <h3 className="properties-stat-value">
-              {loading ? "—" : formatPercent(summary.averageOccupancyRate)}
+              {loading ? "—" : summary.totalUnits}
             </h3>
           </div>
 
           <div className="properties-stat-card">
-            <p className="properties-stat-label">Market Value</p>
+            <p className="properties-stat-label">Vacant Spaces</p>
             <h3 className="properties-stat-value">
-              {loading ? "—" : formatCurrency(summary.totalMarketValue)}
+              {loading ? "—" : summary.vacantUnits}
             </h3>
           </div>
 
           <div className="properties-stat-card">
-            <p className="properties-stat-label">Monthly Potential</p>
+            <p className="properties-stat-label">Occupied Spaces</p>
             <h3 className="properties-stat-value">
-              {loading ? "—" : formatCurrency(summary.totalMonthlyRentPotential)}
+              {loading ? "—" : summary.occupiedUnits}
             </h3>
           </div>
         </div>
@@ -261,103 +437,110 @@ export default function PropertiesPage() {
         <div className="properties-panel">
           <div className="properties-panel-head">
             <div>
-              <h3 className="properties-panel-title">Platform snapshot</h3>
+              <h3 className="properties-panel-title">
+                {isManager ? "Assigned snapshot" : "Platform snapshot"}
+              </h3>
               <p className="properties-panel-subtitle">
-                High-level portfolio health across all properties
+                Unit count, occupied spaces, vacant spaces, and maintenance
+                pressure
               </p>
             </div>
-            <span className="properties-panel-chip">Admin</span>
+            <span className="properties-panel-chip">
+              {isManager ? "Manager" : "Admin"}
+            </span>
           </div>
 
-          {loading ? (
-            <div className="properties-ops-grid">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="income-mini-stat-box">
-                  <div className="properties-skeleton-line short" />
-                  <div className="properties-skeleton-line medium" />
-                </div>
-              ))}
+          <div className="income-mini-stats properties-ops-grid">
+            <div className="income-mini-stat-box">
+              <p className="income-mini-stat-label">Properties</p>
+              <p className="income-mini-stat-value">{summary.totalProperties}</p>
             </div>
-          ) : (
-            <div className="income-mini-stats properties-ops-grid">
-              <div className="income-mini-stat-box">
-                <p className="income-mini-stat-label">With Managers</p>
-                <p className="income-mini-stat-value">{summary.withManagers}</p>
-              </div>
-              <div className="income-mini-stat-box">
-                <p className="income-mini-stat-label">Without Managers</p>
-                <p className="income-mini-stat-value">{summary.withoutManagers}</p>
-              </div>
-              <div className="income-mini-stat-box">
-                <p className="income-mini-stat-label">Units</p>
-                <p className="income-mini-stat-value">{summary.totalUnits}</p>
-              </div>
-              <div className="income-mini-stat-box">
-                <p className="income-mini-stat-label">Occupied</p>
-                <p className="income-mini-stat-value">{summary.occupiedUnits}</p>
-              </div>
-              <div className="income-mini-stat-box">
-                <p className="income-mini-stat-label">Vacant</p>
-                <p className="income-mini-stat-value">{summary.vacantUnits}</p>
-              </div>
-              <div className="income-mini-stat-box">
-                <p className="income-mini-stat-label">Maintenance</p>
-                <p className="income-mini-stat-value">
-                  {summary.activeMaintenanceCount}
-                </p>
-              </div>
+
+            <div className="income-mini-stat-box">
+              <p className="income-mini-stat-label">Total Units</p>
+              <p className="income-mini-stat-value">{summary.totalUnits}</p>
             </div>
-          )}
+
+            <div className="income-mini-stat-box">
+              <p className="income-mini-stat-label">Occupied</p>
+              <p className="income-mini-stat-value">{summary.occupiedUnits}</p>
+            </div>
+
+            <div className="income-mini-stat-box">
+              <p className="income-mini-stat-label">Vacant</p>
+              <p className="income-mini-stat-value">{summary.vacantUnits}</p>
+            </div>
+
+            <div className="income-mini-stat-box">
+              <p className="income-mini-stat-label">Occupancy</p>
+              <p className="income-mini-stat-value">
+                {formatPercent(summary.averageOccupancyRate)}
+              </p>
+            </div>
+
+            <div className="income-mini-stat-box">
+              <p className="income-mini-stat-label">Maintenance</p>
+              <p className="income-mini-stat-value">
+                {summary.activeMaintenanceCount}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="properties-panel">
           <div className="properties-panel-head">
             <div>
-              <h3 className="properties-panel-title">Financial exposure</h3>
+              <h3 className="properties-panel-title">
+                {isManager ? "Operating exposure" : "Financial exposure"}
+              </h3>
               <p className="properties-panel-subtitle">
-                Admin-wide money visibility across accounts and receivables
+                {isManager
+                  ? "Simple operational view of rent potential, invoices, and occupancy"
+                  : "Admin view of value and receivables across properties"}
               </p>
             </div>
-            <span className="properties-panel-chip">Finance</span>
+            <span className="properties-panel-chip">
+              {isManager ? "Operations" : "Finance"}
+            </span>
           </div>
 
-          {loading ? (
-            <div className="properties-ops-grid">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="income-mini-stat-box">
-                  <div className="properties-skeleton-line short" />
-                  <div className="properties-skeleton-line medium" />
-                </div>
-              ))}
+          <div className="income-mini-stats properties-ops-grid">
+            <div className="income-mini-stat-box">
+              <p className="income-mini-stat-label">Monthly Potential</p>
+              <p className="income-mini-stat-value">
+                {formatCurrency(summary.totalMonthlyRentPotential)}
+              </p>
             </div>
-          ) : (
-            <div className="income-mini-stats properties-ops-grid">
-              <div className="income-mini-stat-box">
-                <p className="income-mini-stat-label">Account Balances</p>
-                <p className="income-mini-stat-value">
-                  {formatCurrency(summary.totalAccountBalance)}
-                </p>
-              </div>
-              <div className="income-mini-stat-box">
-                <p className="income-mini-stat-label">Invoice Exposure</p>
-                <p className="income-mini-stat-value">
-                  {formatCurrency(summary.totalInvoiceExposure)}
-                </p>
-              </div>
-              <div className="income-mini-stat-box">
-                <p className="income-mini-stat-label">Monthly Potential</p>
-                <p className="income-mini-stat-value">
-                  {formatCurrency(summary.totalMonthlyRentPotential)}
-                </p>
-              </div>
-              <div className="income-mini-stat-box">
-                <p className="income-mini-stat-label">Market Value</p>
-                <p className="income-mini-stat-value">
-                  {formatCurrency(summary.totalMarketValue)}
-                </p>
-              </div>
+
+            <div className="income-mini-stat-box">
+              <p className="income-mini-stat-label">Invoice Exposure</p>
+              <p className="income-mini-stat-value">
+                {formatCurrency(summary.totalInvoiceExposure)}
+              </p>
             </div>
-          )}
+
+            <div className="income-mini-stat-box">
+              <p className="income-mini-stat-label">
+                {isManager ? "Occupied Units" : "Market Value"}
+              </p>
+              <p className="income-mini-stat-value">
+                {isManager
+                  ? summary.occupiedUnits
+                  : formatCurrency(summary.totalMarketValue)}
+              </p>
+            </div>
+
+            <div className="income-mini-stat-box">
+              <p className="income-mini-stat-label">
+                {isManager ? "Rentable Units" : "Account Balances"}
+              </p>
+              <p className="income-mini-stat-value">
+                {isManager
+                  ? summary.totalUnits
+                  : formatCurrency(summary.totalAccountBalance)}
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -366,7 +549,7 @@ export default function PropertiesPage() {
           <div>
             <h3 className="properties-panel-title">Search properties</h3>
             <p className="properties-panel-subtitle">
-              Filter by property, location, owner, or manager
+              Filter by property, location, owner, manager, or unit count
             </p>
           </div>
           <span className="properties-panel-chip">
@@ -377,8 +560,8 @@ export default function PropertiesPage() {
         <div style={{ marginTop: 12 }}>
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search title, location, owner, or manager..."
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search title, location, owner, manager, or unit count..."
             className="properties-search-input"
           />
         </div>
@@ -390,21 +573,14 @@ export default function PropertiesPage() {
             <div>
               <h3 className="properties-panel-title">Occupancy by property</h3>
               <p className="properties-panel-subtitle">
-                Quick view of property utilization across the platform
+                Unit count is used to calculate occupied and vacant spaces
               </p>
             </div>
             <span className="properties-panel-chip">Live</span>
           </div>
 
           {loading ? (
-            <div className="properties-skeleton-stack">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="properties-bar-skeleton">
-                  <div className="properties-skeleton-line short" />
-                  <div className="properties-skeleton-line full" />
-                </div>
-              ))}
-            </div>
+            <div className="properties-empty-state compact">Loading...</div>
           ) : !filteredProperties.length ? (
             <div className="properties-empty-state compact">
               No properties matched your search.
@@ -413,20 +589,34 @@ export default function PropertiesPage() {
             </div>
           ) : (
             <div className="occupancy-bars-list">
-              {filteredProperties.map((item) => (
-                <div key={item.id} className="occupancy-bar-row">
-                  <div className="occupancy-bar-top">
-                    <span>{item.title}</span>
-                    <strong>{formatPercent(item.metrics.occupancyRate)}</strong>
+              {filteredProperties.map((item) => {
+                const metrics = buildMetrics(item);
+
+                return (
+                  <div key={item.id} className="occupancy-bar-row">
+                    <div className="occupancy-bar-top">
+                      <span>
+                        {item.title} • {formatUnitCount(metrics.totalUnits)}
+                      </span>
+                      <strong>{formatPercent(metrics.occupancyRate)}</strong>
+                    </div>
+
+                    <div className="occupancy-bar-top" style={{ marginTop: 4 }}>
+                      <small>
+                        Occupied: {metrics.occupiedUnits} • Vacant:{" "}
+                        {metrics.vacantUnits}
+                      </small>
+                    </div>
+
+                    <div className="occupancy-bar-track">
+                      <div
+                        className="occupancy-bar-fill"
+                        style={{ width: `${metrics.occupancyRate}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="occupancy-bar-track">
-                    <div
-                      className="occupancy-bar-fill"
-                      style={{ width: `${item.metrics.occupancyRate}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -436,21 +626,14 @@ export default function PropertiesPage() {
             <div>
               <h3 className="properties-panel-title">Attention queue</h3>
               <p className="properties-panel-subtitle">
-                Properties most likely to need admin action
+                Properties missing units or needing operational action
               </p>
             </div>
             <span className="properties-panel-chip">Priority</span>
           </div>
 
           {loading ? (
-            <div className="properties-skeleton-stack">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="properties-bar-skeleton">
-                  <div className="properties-skeleton-line medium" />
-                  <div className="properties-skeleton-line short" />
-                </div>
-              ))}
-            </div>
+            <div className="properties-empty-state compact">Loading...</div>
           ) : !topAttention.length ? (
             <div className="properties-empty-state compact">
               No property alerts right now.
@@ -459,28 +642,40 @@ export default function PropertiesPage() {
             </div>
           ) : (
             <div className="property-expense-list">
-              {topAttention.map((item) => (
-                <div key={item.id} className="property-expense-row">
-                  <div>
-                    <p className="property-expense-title">{item.title}</p>
-                    <p className="property-expense-meta">
-                      {item.manager?.name || "No manager"} •{" "}
-                      {item.location || "No location"}
-                    </p>
+              {topAttention.map((item) => {
+                const metrics = buildMetrics(item);
+
+                return (
+                  <div key={item.id} className="property-expense-row">
+                    <div>
+                      <p className="property-expense-title">{item.title}</p>
+                      <p className="property-expense-meta">
+                        {isManager
+                          ? item.owner?.name || "Owner not set"
+                          : item.manager?.name || "No manager"}{" "}
+                        • {item.location || "No location"} •{" "}
+                        {formatUnitCount(metrics.totalUnits)}
+                      </p>
+                      <p className="property-expense-meta">
+                        Occupied {metrics.occupiedUnits} • Vacant{" "}
+                        {metrics.vacantUnits}
+                      </p>
+                    </div>
+
+                    <strong
+                      className={
+                        getPropertyStatusTone(item, isManager) === "issue"
+                          ? "table-badge-issue"
+                          : getPropertyStatusTone(item, isManager) === "warn"
+                            ? "table-badge-warn"
+                            : "table-badge-clear"
+                      }
+                    >
+                      {getPropertyStatusLabel(item, isManager)}
+                    </strong>
                   </div>
-                  <strong
-                    className={
-                      getPropertyStatusTone(item) === "issue"
-                        ? "table-badge-issue"
-                        : getPropertyStatusTone(item) === "warn"
-                        ? "table-badge-warn"
-                        : "table-badge-clear"
-                    }
-                  >
-                    {getPropertyStatusLabel(item)}
-                  </strong>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -491,7 +686,8 @@ export default function PropertiesPage() {
           <div>
             <h3 className="properties-panel-title">Properties overview</h3>
             <p className="properties-panel-subtitle">
-              Full admin view across ownership, management, occupancy, and value
+              Every property shows total building units, occupied units, vacant
+              units, and occupancy
             </p>
           </div>
           <span className="properties-panel-chip">
@@ -500,36 +696,26 @@ export default function PropertiesPage() {
         </div>
 
         <div className="properties-table">
-          <div className="properties-table-head properties-table-head-admin">
+          <div
+            className={
+              isManager
+                ? "properties-table-head-manager"
+                : "properties-table-head-admin"
+            }
+          >
             <span>Property</span>
             <span>Owner</span>
-            <span>Manager</span>
+            {!isManager ? <span>Manager</span> : null}
+            <span>Total Units</span>
+            <span>Occupied</span>
+            <span>Vacant</span>
             <span>Occupancy</span>
-            <span>Units</span>
-            <span>Potential</span>
-            <span>Exposure</span>
             <span>Status</span>
           </div>
 
           <div className="properties-table-body">
             {loading ? (
-              <div className="properties-table-skeleton">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="properties-table-row properties-table-row-admin properties-row-skeleton"
-                  >
-                    <div className="properties-skeleton-line medium" />
-                    <div className="properties-skeleton-line short" />
-                    <div className="properties-skeleton-line short" />
-                    <div className="properties-skeleton-line short" />
-                    <div className="properties-skeleton-line short" />
-                    <div className="properties-skeleton-line medium" />
-                    <div className="properties-skeleton-line medium" />
-                    <div className="properties-skeleton-pill" />
-                  </div>
-                ))}
-              </div>
+              <div className="properties-empty-state">Loading properties...</div>
             ) : error ? (
               <div className="properties-error-state">
                 We couldn’t load the properties table.
@@ -538,48 +724,67 @@ export default function PropertiesPage() {
               <div className="properties-empty-state">
                 No properties found.
                 <br />
-                <span>Platform properties will appear here once available.</span>
+                <span>
+                  {isManager
+                    ? "Assigned properties will appear here once available."
+                    : "Platform properties will appear here once available."}
+                </span>
               </div>
             ) : (
-              filteredProperties.map((property) => (
-                <Link
-                  key={property.id}
-                  href={`/properties/${property.id}`}
-                  className="properties-table-row properties-table-row-admin"
-                >
-                  <span className="table-property-name">
-                    <strong>{property.title}</strong>
-                    <small>{property.location || "No location"}</small>
-                  </span>
+              filteredProperties.map((property) => {
+                const metrics = buildMetrics(property);
 
-                  <span className="table-person-cell">
-                    <strong>{property.owner?.name || "No owner"}</strong>
-                    <small>{property.owner?.email || "—"}</small>
-                  </span>
-
-                  <span className="table-person-cell">
-                    <strong>{property.manager?.name || "Unassigned"}</strong>
-                    <small>{property.manager?.email || "No manager yet"}</small>
-                  </span>
-
-                  <span>{formatPercent(property.metrics.occupancyRate)}</span>
-                  <span>{property.metrics.totalUnits}</span>
-                  <span>{formatCurrency(property.metrics.monthlyRentPotential)}</span>
-                  <span>{formatCurrency(property.metrics.invoiceExposure)}</span>
-
-                  <span
+                return (
+                  <Link
+                    key={property.id}
+                    href={`/properties/${property.id}`}
                     className={
-                      getPropertyStatusTone(property) === "issue"
-                        ? "table-badge-issue"
-                        : getPropertyStatusTone(property) === "warn"
-                        ? "table-badge-warn"
-                        : "table-badge-clear"
+                      isManager
+                        ? "properties-table-row-manager"
+                        : "properties-table-row-admin"
                     }
                   >
-                    {getPropertyStatusLabel(property)}
-                  </span>
-                </Link>
-              ))
+                    <div className="table-property-name">
+                      <strong>{property.title}</strong>
+                      <small>
+                        {property.location || "No location"} •{" "}
+                        {formatUnitCount(metrics.totalUnits)}
+                      </small>
+                    </div>
+
+                    <div className="table-person-cell">
+                      <strong>{property.owner?.name || "Not set"}</strong>
+                      <small>{property.owner?.email || "No email"}</small>
+                    </div>
+
+                    {!isManager ? (
+                      <div className="table-person-cell">
+                        <strong>
+                          {property.manager?.name || "Not assigned"}
+                        </strong>
+                        <small>{property.manager?.email || "No email"}</small>
+                      </div>
+                    ) : null}
+
+                    <span>{metrics.totalUnits}</span>
+                    <span>{metrics.occupiedUnits}</span>
+                    <span>{metrics.vacantUnits}</span>
+                    <span>{formatPercent(metrics.occupancyRate)}</span>
+
+                    <span
+                      className={
+                        getPropertyStatusTone(property, isManager) === "issue"
+                          ? "table-badge-issue"
+                          : getPropertyStatusTone(property, isManager) === "warn"
+                            ? "table-badge-warn"
+                            : "table-badge-clear"
+                      }
+                    >
+                      {getPropertyStatusLabel(property, isManager)}
+                    </span>
+                  </Link>
+                );
+              })
             )}
           </div>
         </div>

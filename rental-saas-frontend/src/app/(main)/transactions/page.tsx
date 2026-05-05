@@ -38,6 +38,19 @@ type TransactionItem = {
   reference?: string | null;
 };
 
+type DisplayTransactionType =
+  | "deposit"
+  | "withdrawal"
+  | "profit"
+  | "investment"
+  | "refund"
+  | "expense"
+  | "payment"
+  | "rent"
+  | "maintenance"
+  | "payout"
+  | "other";
+
 type PropertyBreakdownItem = {
   propertyId: string | null;
   propertyTitle: string;
@@ -111,6 +124,9 @@ type ResidentSummary = {
   typeBreakdown?: {
     deposits?: number;
     rentPayments?: number;
+    serviceChargePayments?: number;
+    garbagePayments?: number;
+    invoicePayments?: number;
     maintenanceCharges?: number;
     refunds?: number;
   };
@@ -154,6 +170,7 @@ type FilterType =
   | "payment"
   | "rent"
   | "maintenance"
+  | "payout"
   | "other";
 
 type FilterStatus =
@@ -170,16 +187,14 @@ type ResidentInsightSlice = {
   className: string;
 };
 
-function formatCurrency(value: number) {
-  return `UGX ${Number(value || 0).toLocaleString()}`;
-}
+function formatCurrency(value: number | string | null | undefined) {
+  const amount = Number(value ?? 0);
 
-function formatCompactCurrency(value: number) {
-  const num = Number(value || 0);
-  if (num >= 1_000_000_000) return `UGX ${(num / 1_000_000_000).toFixed(1)}B`;
-  if (num >= 1_000_000) return `UGX ${(num / 1_000_000).toFixed(1)}M`;
-  if (num >= 1_000) return `UGX ${(num / 1_000).toFixed(0)}K`;
-  return `UGX ${num.toLocaleString()}`;
+  if (!Number.isFinite(amount)) {
+    return "UGX 0";
+  }
+
+  return `UGX ${Math.round(amount).toLocaleString("en-UG")}`;
 }
 
 function formatDate(value: string) {
@@ -200,13 +215,58 @@ function formatDateTime(value: string) {
   });
 }
 
-function getTypeLabel(type: TransactionItem["type"], audience: Audience) {
+function normalizeText(value?: string | null) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function isProviderPayout(item: TransactionItem) {
+  const title = normalizeText(item.title);
+  const subtitle = normalizeText(item.subtitle);
+  const category = normalizeText(item.category);
+  const reference = normalizeText(item.reference);
+
+  return (
+    title.includes("provider payout") ||
+    title.includes("vendor payout") ||
+    title.includes("payout") ||
+    subtitle.includes("provider payout") ||
+    subtitle.includes("vendor payout") ||
+    reference.includes("payout") ||
+    category.includes("payout")
+  );
+}
+
+function getDisplayType(item: TransactionItem, audience: Audience): DisplayTransactionType {
+  if ((audience === "manager" || audience === "admin") && isProviderPayout(item)) {
+    return "payout";
+  }
+
+  if (
+    (audience === "manager" || audience === "admin") &&
+    item.type === "maintenance" &&
+    item.direction === "negative"
+  ) {
+    return "expense";
+  }
+
+  return item.type;
+}
+
+function getTypeLabel(
+  type: TransactionItem["type"],
+  audience: Audience,
+  item?: TransactionItem,
+) {
+  const displayType = item ? getDisplayType(item, audience) : type;
+
   if (audience === "resident") {
-    switch (type) {
+    switch (displayType) {
       case "deposit":
         return "Top Up";
       case "rent":
         return "Rent Payment";
+      case "payment":
+        return "Invoice Payment";
       case "maintenance":
         return "Maintenance";
       case "refund":
@@ -217,19 +277,36 @@ function getTypeLabel(type: TransactionItem["type"], audience: Audience) {
   }
 
   if (audience === "admin") {
-    switch (type) {
+    switch (displayType) {
       case "payment":
-        return "Platform Payment";
+      case "rent":
+        return "Payment";
+      case "payout":
+        return "Payout";
       case "expense":
-        return "Platform Expense";
       case "maintenance":
-        return "Maintenance";
+        return "Expense";
       default:
-        return type.charAt(0).toUpperCase() + type.slice(1);
+        return displayType.charAt(0).toUpperCase() + displayType.slice(1);
     }
   }
 
-  switch (type) {
+  if (audience === "manager") {
+    switch (displayType) {
+      case "payment":
+      case "rent":
+        return "Payment";
+      case "payout":
+        return "Payout";
+      case "expense":
+      case "maintenance":
+        return "Expense";
+      default:
+        return displayType.charAt(0).toUpperCase() + displayType.slice(1);
+    }
+  }
+
+  switch (displayType) {
     case "deposit":
       return "Deposit";
     case "withdrawal":
@@ -248,13 +325,17 @@ function getTypeLabel(type: TransactionItem["type"], audience: Audience) {
       return "Rent";
     case "maintenance":
       return "Maintenance";
+    case "payout":
+      return "Payout";
     default:
       return "Other";
   }
 }
 
-function getTypeTone(type: TransactionItem["type"]) {
-  switch (type) {
+function getTypeTone(type: TransactionItem["type"], item?: TransactionItem, audience?: Audience) {
+  const displayType = item && audience ? getDisplayType(item, audience) : type;
+
+  switch (displayType) {
     case "deposit":
       return "deposit";
     case "withdrawal":
@@ -272,6 +353,8 @@ function getTypeTone(type: TransactionItem["type"]) {
       return "payment";
     case "maintenance":
       return "maintenance";
+    case "payout":
+      return "expense";
     default:
       return "other";
   }
@@ -292,6 +375,53 @@ function getStatusTone(status: string) {
   if (normalized === "PENDING") return "pending";
   if (normalized === "FAILED" || normalized === "REJECTED") return "failed";
   return "neutral";
+}
+
+function getStatusLabel(status: string) {
+  const normalized = status.toUpperCase();
+
+  if (normalized === "SUCCESS") return "Success";
+  if (normalized === "PAID") return "Paid";
+  if (normalized === "COMPLETED") return "Completed";
+  if (normalized === "PENDING") return "Pending";
+  if (normalized === "FAILED") return "Failed";
+  if (normalized === "APPROVED") return "Approved";
+  if (normalized === "REJECTED") return "Rejected";
+
+  return status;
+}
+
+function getTitleLabel(item: TransactionItem, audience: Audience) {
+  const displayType = getDisplayType(item, audience);
+
+  if ((audience === "manager" || audience === "admin") && displayType === "payout") {
+    const subtitle = item.subtitle || "";
+    const provider = subtitle.split("•")[0]?.trim();
+
+    return provider ? `Vendor Payment - ${provider}` : "Vendor Payment";
+  }
+
+  if ((audience === "manager" || audience === "admin") && displayType === "expense") {
+    if (item.title.toLowerCase().includes("operating expense")) {
+      return "Operating Expense";
+    }
+
+    if (item.type === "maintenance" || item.family === "maintenance") {
+      return item.title || "Maintenance Expense";
+    }
+
+    return item.title || "Operating Expense";
+  }
+
+  return item.title;
+}
+
+function getFilterValueForApi(filter: FilterType, audience: Audience): FilterType {
+  if ((audience === "manager" || audience === "admin") && filter === "payout") {
+    return "expense";
+  }
+
+  return filter;
 }
 
 function groupByDay(items: TransactionItem[]) {
@@ -321,6 +451,8 @@ function buildResidentDonut(slices: ResidentInsightSlice[]) {
   let current = 0;
   const colors: Record<string, string> = {
     rent: "#2456db",
+    service: "#0ea5e9",
+    garbage: "#64748b",
     maintenance: "#7c3aed",
     topups: "#16a34a",
     refunds: "#f59e0b",
@@ -331,7 +463,7 @@ function buildResidentDonut(slices: ResidentInsightSlice[]) {
     const angle = (slice.value / total) * 360;
     current += angle;
     const end = current;
-    return `${colors[slice.className]} ${start}deg ${end}deg`;
+    return `${colors[slice.className] || "#dbe7f5"} ${start}deg ${end}deg`;
   });
 
   return `conic-gradient(${parts.join(", ")})`;
@@ -372,13 +504,15 @@ export default function TransactionsPage() {
       try {
         setLoading(true);
 
+        const apiTypeFilter = getFilterValueForApi(typeFilter, audience);
+
         const [summaryRes, txRes] = await Promise.all([
           api.get<TransactionSummary>("/transactions/summary"),
           api.get<TransactionResponse>("/transactions/me", {
             params: {
               page,
               limit: 10,
-              ...(typeFilter !== "all" ? { type: typeFilter } : {}),
+              ...(apiTypeFilter !== "all" ? { type: apiTypeFilter } : {}),
               ...(statusFilter !== "all" ? { status: statusFilter } : {}),
               ...(search.trim() ? { search: search.trim() } : {}),
             },
@@ -391,8 +525,40 @@ export default function TransactionsPage() {
           summaryRes.data.audience ||
           "investor") as Audience;
 
+        const rawItems = txRes.data.items ?? [];
+
+        const cleanedItems =
+          resolvedAudience === "manager" || resolvedAudience === "admin"
+            ? rawItems.filter((item) => {
+                if (typeFilter === "payout") {
+                  return isProviderPayout(item);
+                }
+
+                if (typeFilter === "expense") {
+                  return (
+                    (item.type === "expense" || item.type === "maintenance") &&
+                    !isProviderPayout(item)
+                  );
+                }
+
+                if (typeFilter === "maintenance") {
+                  return (
+                    item.type === "maintenance" ||
+                    item.family === "maintenance" ||
+                    normalizeText(item.category).includes("maintenance")
+                  );
+                }
+
+                if (typeFilter === "payment") {
+                  return item.type === "payment" || item.type === "rent";
+                }
+
+                return true;
+              })
+            : rawItems;
+
         setSummary(summaryRes.data);
-        setTransactions(txRes.data.items ?? []);
+        setTransactions(cleanedItems);
         setPagination(txRes.data.pagination);
         setAudience(resolvedAudience);
 
@@ -418,16 +584,18 @@ export default function TransactionsPage() {
     return () => {
       mounted = false;
     };
-  }, [page, typeFilter, statusFilter, search, refreshKey]);
+  }, [page, typeFilter, statusFilter, search, refreshKey, audience]);
 
   const residentGroups = useMemo(() => groupByDay(transactions), [transactions]);
+
+  const managerGroups = useMemo(() => groupByDay(transactions), [transactions]);
 
   const stats = useMemo(() => {
     const positiveCount = transactions.filter((item) => item.direction === "positive").length;
     const negativeCount = transactions.filter((item) => item.direction === "negative").length;
     const topUps = transactions.filter((item) => item.type === "deposit").length;
     const chargeRows = transactions.filter(
-      (item) => item.type === "rent" || item.type === "maintenance",
+      (item) => item.type === "rent" || item.type === "maintenance" || item.type === "payment",
     ).length;
 
     return {
@@ -438,45 +606,69 @@ export default function TransactionsPage() {
     };
   }, [transactions]);
 
+  const managerTypeCounts = useMemo(() => {
+    const payments = transactions.filter(
+      (item) => item.type === "payment" || item.type === "rent",
+    ).length;
+
+    const payouts = transactions.filter((item) => isProviderPayout(item)).length;
+
+    const expenses = transactions.filter(
+      (item) =>
+        (item.type === "expense" || item.type === "maintenance") &&
+        !isProviderPayout(item),
+    ).length;
+
+    return {
+      payments,
+      payouts,
+      expenses,
+    };
+  }, [transactions]);
+
   const residentInsight = useMemo(() => {
     const residentSummary =
       summary?.audience === "resident" ? (summary as ResidentSummary) : null;
 
+    const rentPayments = residentSummary?.typeBreakdown?.rentPayments ?? 0;
+    const serviceChargePayments =
+      residentSummary?.typeBreakdown?.serviceChargePayments ?? 0;
+    const garbagePayments = residentSummary?.typeBreakdown?.garbagePayments ?? 0;
+    const maintenanceCharges =
+      residentSummary?.typeBreakdown?.maintenanceCharges ?? 0;
+
     const slices: ResidentInsightSlice[] = [
       {
         label: "Rent",
-        value: residentSummary?.typeBreakdown?.rentPayments ?? 0,
+        value: rentPayments,
         className: "rent",
       },
       {
+        label: "Service Charge",
+        value: serviceChargePayments,
+        className: "service",
+      },
+      {
+        label: "Garbage",
+        value: garbagePayments,
+        className: "garbage",
+      },
+      {
         label: "Maintenance",
-        value: residentSummary?.typeBreakdown?.maintenanceCharges ?? 0,
+        value: maintenanceCharges,
         className: "maintenance",
-      },
-      {
-        label: "Top Ups",
-        value: residentSummary?.typeBreakdown?.deposits ?? 0,
-        className: "topups",
-      },
-      {
-        label: "Refunds",
-        value: residentSummary?.typeBreakdown?.refunds ?? 0,
-        className: "refunds",
       },
     ];
 
     const totalOutflow =
-      (residentSummary?.typeBreakdown?.rentPayments ?? 0) +
-      (residentSummary?.typeBreakdown?.maintenanceCharges ?? 0);
+      rentPayments + serviceChargePayments + garbagePayments + maintenanceCharges;
 
     const largestOutflow = transactions
       .filter((item) => item.direction === "negative")
       .reduce<number>((max, item) => Math.max(max, item.amount), 0);
 
     const latestTopUp = transactions.find((item) => item.type === "deposit");
-    const rentShare = totalOutflow
-      ? Math.round(((residentSummary?.typeBreakdown?.rentPayments ?? 0) / totalOutflow) * 100)
-      : 0;
+    const rentShare = totalOutflow ? Math.round((rentPayments / totalOutflow) * 100) : 0;
 
     return {
       slices,
@@ -546,14 +738,16 @@ export default function TransactionsPage() {
         { key: "all" as FilterType, label: "All" },
         { key: "deposit" as FilterType, label: "Top Ups" },
         { key: "rent" as FilterType, label: "Rent" },
+        { key: "payment" as FilterType, label: "Other Fees" },
         { key: "maintenance" as FilterType, label: "Maintenance" },
         { key: "refund" as FilterType, label: "Refunds" },
       ]
     : isManager || isAdmin
       ? [
           { key: "all" as FilterType, label: "All" },
-          { key: "payment" as FilterType, label: "Payments" },
+          { key: "payment" as FilterType, label: "Inflows" },
           { key: "expense" as FilterType, label: "Expenses" },
+          { key: "payout" as FilterType, label: "Payouts" },
           { key: "maintenance" as FilterType, label: "Maintenance" },
         ]
       : [
@@ -618,9 +812,9 @@ export default function TransactionsPage() {
             {isResident
               ? "See wallet top-ups, rent payments, refunds, and service-related charges in a clean chronological journal."
               : isManager
-                ? "Review rent collections, operating expenses, maintenance spend, and property-related cash movement."
+                ? "Review rent collections, operating expenses, maintenance spend, vendor payouts, and property-related cash movement."
                 : isAdmin
-                  ? "Review platform-wide payments, operating spend, maintenance outflows, and property-level cash movement in one command center."
+                  ? "Review platform-wide payments, operating spend, maintenance outflows, payouts, and property-level cash movement in one command center."
                   : "Review inflows, outflows, profits, withdrawals, investment activity, and allocated expenses in one premium transaction center."}
           </p>
 
@@ -628,7 +822,7 @@ export default function TransactionsPage() {
             {(isResident
               ? ["Money timeline", "Wallet activity", "Rent history", "Simple records"]
               : isManager
-                ? ["Property cash flow", "Expense visibility", "Status tracking", "Operations view"]
+                ? ["Property cash flow", "Expense visibility", "Payout tracking", "Operations view"]
                 : isAdmin
                   ? ["Platform oversight", "Property cash flow", "Expense visibility", "Admin finance view"]
                   : ["Unified timeline", "Expense visibility", "Status tracking", "Investor-grade reporting"]
@@ -654,7 +848,7 @@ export default function TransactionsPage() {
                   : "Net Cash Flow"}
             </p>
             <h3 className="transactions-summary-value">
-              {summary ? formatCompactCurrency(summary.netCashFlow) : "—"}
+              {summary ? formatCurrency(summary.netCashFlow) : "—"}
             </h3>
           </div>
         </div>
@@ -670,12 +864,12 @@ export default function TransactionsPage() {
             <div className="transactions-overview-item">
               <span>Wallet Inflow</span>
               <strong className="positive">
-                {summary ? formatCompactCurrency(summary.inflow) : "—"}
+                {summary ? formatCurrency(summary.inflow) : "—"}
               </strong>
             </div>
             <div className="transactions-overview-item">
               <span>Resident Outflow</span>
-              <strong>{summary ? formatCompactCurrency(summary.outflow) : "—"}</strong>
+              <strong>{summary ? formatCurrency(summary.outflow) : "—"}</strong>
             </div>
             <div className="transactions-overview-item">
               <span>Pending</span>
@@ -685,7 +879,7 @@ export default function TransactionsPage() {
               <span>Rent Payments</span>
               <strong>
                 {"typeBreakdown" in (summary || {})
-                  ? formatCompactCurrency(
+                  ? formatCurrency(
                       (summary as ResidentSummary).typeBreakdown?.rentPayments ?? 0,
                     )
                   : "UGX 0"}
@@ -697,12 +891,12 @@ export default function TransactionsPage() {
             <div className="transactions-overview-item">
               <span>Total Inflow</span>
               <strong className="positive">
-                {summary ? formatCompactCurrency(summary.inflow) : "—"}
+                {summary ? formatCurrency(summary.inflow) : "—"}
               </strong>
             </div>
             <div className="transactions-overview-item">
               <span>Total Outflow</span>
-              <strong>{summary ? formatCompactCurrency(summary.outflow) : "—"}</strong>
+              <strong>{summary ? formatCurrency(summary.outflow) : "—"}</strong>
             </div>
             <div className="transactions-overview-item">
               <span>Pending</span>
@@ -712,7 +906,7 @@ export default function TransactionsPage() {
               <span>{isManager || isAdmin ? "Expense Total" : "Expenses"}</span>
               <strong>
                 {"expenseTotal" in (summary || {})
-                  ? formatCompactCurrency(
+                  ? formatCurrency(
                       (summary as InvestorSummary | ManagerSummary | AdminSummary)
                         .expenseTotal ?? 0,
                     )
@@ -723,65 +917,40 @@ export default function TransactionsPage() {
         )}
       </section>
 
-      <section
-        className={`transactions-overview-bar secondary ${
-          isResident ? "transactions-overview-bar-resident" : ""
-        }`}
-      >
-        {isResident ? (
-          <>
-            <div className="transactions-overview-item">
-              <span>Positive Entries</span>
-              <strong>{stats.positiveCount}</strong>
-            </div>
-            <div className="transactions-overview-item">
-              <span>Negative Entries</span>
-              <strong>{stats.negativeCount}</strong>
-            </div>
-            <div className="transactions-overview-item">
-              <span>Wallet Top-ups</span>
-              <strong>{stats.topUps}</strong>
-            </div>
-            <div className="transactions-overview-item">
-              <span>Charge Rows</span>
-              <strong>{stats.chargeRows}</strong>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="transactions-overview-item">
-              <span>Positive Entries</span>
-              <strong>
-                {transactions.filter((item) => item.direction === "positive").length}
-              </strong>
-            </div>
-            <div className="transactions-overview-item">
-              <span>Negative Entries</span>
-              <strong>
-                {transactions.filter((item) => item.direction === "negative").length}
-              </strong>
-            </div>
-            <div className="transactions-overview-item">
-              <span>{isManager || isAdmin ? "Payment Rows" : "Profit Rows"}</span>
-              <strong>
-                {isManager || isAdmin
-                  ? transactions.filter((item) => item.type === "payment").length
-                  : transactions.filter((item) => item.type === "profit").length}
-              </strong>
-            </div>
-            <div className="transactions-overview-item">
-              <span>Expense Rows</span>
-              <strong>
-                {
-                  transactions.filter(
+      {!isResident ? (
+        <section className="transactions-overview-bar secondary">
+          <div className="transactions-overview-item">
+            <span>Positive Entries</span>
+            <strong>
+              {transactions.filter((item) => item.direction === "positive").length}
+            </strong>
+          </div>
+          <div className="transactions-overview-item">
+            <span>Negative Entries</span>
+            <strong>
+              {transactions.filter((item) => item.direction === "negative").length}
+            </strong>
+          </div>
+          <div className="transactions-overview-item">
+            <span>{isManager || isAdmin ? "Inflow Rows" : "Profit Rows"}</span>
+            <strong>
+              {isManager || isAdmin
+                ? managerTypeCounts.payments
+                : transactions.filter((item) => item.type === "profit").length}
+            </strong>
+          </div>
+          <div className="transactions-overview-item">
+            <span>{isManager || isAdmin ? "Outflow Rows" : "Expense Rows"}</span>
+            <strong>
+              {isManager || isAdmin
+                ? managerTypeCounts.expenses + managerTypeCounts.payouts
+                : transactions.filter(
                     (item) => item.type === "expense" || item.type === "maintenance",
-                  ).length
-                }
-              </strong>
-            </div>
-          </>
-        )}
-      </section>
+                  ).length}
+            </strong>
+          </div>
+        </section>
+      ) : null}
 
       {isResident ? (
         <section className="transactions-insights">
@@ -791,7 +960,7 @@ export default function TransactionsPage() {
                 <p className="transactions-insights-eyebrow">Spend mix</p>
                 <h3 className="transactions-insights-title">Where your money is going</h3>
                 <p className="transactions-insights-text">
-                  Recent movement split across rent, maintenance, top-ups, and refunds.
+                  Recent outflow split across rent, service charge, garbage, and maintenance.
                 </p>
               </div>
 
@@ -802,7 +971,7 @@ export default function TransactionsPage() {
                 >
                   <div className="transactions-donut-center">
                     <span>Outflow</span>
-                    <strong>{formatCompactCurrency(residentInsight.totalOutflow)}</strong>
+                    <strong>{formatCurrency(residentInsight.totalOutflow)}</strong>
                   </div>
                 </div>
 
@@ -811,7 +980,7 @@ export default function TransactionsPage() {
                     <div key={slice.label} className="transactions-donut-legend-row">
                       <span className={`transactions-donut-dot ${slice.className}`} />
                       <span>{slice.label}</span>
-                      <strong>{formatCompactCurrency(slice.value)}</strong>
+                      <strong>{formatCurrency(slice.value)}</strong>
                     </div>
                   ))}
                 </div>
@@ -858,16 +1027,13 @@ export default function TransactionsPage() {
 
           <div className="transactions-insights-side">
             <div className="transactions-insight-mini">
-              <span>Largest recent payment</span>
-              <strong>{formatCompactCurrency(residentInsight.largestOutflow)}</strong>
-            </div>
-            <div className="transactions-insight-mini">
-              <span>Latest top-up</span>
-              <strong>{formatCompactCurrency(residentInsight.latestTopUp)}</strong>
-            </div>
-            <div className="transactions-insight-mini">
-              <span>Rent share of spend</span>
-              <strong>{residentInsight.rentShare}%</strong>
+              <span>Recent highlights</span>
+              <strong>{formatCurrency(residentInsight.largestOutflow)}</strong>
+              <div className="transactions-card-meta">
+                <span>Largest payment</span>
+                <span>Top-up {formatCurrency(residentInsight.latestTopUp)}</span>
+                <span>Rent share {residentInsight.rentShare}%</span>
+              </div>
             </div>
           </div>
         </section>
@@ -882,7 +1048,7 @@ export default function TransactionsPage() {
           <div className="transactions-overview-item">
             <span>Top Net Flow</span>
             <strong className="positive">
-              {topProperty ? formatCompactCurrency(topProperty.netCashFlow) : "—"}
+              {topProperty ? formatCurrency(topProperty.netCashFlow) : "—"}
             </strong>
           </div>
           <div className="transactions-overview-item">
@@ -892,7 +1058,7 @@ export default function TransactionsPage() {
           <div className="transactions-overview-item">
             <span>Lowest Net Flow</span>
             <strong>
-              {weakestProperty ? formatCompactCurrency(weakestProperty.netCashFlow) : "—"}
+              {weakestProperty ? formatCurrency(weakestProperty.netCashFlow) : "—"}
             </strong>
           </div>
         </section>
@@ -916,9 +1082,9 @@ export default function TransactionsPage() {
               {isResident
                 ? "A day-by-day money journal showing how funds moved through your account."
                 : isManager
-                  ? "Filter, search, and review operational money movement across managed properties."
+                  ? "Filter, search, and review inflows, expenses, and payouts across managed properties."
                   : isAdmin
-                    ? "Filter, search, and review platform-wide payments, expenses, and maintenance flows."
+                    ? "Filter, search, and review platform-wide payments, expenses, payouts, and maintenance flows."
                     : "Filter, search, and review the full investor money timeline."}
             </p>
           </div>
@@ -1010,17 +1176,19 @@ export default function TransactionsPage() {
 
                       <div className="transactions-journal-main">
                         <div className="transactions-card-topline">
-                          <span className={`transactions-type-pill ${getTypeTone(item.type)}`}>
-                            {getTypeLabel(item.type, audience)}
+                          <span className={`transactions-type-pill ${getTypeTone(item.type, item, audience)}`}>
+                            {getTypeLabel(item.type, audience, item)}
                           </span>
                           <span
                             className={`transactions-status-pill ${getStatusTone(item.status)}`}
                           >
-                            {item.status}
+                            {getStatusLabel(item.status)}
                           </span>
                         </div>
 
-                        <h4 className="transactions-card-title">{item.title}</h4>
+                        <h4 className="transactions-card-title">
+                          {getTitleLabel(item, audience)}
+                        </h4>
                         <p className="transactions-card-subtitle">{item.subtitle}</p>
 
                         <div className="transactions-card-meta">
@@ -1069,24 +1237,24 @@ export default function TransactionsPage() {
                       <div>
                         <span>Inflow</span>
                         <strong className="positive">
-                          {formatCompactCurrency(row.inflow)}
+                          {formatCurrency(row.inflow)}
                         </strong>
                       </div>
                       <div>
                         <span>Outflow</span>
-                        <strong>{formatCompactCurrency(row.outflow)}</strong>
+                        <strong>{formatCurrency(row.outflow)}</strong>
                       </div>
                       <div>
                         <span>Net</span>
                         <strong
                           className={row.netCashFlow >= 0 ? "positive" : "negative"}
                         >
-                          {formatCompactCurrency(row.netCashFlow)}
+                          {formatCurrency(row.netCashFlow)}
                         </strong>
                       </div>
                       <div>
                         <span>Maintenance</span>
-                        <strong>{formatCompactCurrency(row.maintenanceExpenses)}</strong>
+                        <strong>{formatCurrency(row.maintenanceExpenses)}</strong>
                       </div>
                     </div>
                   </div>
@@ -1094,42 +1262,52 @@ export default function TransactionsPage() {
               </div>
             ) : null}
 
-            <div className="transactions-list">
-              {transactions.map((item) => (
-                <div key={item.id} className="transactions-card">
-                  <div className="transactions-card-left">
-                    <div className="transactions-card-topline">
-                      <span className={`transactions-type-pill ${getTypeTone(item.type)}`}>
-                        {getTypeLabel(item.type, audience)}
-                      </span>
-                      <span
-                        className={`transactions-status-pill ${getStatusTone(item.status)}`}
-                      >
-                        {item.status}
-                      </span>
-                    </div>
+            <div className="transactions-journal">
+              {managerGroups.map((group) => (
+                <div key={group.key} className="transactions-journal-group">
+                  <div className="transactions-journal-date">{group.label}</div>
 
-                    <h4 className="transactions-card-title">{item.title}</h4>
-                    <p className="transactions-card-subtitle">{item.subtitle}</p>
+                  <div className="transactions-list">
+                    {group.items.map((item) => (
+                      <div key={item.id} className="transactions-card">
+                        <div className="transactions-card-left">
+                          <div className="transactions-card-topline">
+                            <span className={`transactions-type-pill ${getTypeTone(item.type, item, audience)}`}>
+                              {getTypeLabel(item.type, audience, item)}
+                            </span>
+                            <span
+                              className={`transactions-status-pill ${getStatusTone(item.status)}`}
+                            >
+                              {getStatusLabel(item.status)}
+                            </span>
+                          </div>
 
-                    <div className="transactions-card-meta">
-                      <span>{formatDateTime(item.time)}</span>
-                      {item.propertyTitle ? <span>{item.propertyTitle}</span> : null}
-                      {item.category ? <span>{item.category}</span> : null}
-                      {item.reference ? <span>{item.reference}</span> : null}
-                    </div>
-                  </div>
+                          <h4 className="transactions-card-title">
+                            {getTitleLabel(item, audience)}
+                          </h4>
+                          <p className="transactions-card-subtitle">{item.subtitle}</p>
 
-                  <div className="transactions-card-right">
-                    <strong
-                      className={`transactions-amount ${
-                        item.direction === "positive" ? "positive" : "negative"
-                      }`}
-                    >
-                      {item.direction === "positive" ? "+" : "-"}
-                      {formatCurrency(item.amount)}
-                    </strong>
-                    <span className="transactions-date">{formatDate(item.time)}</span>
+                          <div className="transactions-card-meta">
+                            <span>{formatDateTime(item.time)}</span>
+                            {item.propertyTitle ? <span>{item.propertyTitle}</span> : null}
+                            {item.category ? <span>{item.category}</span> : null}
+                            {item.reference ? <span>{item.reference}</span> : null}
+                          </div>
+                        </div>
+
+                        <div className="transactions-card-right">
+                          <strong
+                            className={`transactions-amount ${
+                              item.direction === "positive" ? "positive" : "negative"
+                            }`}
+                          >
+                            {item.direction === "positive" ? "+" : "-"}
+                            {formatCurrency(item.amount)}
+                          </strong>
+                          <span className="transactions-date">{formatDate(item.time)}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}

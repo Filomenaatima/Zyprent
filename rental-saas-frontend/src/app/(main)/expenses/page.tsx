@@ -135,6 +135,14 @@ const categoryOptions: ExpenseCategory[] = [
   "OTHER",
 ];
 
+const expenseStatusPriority: Record<ExpenseStatus, number> = {
+  SUBMITTED: 1,
+  APPROVED: 2,
+  DRAFT: 3,
+  PAID: 4,
+  REJECTED: 5,
+};
+
 function formatCurrency(
   value: number | string | null | undefined,
   currency = "UGX",
@@ -220,6 +228,16 @@ function getFilterStatus(key: FilterKey): ExpenseStatus | undefined {
   }
 }
 
+function getPersonLabel(
+  user?: {
+    name: string | null;
+    email: string | null;
+  } | null,
+  fallback = "System",
+) {
+  return user?.name || user?.email || fallback;
+}
+
 function getExpenseWorkflowLabel(expense: ExpenseItem, role: UserRole | null) {
   if (expense.status === "PAID") {
     return expense.category === "MAINTENANCE"
@@ -232,6 +250,12 @@ function getExpenseWorkflowLabel(expense: ExpenseItem, role: UserRole | null) {
       return "Approved and ready for platform-level settlement";
     }
 
+    if (role === "MANAGER") {
+      return expense.category === "MAINTENANCE"
+        ? "Approved maintenance expense ready for property-side payment"
+        : "Approved expense ready for settlement";
+    }
+
     return expense.category === "MAINTENANCE"
       ? "Approved and ready for property-side payment"
       : "Approved and ready for settlement";
@@ -240,6 +264,12 @@ function getExpenseWorkflowLabel(expense: ExpenseItem, role: UserRole | null) {
   if (expense.status === "SUBMITTED") {
     if (role === "ADMIN") {
       return "Submitted and waiting for admin or investor review";
+    }
+
+    if (role === "MANAGER") {
+      return expense.isAboveApprovalThreshold
+        ? "Awaiting investor approval"
+        : "Submitted for review";
     }
 
     return expense.isAboveApprovalThreshold
@@ -252,6 +282,20 @@ function getExpenseWorkflowLabel(expense: ExpenseItem, role: UserRole | null) {
   }
 
   return "Draft expense waiting for submission";
+}
+
+function sortExpenses(rows: ExpenseItem[]) {
+  return [...rows].sort((a, b) => {
+    const statusDiff =
+      expenseStatusPriority[a.status] - expenseStatusPriority[b.status];
+
+    if (statusDiff !== 0) return statusDiff;
+
+    const aDate = new Date(a.expenseDate || a.createdAt).getTime();
+    const bDate = new Date(b.expenseDate || b.createdAt).getTime();
+
+    return bDate - aDate;
+  });
 }
 
 export default function ExpensesPage() {
@@ -402,7 +446,8 @@ export default function ExpensesPage() {
         api.get<SummaryResponse>(summaryPath),
       ]);
 
-      const rows = expenseRes.data ?? [];
+      const rows = sortExpenses(expenseRes.data ?? []);
+
       setExpenses(rows);
       setSummary(summaryRes.data ?? null);
 
@@ -419,13 +464,16 @@ export default function ExpensesPage() {
 
   useEffect(() => {
     loadExpenses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role, activeFilter, selectedPropertyId, selectedCategory]);
 
   const filteredExpenses = useMemo(() => {
     const term = search.trim().toLowerCase();
-    if (!term) return expenses;
+    const sortedRows = sortExpenses(expenses);
 
-    return expenses.filter((item) => {
+    if (!term) return sortedRows;
+
+    return sortedRows.filter((item) => {
       const text = [
         item.title,
         item.description,
@@ -710,7 +758,7 @@ export default function ExpensesPage() {
           {canCreate && (
             <div className="expenses-form-card">
               <div className="expenses-section-head">
-                <h3>{isAdmin ? "Create Expense" : "Create Expense"}</h3>
+                <h3>Create Expense</h3>
                 <span>
                   {isAdmin
                     ? "Admin workflow"
@@ -786,7 +834,11 @@ export default function ExpensesPage() {
 
                 <input
                   className="expenses-input"
-                  placeholder="Vendor name"
+                  placeholder={
+                    form.category === "MAINTENANCE"
+                      ? "Service provider / contractor name"
+                      : "Vendor name"
+                  }
                   value={form.vendorName}
                   onChange={(e) =>
                     setForm((current) => ({
@@ -846,7 +898,9 @@ export default function ExpensesPage() {
           <div className="expenses-list-card">
             <div className="expenses-section-head">
               <h3>Expense Queue</h3>
-              <span>{loading ? "Loading..." : `${filteredExpenses.length} items`}</span>
+              <span>
+                {loading ? "Loading..." : `${filteredExpenses.length} items`}
+              </span>
             </div>
 
             {loading ? (
@@ -865,11 +919,22 @@ export default function ExpensesPage() {
                     onClick={() => setSelectedExpenseId(expense.id)}
                   >
                     <div className="expenses-list-top">
-                      <span
-                        className={`expenses-badge ${getStatusTone(expense.status)}`}
-                      >
-                        {formatStatusLabel(expense.status)}
-                      </span>
+                      <div className="expenses-detail-topline">
+                        <span
+                          className={`expenses-badge ${getStatusTone(
+                            expense.status,
+                          )}`}
+                        >
+                          {formatStatusLabel(expense.status)}
+                        </span>
+
+                        {expense.category === "MAINTENANCE" && (
+                          <span className="expenses-badge blue">
+                            Maintenance
+                          </span>
+                        )}
+                      </div>
+
                       <span className="expenses-list-date">
                         {formatDate(expense.expenseDate)}
                       </span>
@@ -884,7 +949,9 @@ export default function ExpensesPage() {
 
                     <div className="expenses-list-bottom">
                       <span>{expense.vendorName || "No vendor"}</span>
-                      <strong>{formatCurrency(expense.amount, expense.currency)}</strong>
+                      <strong>
+                        {formatCurrency(expense.amount, expense.currency)}
+                      </strong>
                     </div>
                   </button>
                 ))}
@@ -922,18 +989,27 @@ export default function ExpensesPage() {
                     )}
 
                     {selectedExpense.isAboveApprovalThreshold && (
-                      <span className="expenses-badge rose">Above threshold</span>
+                      <span className="expenses-badge rose">
+                        Above threshold
+                      </span>
                     )}
 
                     {selectedExpense.autoApproved && (
-                      <span className="expenses-badge success">Auto approved</span>
+                      <span className="expenses-badge success">
+                        Auto approved
+                      </span>
                     )}
                   </div>
 
-                  <h2 className="expenses-detail-title">{selectedExpense.title}</h2>
+                  <h2 className="expenses-detail-title">
+                    {selectedExpense.title}
+                  </h2>
                   <p className="expenses-detail-subtitle">
                     {selectedExpense.property?.title || "Property"} •{" "}
                     {selectedExpense.property?.location || "No location"}
+                    {selectedExpense.unit?.number
+                      ? ` • Unit ${selectedExpense.unit.number}`
+                      : ""}
                   </p>
                 </div>
 
@@ -957,7 +1033,9 @@ export default function ExpensesPage() {
                 <div className="expenses-info-grid">
                   <div className="expenses-info-card">
                     <span>Vendor</span>
-                    <strong>{selectedExpense.vendorName || "Not provided"}</strong>
+                    <strong>
+                      {selectedExpense.vendorName || "Not provided"}
+                    </strong>
                   </div>
 
                   <div className="expenses-info-card">
@@ -975,18 +1053,17 @@ export default function ExpensesPage() {
                   <div className="expenses-info-card">
                     <span>Created By</span>
                     <strong>
-                      {selectedExpense.createdBy?.name ||
-                        selectedExpense.createdBy?.email ||
-                        "Unknown"}
+                      {getPersonLabel(selectedExpense.createdBy, "System")}
                     </strong>
                   </div>
 
                   <div className="expenses-info-card">
                     <span>Reviewed By</span>
                     <strong>
-                      {selectedExpense.reviewedBy?.name ||
-                        selectedExpense.reviewedBy?.email ||
-                        "Not reviewed"}
+                      {getPersonLabel(
+                        selectedExpense.reviewedBy,
+                        "Not reviewed",
+                      )}
                     </strong>
                   </div>
 
@@ -1000,14 +1077,16 @@ export default function ExpensesPage() {
                   </div>
                 </div>
 
-                {(selectedExpense.description || selectedExpense.notes) && (
-                  <div className="expenses-description-card">
-                    <p>{selectedExpense.description || "No description provided."}</p>
-                    {selectedExpense.notes && (
-                      <small>Notes: {selectedExpense.notes}</small>
-                    )}
-                  </div>
-                )}
+                <div className="expenses-description-card">
+                  <p>
+                    {selectedExpense.description ||
+                      selectedExpense.notes ||
+                      "No description or notes provided."}
+                  </p>
+                  {selectedExpense.description && selectedExpense.notes && (
+                    <small>Notes: {selectedExpense.notes}</small>
+                  )}
+                </div>
 
                 {selectedExpense.maintenanceRequest && (
                   <div className="expenses-description-card">
@@ -1016,8 +1095,24 @@ export default function ExpensesPage() {
                       <strong>{selectedExpense.maintenanceRequest.title}</strong>
                     </p>
                     <small>
-                      Maintenance status: {selectedExpense.maintenanceRequest.status}
+                      Maintenance status:{" "}
+                      {selectedExpense.maintenanceRequest.status}
                     </small>
+                  </div>
+                )}
+
+                {selectedExpense.receiptUrl && (
+                  <div className="expenses-description-card">
+                    <p>
+                      Receipt:{" "}
+                      <a
+                        href={selectedExpense.receiptUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open receipt
+                      </a>
+                    </p>
                   </div>
                 )}
               </section>
@@ -1098,6 +1193,14 @@ export default function ExpensesPage() {
                           : "Mark Paid"}
                     </button>
                   )}
+
+                  {selectedExpense.status !== "DRAFT" &&
+                    selectedExpense.status !== "SUBMITTED" &&
+                    selectedExpense.status !== "APPROVED" && (
+                      <div className="expenses-empty">
+                        No action is required for this expense.
+                      </div>
+                    )}
                 </div>
               </section>
 
@@ -1114,7 +1217,9 @@ export default function ExpensesPage() {
                   </div>
                   <div className="expenses-info-card">
                     <span>Submitted At</span>
-                    <strong>{formatDateTime(selectedExpense.submittedAt)}</strong>
+                    <strong>
+                      {formatDateTime(selectedExpense.submittedAt)}
+                    </strong>
                   </div>
                   <div className="expenses-info-card">
                     <span>Reviewed At</span>

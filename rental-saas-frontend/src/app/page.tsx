@@ -1,182 +1,76 @@
+"use client";
+
+import { useState } from "react";
 import "@/styles/landing.css";
 
-const trustStats = [
-  { value: "All-in-one", label: "Property operating system" },
-  { value: "7 core layers", label: "Operations, finance, maintenance, investors, residents, providers, admin" },
-  { value: "Built to scale", label: "From active properties to growing portfolios" },
-];
+const roles = {
+  Managers: {
+    title: "Property Managers",
+    label: "Portfolio control",
+    text: "Manage properties, units, contracts, invoices, rent, expenses, residents, providers, and maintenance from one workspace.",
+    items: ["Rent collection", "Unit occupancy", "Expense tracking"],
+  },
+  Investors: {
+    title: "Investors",
+    label: "Returns visibility",
+    text: "Track property performance, profit movement, expenses, payouts, wallet activity, and returns clearly.",
+    items: ["Profit movement", "Expense share", "Portfolio returns"],
+  },
+  Residents: {
+    title: "Residents",
+    label: "Resident self-service",
+    text: "Pay rent, view receipts, manage wallet activity, and submit maintenance requests from a clean portal.",
+    items: ["Rent receipts", "Wallet history", "Maintenance requests"],
+  },
+  Providers: {
+    title: "Service Providers",
+    label: "Job workflow",
+    text: "Receive jobs, submit quotes, update work progress, manage completion, and track payouts.",
+    items: ["Assigned jobs", "Quote approvals", "Payout tracking"],
+  },
+};
 
-const solutionPillars = [
-  {
-    title: "Property Operations",
-    description:
-      "Units, residents, contracts, invoices, and day-to-day workflows connected in one place.",
-  },
-  {
-    title: "Financial Control",
-    description:
-      "Payments, expenses, transactions, subscriptions, billing, and reporting with cleaner visibility.",
-  },
-  {
-    title: "Maintenance & Providers",
-    description:
-      "Requests, quotes, dispatches, approvals, payouts, and provider oversight in one workflow.",
-  },
-  {
-    title: "Admin & Compliance",
-    description:
-      "KYC, approvals, verification, platform governance, and operational control built into the core.",
-  },
-];
-
-const audiences = [
-  {
-    eyebrow: "For Property Managers",
-    title: "Operate faster with more structure",
-    description:
-      "Manage units, residents, contracts, invoices, payments, expenses, maintenance, and provider activity from one connected system.",
-    points: [
-      "Centralized property and unit management",
-      "Rent, invoice, and payment visibility",
-      "Maintenance coordination and provider oversight",
-    ],
-  },
-  {
-    eyebrow: "For Investors",
-    title: "Track capital, performance, and portfolio health",
-    description:
-      "Monitor funding activity, investment positions, profit visibility, subscriptions, and reporting across the portfolio.",
-    points: [
-      "Investment and portfolio visibility",
-      "Revenue and distribution oversight",
-      "Cleaner reporting for stronger decisions",
-    ],
-  },
-  {
-    eyebrow: "For Residents",
-    title: "Deliver a more modern resident experience",
-    description:
-      "Give residents a cleaner experience for invoices, receipts, payments, maintenance requests, and account activity.",
-    points: [
-      "Invoice and receipt access",
-      "Maintenance request tracking",
-      "A more professional resident journey",
-    ],
-  },
-  {
-    eyebrow: "For Service Providers",
-    title: "Coordinate service delivery professionally",
-    description:
-      "Track dispatches, quotes, approvals, payouts, ratings, and provider verification inside one platform workflow.",
-    points: [
-      "Quote and dispatch visibility",
-      "Provider verification and ratings",
-      "Payout and job tracking",
-    ],
-  },
-];
-
-const capabilities = [
-  "Properties & units",
-  "Contracts & invoices",
-  "Payments & expenses",
-  "Maintenance workflows",
-  "Service providers",
-  "KYC & approvals",
-  "Investments",
-  "Subscriptions & billing",
-];
-
-const productRows = [
-  {
-    tag: "Command Center",
-    title: "One dashboard for the moving parts of real estate",
-    description:
-      "See the operating picture clearly across financial activity, maintenance pressure, provider operations, investor visibility, and admin control.",
-  },
-  {
-    tag: "Maintenance + Providers",
-    title: "Repairs, quotes, dispatches, approvals, and payouts connected",
-    description:
-      "Zyprent brings maintenance requests together with service providers, quotes, dispatches, approval flow, ratings, and provider payouts.",
-  },
-  {
-    tag: "Finance + Reporting",
-    title: "Billing, subscriptions, expenses, transactions, and reports in one system",
-    description:
-      "Track money movement and operating performance through billing controls, subscription workflows, expenses, transactions, and reporting.",
-  },
-];
-
-const differentiators = [
-  {
-    title: "One connected platform",
-    text: "Zyprent replaces fragmented workflows with one structured system for operations, finance, maintenance, providers, and oversight.",
-  },
-  {
-    title: "Built for real operational complexity",
-    text: "It is designed around the actual work: contracts, invoices, payments, maintenance, service providers, KYC, approvals, and reporting.",
-  },
-  {
-    title: "Minimal, premium, and clear",
-    text: "The product experience is intentionally built to feel polished, modern, and credible for serious real estate businesses.",
-  },
-  {
-    title: "Ready for scale",
-    text: "Whether you are running a growing portfolio or building a more advanced operating company, Zyprent is structured to grow with you.",
-  },
-];
-
-const faqItems = [
+const faqs = [
   {
     question: "What is Zyprent?",
     answer:
-      "Zyprent is a real estate operating platform that brings together property management, finance, maintenance, service providers, investor visibility, resident workflows, and admin oversight.",
+      "Zyprent is a real estate operating platform for managing property operations, finance, maintenance, residents, providers, and investor visibility.",
   },
   {
     question: "Who is Zyprent built for?",
     answer:
-      "Zyprent is built for property managers, investors, residents, operators, and service providers who need a cleaner, more connected operating system.",
+      "Zyprent is built for property managers, investors, residents, and service providers who need one connected real estate workspace.",
   },
   {
-    question: "Does Zyprent include service provider workflows?",
+    question: "Can I request a demo?",
     answer:
-      "Yes. Zyprent covers provider verification, dispatches, quotes, reviews, payouts, and maintenance-linked provider coordination.",
-  },
-  {
-    question: "Can I request a demo before using the product?",
-    answer:
-      "Yes. You can request a demo to explore how Zyprent fits your business before rollout.",
+      "Yes. You can request a demo and review how Zyprent fits your workflow before rollout.",
   },
 ];
 
 export default function HomePage() {
+  const [activeRole, setActiveRole] = useState<keyof typeof roles>("Managers");
+  const role = roles[activeRole];
+
   return (
     <main className="landing-page">
-      <div className="landing-ambient landing-ambient-one" />
-      <div className="landing-ambient landing-ambient-two" />
-
       <header className="landing-nav">
-        <a href="/" className="landing-brand">
-          <div className="landing-brand-mark">Z</div>
-          <div className="landing-brand-copy">
-            <span className="landing-brand-name">ZYPRENT</span>
-            <span className="landing-brand-sub">Real estate operating platform</span>
-          </div>
+        <a href="/" className="landing-brand" aria-label="Zyprent home">
+          <span className="landing-brand-mark">Z</span>
+          <strong>Zyprent</strong>
         </a>
 
-        <nav className="landing-nav-links">
+        <nav className="landing-nav-links" aria-label="Landing navigation">
           <a href="#solution">Solution</a>
-          <a href="#audiences">Who it&apos;s for</a>
-          <a href="#product">Product</a>
+          <a href="#roles">Who it&apos;s for</a>
           <a href="#faq">FAQ</a>
         </nav>
 
         <div className="landing-nav-actions">
-          <a className="landing-btn ghost" href="/login">
+          <a href="/login" className="landing-link">
             Sign In
           </a>
-          <a className="landing-btn primary" href="mailto:info@zyprent.com">
+          <a href="mailto:info@zyprent.com" className="landing-btn primary">
             Book Demo
           </a>
         </div>
@@ -184,299 +78,289 @@ export default function HomePage() {
 
       <section className="hero-section">
         <div className="hero-copy">
-          <p className="section-eyebrow">MODERN REAL ESTATE OPERATING SYSTEM</p>
-          <h1>Run properties, finance, maintenance, providers, investors, and residents from one platform</h1>
-          <p className="hero-text">
-            Zyprent gives modern real estate businesses a cleaner way to manage operations,
-            payments, expenses, maintenance, service providers, subscriptions, approvals,
-            reporting, and portfolio visibility without scattered tools.
+          <p className="hero-eyebrow">Modern real estate operating system</p>
+
+          <h1>Real estate operations made simple.</h1>
+
+          <p className="hero-subtext">
+            A premium workspace for property operations, finance, maintenance,
+            residents, providers, and investor visibility.
           </p>
 
           <div className="hero-actions">
-            <a className="landing-btn primary large" href="mailto:info@zyprent.com">
+            <a href="mailto:info@zyprent.com" className="landing-btn primary large">
               Request Demo
             </a>
-            <a className="landing-btn secondary large" href="/login">
+            <a href="/login" className="landing-btn secondary large">
               Open Platform
             </a>
           </div>
-
-          <div className="hero-meta">
-            <span className="hero-meta-label">Built for modern real estate operators</span>
-            <div className="hero-meta-line" />
-          </div>
         </div>
 
-        <div className="hero-visual">
-          <div className="hero-frame">
-            <div className="hero-frame-top">
-              <span className="hero-chip">Live platform preview</span>
-              <span className="hero-chip subtle">Premium workflow</span>
-            </div>
+        <div className="hero-graphic">
+          <div className="hero-orb orb-one" />
+          <div className="hero-orb orb-two" />
+          <div className="hero-orb orb-three" />
 
-            <div className="hero-panel-grid">
-              <article className="hero-panel hero-panel-main">
-                <span>Operations</span>
-                <strong>Unified</strong>
-                <p>Properties, units, contracts, and residents connected.</p>
-              </article>
-
-              <article className="hero-panel">
-                <span>Finance</span>
-                <strong>Tracked</strong>
-                <p>Invoices, payments, billing, and expenses clearly visible.</p>
-              </article>
-
-              <article className="hero-panel">
-                <span>Maintenance</span>
-                <strong>Structured</strong>
-                <p>Requests, providers, quotes, dispatches, and payouts aligned.</p>
-              </article>
-
-              <article className="hero-panel">
-                <span>Admin</span>
-                <strong>Controlled</strong>
-                <p>KYC, approvals, verification, and reporting built in.</p>
-              </article>
-            </div>
-
-            <div className="hero-system-card">
-              <div className="hero-system-copy">
-                <p className="hero-system-kicker">Core platform coverage</p>
-                <h3>One operating layer across the business</h3>
+          <div className="hero-dashboard">
+            <div className="hero-dashboard-top">
+              <div className="dashboard-window-dots">
+                <span />
+                <span />
+                <span />
               </div>
 
-              <div className="hero-system-list">
-                {capabilities.map((item) => (
-                  <div key={item} className="hero-system-item">
-                    <span className="hero-system-dot" />
-                    <span>{item}</span>
+              <div className="dashboard-search">Search properties, payments, requests</div>
+
+              <div className="dashboard-user-dot" />
+            </div>
+
+            <div className="hero-dashboard-body">
+              <aside className="dashboard-sidebar">
+                <span className="sidebar-pill active">Dashboard</span>
+                <span className="sidebar-pill">Finance</span>
+                <span className="sidebar-pill">Maintenance</span>
+                <span className="sidebar-pill">Reports</span>
+              </aside>
+
+              <div className="dashboard-main">
+                <div className="dashboard-hero-card">
+                  <div>
+                    <span>Operating balance</span>
+                    <strong>UGX 2.8M</strong>
+                    <small>Live property overview</small>
                   </div>
-                ))}
+
+                  <div className="balance-ring">
+                    <span>82%</span>
+                  </div>
+                </div>
+
+                <div className="dashboard-grid">
+                  <div className="dashboard-tile">
+                    <span>Rent status</span>
+                    <strong>Paid</strong>
+                  </div>
+
+                  <div className="dashboard-tile">
+                    <span>Requests</span>
+                    <strong>2 Open</strong>
+                  </div>
+
+                  <div className="dashboard-chart-card">
+                    <div className="chart-bars">
+                      <i />
+                      <i />
+                      <i />
+                      <i />
+                      <i />
+                    </div>
+                    <strong>Revenue trend</strong>
+                  </div>
+
+                  <div className="dashboard-task-card">
+                    <span />
+                    <div>
+                      <strong>Maintenance update</strong>
+                      <p>Provider assigned and work is in progress.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="hero-floating-card hero-floating-left">
-            <span>Service Providers</span>
-            <strong>Quotes, dispatches, verification, and payouts</strong>
+          <div className="hero-floating-card hero-card-one">
+            <span>Finance</span>
+            <strong>Payments connected</strong>
           </div>
 
-          <div className="hero-floating-card hero-floating-right">
-            <span>Reporting</span>
-            <strong>Financial and operating visibility built in</strong>
+          <div className="hero-floating-card hero-card-two">
+            <span>Maintenance</span>
+            <strong>Requests tracked</strong>
+          </div>
+
+          <div className="hero-floating-card hero-card-three">
+            <span>Investors</span>
+            <strong>Returns visible</strong>
           </div>
         </div>
       </section>
 
-      <section className="trust-strip">
-        {trustStats.map((stat) => (
-          <article key={stat.value} className="trust-card">
-            <strong>{stat.value}</strong>
-            <span>{stat.label}</span>
-          </article>
-        ))}
-      </section>
-
-      <section id="solution" className="content-section split-section">
-        <div className="section-heading split-heading">
-          <p className="section-eyebrow">WHY IT MATTERS</p>
-          <h2>Real estate operations break down when the system is fragmented</h2>
-          <p>
-            Spreadsheets, manual follow-up, scattered billing, disconnected maintenance, and weak
-            provider coordination create friction. Zyprent brings those layers together into one
-            clean operating system.
-          </p>
+      <section id="solution" className="section solution-section">
+        <div className="section-heading center">
+          <span>Solution</span>
+          <h2>Everything connected in one operating layer.</h2>
         </div>
 
-        <div className="solution-grid">
-          {solutionPillars.map((pillar) => (
-            <article key={pillar.title} className="solution-card">
-              <h3>{pillar.title}</h3>
-              <p>{pillar.description}</p>
-            </article>
-          ))}
+        <div className="system-flow">
+          <div className="flow-node">
+            <small>01</small>
+            <strong>Properties</strong>
+          </div>
+
+          <div className="flow-line" />
+
+          <div className="flow-node highlight">
+            <small>02</small>
+            <strong>Finance</strong>
+          </div>
+
+          <div className="flow-line" />
+
+          <div className="flow-node">
+            <small>03</small>
+            <strong>Maintenance</strong>
+          </div>
+
+          <div className="flow-line" />
+
+          <div className="flow-node">
+            <small>04</small>
+            <strong>Reports</strong>
+          </div>
         </div>
+
+        <p className="system-flow-subtext">
+          Properties, payments, wallets, residents, maintenance, providers and
+          investors stay connected in one place, so your operations run smoothly
+          without scattered spreadsheets or manual follow ups.
+        </p>
       </section>
 
-      <section id="product" className="content-section product-preview-section">
+      <section id="roles" className="section roles-section">
         <div className="section-heading">
-          <p className="section-eyebrow">PRODUCT PREVIEW</p>
-          <h2>A premium operating platform, not a patchwork of disconnected tools</h2>
-          <p>
-            The product is built to feel clear, structured, and investor-grade while supporting the
-            complexity behind property operations.
-          </p>
+          <span>Built for</span>
+          <h2>Four user experiences. One connected system.</h2>
         </div>
 
-        <div className="product-preview-shell">
-          <div className="product-preview-main">
-            <div className="product-preview-topbar">
-              <span className="preview-pill active">Platform overview</span>
-              <span className="preview-pill">Operations</span>
-              <span className="preview-pill">Finance</span>
-              <span className="preview-pill">Maintenance</span>
-            </div>
-
-            <div className="product-preview-grid">
-              <div className="preview-card preview-card-large">
-                <span>Portfolio visibility</span>
-                <strong>One command layer</strong>
-              </div>
-              <div className="preview-card">
-                <span>Billing</span>
-                <strong>Live control</strong>
-              </div>
-              <div className="preview-card">
-                <span>Providers</span>
-                <strong>Verified flow</strong>
-              </div>
-              <div className="preview-card">
-                <span>Approvals</span>
-                <strong>Structured review</strong>
-              </div>
-            </div>
-
-            <div className="preview-chart">
-              <div className="preview-chart-head">
-                <h3>Operating coverage across the platform</h3>
-                <p>Built for real estate businesses that need visibility and control.</p>
-              </div>
-
-              <div className="preview-bars">
-                <div className="preview-bar-row">
-                  <span>Property operations</span>
-                  <div className="preview-bar-track"><div className="preview-bar-fill fill-1" /></div>
-                </div>
-                <div className="preview-bar-row">
-                  <span>Financial visibility</span>
-                  <div className="preview-bar-track"><div className="preview-bar-fill fill-2" /></div>
-                </div>
-                <div className="preview-bar-row">
-                  <span>Maintenance & providers</span>
-                  <div className="preview-bar-track"><div className="preview-bar-fill fill-3" /></div>
-                </div>
-                <div className="preview-bar-row">
-                  <span>Admin governance</span>
-                  <div className="preview-bar-track"><div className="preview-bar-fill fill-4" /></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="product-preview-side">
-            {productRows.map((row) => (
-              <article key={row.title} className="preview-side-card">
-                <span className="preview-side-tag">{row.tag}</span>
-                <h3>{row.title}</h3>
-                <p>{row.description}</p>
-              </article>
+        <div className="role-box">
+          <div className="role-tabs">
+            {(Object.keys(roles) as Array<keyof typeof roles>).map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={activeRole === item ? "active" : ""}
+                onClick={() => setActiveRole(item)}
+              >
+                {item}
+              </button>
             ))}
           </div>
-        </div>
-      </section>
 
-      <section id="audiences" className="content-section">
-        <div className="section-heading">
-          <p className="section-eyebrow">WHO ZYPRENT SERVES</p>
-          <h2>Built around the people who actually run real estate</h2>
-          <p>
-            Zyprent is designed around real workflows across management, investment, resident
-            experience, service providers, and platform administration.
-          </p>
-        </div>
+          <div className="role-content">
+            <div className="role-copy">
+              <span>{role.label}</span>
+              <h3>{role.title}</h3>
+              <p>{role.text}</p>
+            </div>
 
-        <div className="audience-grid">
-          {audiences.map((item) => (
-            <article key={item.title} className="audience-card">
-              <p className="audience-eyebrow">{item.eyebrow}</p>
-              <h3>{item.title}</h3>
-              <p className="audience-description">{item.description}</p>
-
-              <div className="audience-points">
-                {item.points.map((point) => (
-                  <div key={point} className="audience-point">
-                    <span className="audience-point-dot" />
-                    <span>{point}</span>
-                  </div>
-                ))}
+            <div className="role-panel">
+              <div className="role-panel-header">
+                <strong>{role.title}</strong>
+                <small>Live view</small>
               </div>
-            </article>
-          ))}
-        </div>
-      </section>
 
-      <section className="content-section">
-        <div className="section-heading compact">
-          <p className="section-eyebrow">WHY ZYPRENT</p>
-          <h2>Built to replace fragmented workflows with one cleaner operating layer</h2>
-        </div>
-
-        <div className="differentiator-grid">
-          {differentiators.map((item) => (
-            <article key={item.title} className="differentiator-card">
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="content-section cta-section">
-        <div className="cta-card">
-          <div className="cta-copy">
-            <p className="section-eyebrow">READY TO RUN REAL ESTATE BETTER?</p>
-            <h2>Bring operations, billing, maintenance, providers, and investor visibility into one premium platform</h2>
-            <p>
-              Start the conversation, request a demo, and explore how Zyprent can support a more
-              structured and scalable way to manage real estate.
-            </p>
-          </div>
-
-          <div className="cta-actions">
-            <a className="landing-btn primary large" href="mailto:info@zyprent.com">
-              Request Demo
-            </a>
-            <a className="landing-btn secondary large" href="/login">
-              Sign In
-            </a>
+              {role.items.map((item) => (
+                <div key={item} className="role-row">
+                  <i />
+                  <strong>{item}</strong>
+                  <small>Connected</small>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="faq" className="content-section faq-section">
-        <div className="section-heading compact">
-          <p className="section-eyebrow">FAQ</p>
+      <section className="section inside-section">
+        <div className="section-heading center">
+          <span>Inside Zyprent</span>
+          <h2>A command center for your property business.</h2>
+        </div>
+
+        <div className="inside-grid">
+          <article className="inside-card large finance-card">
+            <div className="finance-visual" aria-hidden="true">
+              <div className="finance-orbit orbit-a" />
+              <div className="finance-orbit orbit-b" />
+
+              <div className="finance-tower tower-one" />
+              <div className="finance-tower tower-two" />
+              <div className="finance-tower tower-three" />
+              <div className="finance-tower tower-four" />
+
+              <div className="finance-coin coin-one">UGX</div>
+              <div className="finance-coin coin-two">%</div>
+
+              <div className="finance-mini-card finance-mini-card-one">
+                <span>Collected</span>
+                <strong>UGX 2.8M</strong>
+              </div>
+
+              <div className="finance-mini-card finance-mini-card-two">
+                <span>Returns</span>
+                <strong>18.4%</strong>
+              </div>
+            </div>
+
+            <div className="inside-card-content">
+              <span>Finance</span>
+              <h3>Follow every shilling clearly.</h3>
+              <p>
+                Rent, expenses, payouts, wallet movement, and investor deductions
+                stay tied to the right property, unit, and user.
+              </p>
+            </div>
+          </article>
+
+          <article className="inside-card">
+            <span>Maintenance</span>
+            <h3>Requests move with structure.</h3>
+            <p>From request to quote, approval, assignment, progress, and completion.</p>
+          </article>
+
+          <article className="inside-card">
+            <span>Visibility</span>
+            <h3>No guessing.</h3>
+            <p>Every user sees the information that matters to them.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="faq" className="section faq-section">
+        <div className="section-heading center">
+          <span>FAQ</span>
           <h2>Common questions</h2>
         </div>
 
-        <div className="faq-grid">
-          {faqItems.map((item) => (
-            <article key={item.question} className="faq-card">
-              <h3>{item.question}</h3>
+        <div className="faq-list">
+          {faqs.map((item) => (
+            <details key={item.question}>
+              <summary>{item.question}</summary>
               <p>{item.answer}</p>
-            </article>
+            </details>
           ))}
         </div>
       </section>
 
-      <footer className="landing-footer">
-        <div className="landing-footer-brand">
-          <div className="landing-brand-mark">Z</div>
-          <div>
-            <strong>ZYPRENT</strong>
-            <p>Modern real estate operations, billing, maintenance, providers, and investor visibility.</p>
-          </div>
-        </div>
+      <section className="final-cta">
+        <span>Ready when you are</span>
+        <h2>Run your entire property operation from one system.</h2>
+        <p>
+          From rent collection to maintenance and investor reporting, everything
+          stays connected.
+        </p>
 
-        <div className="landing-footer-links">
-          <a href="#solution">Solution</a>
-          <a href="#audiences">Who it&apos;s for</a>
-          <a href="#product">Product</a>
-          <a href="#faq">FAQ</a>
-          <a href="/login">Sign In</a>
+        <div className="final-actions">
+          <a href="mailto:info@zyprent.com" className="landing-btn primary large">
+            Book Demo
+          </a>
+          <a href="/login" className="landing-btn secondary large">
+            Open Platform
+          </a>
         </div>
-      </footer>
+      </section>
     </main>
   );
 }

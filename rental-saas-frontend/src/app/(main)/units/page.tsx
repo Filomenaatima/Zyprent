@@ -5,7 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import { api } from "@/services/api";
 import { useAuthStore } from "@/store/auth";
 
-type AppRole = "ADMIN" | "MANAGER" | "INVESTOR" | "RESIDENT" | "SERVICE_PROVIDER";
+type AppRole =
+  | "ADMIN"
+  | "MANAGER"
+  | "INVESTOR"
+  | "RESIDENT"
+  | "SERVICE_PROVIDER";
 
 type UnitResponseItem = {
   id: string;
@@ -91,8 +96,11 @@ function getHealthTone(unit: UnitResponseItem) {
 
 function getHealthLabel(unit: UnitResponseItem) {
   if ((unit.pendingInvoices || 0) > 0) {
-    return `${unit.pendingInvoices} pending invoice${unit.pendingInvoices === 1 ? "" : "s"}`;
+    return `${unit.pendingInvoices} pending invoice${
+      unit.pendingInvoices === 1 ? "" : "s"
+    }`;
   }
+
   if (unit.status === "OCCUPIED") return "Occupied";
   return "Vacant";
 }
@@ -126,6 +134,41 @@ export default function UnitsPage() {
     rentAmount: "",
   });
 
+  function buildManagerSummary(items: UnitResponseItem[]) {
+    const totalUnits = items.length;
+    const occupiedUnits = items.filter(
+      (unit) => unit.status === "OCCUPIED",
+    ).length;
+    const vacantUnits = items.filter((unit) => unit.status === "VACANT").length;
+    const assignedResidents = items.filter(
+      (unit) =>
+        Boolean(unit.activeResident) || Boolean(unit.residents?.length || 0),
+    ).length;
+    const unassignedUnits = totalUnits - assignedResidents;
+    const totalRentPotential = items.reduce(
+      (sum, unit) => sum + Number(unit.rentAmount || 0),
+      0,
+    );
+    const totalInvoiceExposure = items.reduce(
+      (sum, unit) => sum + Number(unit.invoiceExposure || 0),
+      0,
+    );
+    const unitsWithPendingInvoices = items.filter(
+      (unit) => Number(unit.pendingInvoices || 0) > 0,
+    ).length;
+
+    return {
+      totalUnits,
+      occupiedUnits,
+      vacantUnits,
+      assignedResidents,
+      unassignedUnits,
+      totalRentPotential,
+      totalInvoiceExposure,
+      unitsWithPendingInvoices,
+    };
+  }
+
   useEffect(() => {
     let mounted = true;
 
@@ -136,7 +179,9 @@ export default function UnitsPage() {
 
         if (role === "ADMIN") {
           const res = await api.get<AdminUnitsResponse>("/units");
+
           if (!mounted) return;
+
           setUnits(res.data.units ?? []);
           setSummary(
             res.data.summary ?? {
@@ -150,45 +195,26 @@ export default function UnitsPage() {
               unitsWithPendingInvoices: 0,
             },
           );
+
           return;
         }
 
         if (role === "MANAGER") {
           const res = await api.get<UnitResponseItem[]>("/units/manager/me");
+
           if (!mounted) return;
 
           const items = res.data ?? [];
           setUnits(items);
-
-          const totalUnits = items.length;
-          const occupiedUnits = items.filter((unit) => unit.status === "OCCUPIED").length;
-          const vacantUnits = items.filter((unit) => unit.status === "VACANT").length;
-          const assignedResidents = items.filter(
-            (unit) => (unit.residents?.length || 0) > 0,
-          ).length;
-          const unassignedUnits = totalUnits - assignedResidents;
-          const totalRentPotential = items.reduce(
-            (sum, unit) => sum + Number(unit.rentAmount || 0),
-            0,
-          );
-
-          setSummary({
-            totalUnits,
-            occupiedUnits,
-            vacantUnits,
-            assignedResidents,
-            unassignedUnits,
-            totalRentPotential,
-            totalInvoiceExposure: 0,
-            unitsWithPendingInvoices: 0,
-          });
+          setSummary(buildManagerSummary(items));
           return;
         }
 
         if (!mounted) return;
         setError("This units view is not available for your account.");
-      } catch (err: any) {
+      } catch (err) {
         console.error("Failed to load units", err);
+
         if (!mounted) return;
         setError("Failed to load units.");
       } finally {
@@ -230,6 +256,7 @@ export default function UnitsPage() {
 
   const filteredUnits = useMemo(() => {
     const normalized = search.trim().toLowerCase();
+
     if (!normalized) return units;
 
     return units.filter((unit) => {
@@ -258,6 +285,14 @@ export default function UnitsPage() {
   const vacantUnits = summary.vacantUnits;
   const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
   const monthlyPotential = summary.totalRentPotential;
+
+  const currentRent = units
+    .filter((unit) => unit.status === "OCCUPIED")
+    .reduce((sum, unit) => sum + Number(unit.rentAmount || 0), 0);
+
+  const vacancyLoss = units
+    .filter((unit) => unit.status === "VACANT")
+    .reduce((sum, unit) => sum + Number(unit.rentAmount || 0), 0);
 
   const groupedUnits = useMemo(() => {
     const byProperty = new Map<
@@ -296,7 +331,18 @@ export default function UnitsPage() {
     if (role === "ADMIN") {
       const res = await api.get<AdminUnitsResponse>("/units");
       setUnits(res.data.units ?? []);
-      setSummary(res.data.summary);
+      setSummary(
+        res.data.summary ?? {
+          totalUnits: 0,
+          occupiedUnits: 0,
+          vacantUnits: 0,
+          assignedResidents: 0,
+          unassignedUnits: 0,
+          totalRentPotential: 0,
+          totalInvoiceExposure: 0,
+          unitsWithPendingInvoices: 0,
+        },
+      );
       return;
     }
 
@@ -304,29 +350,7 @@ export default function UnitsPage() {
       const res = await api.get<UnitResponseItem[]>("/units/manager/me");
       const items = res.data ?? [];
       setUnits(items);
-
-      const totalUnits = items.length;
-      const occupiedUnits = items.filter((unit) => unit.status === "OCCUPIED").length;
-      const vacantUnits = items.filter((unit) => unit.status === "VACANT").length;
-      const assignedResidents = items.filter(
-        (unit) => (unit.residents?.length || 0) > 0,
-      ).length;
-      const unassignedUnits = totalUnits - assignedResidents;
-      const totalRentPotential = items.reduce(
-        (sum, unit) => sum + Number(unit.rentAmount || 0),
-        0,
-      );
-
-      setSummary({
-        totalUnits,
-        occupiedUnits,
-        vacantUnits,
-        assignedResidents,
-        unassignedUnits,
-        totalRentPotential,
-        totalInvoiceExposure: 0,
-        unitsWithPendingInvoices: 0,
-      });
+      setSummary(buildManagerSummary(items));
     }
   }
 
@@ -388,11 +412,13 @@ export default function UnitsPage() {
           <p className="units-eyebrow">
             {role === "ADMIN" ? "Admin Units Control" : "Manager Units"}
           </p>
+
           <h1 className="units-title">
             {role === "ADMIN"
               ? "Oversee unit inventory, occupancy, residents, and rent exposure across the platform"
               : "Monitor occupancy, create units, and manage rentable inventory"}
           </h1>
+
           <p className="units-text">
             {role === "ADMIN"
               ? "Track all units in one control center, review resident assignment, monitor invoice pressure, and maintain visibility across properties, managers, and owners."
@@ -414,14 +440,17 @@ export default function UnitsPage() {
             <span>Total Units</span>
             <strong>{loading ? "—" : totalUnits}</strong>
           </div>
+
           <div className="units-stat-card">
             <span>Occupied</span>
             <strong>{loading ? "—" : occupiedUnits}</strong>
           </div>
+
           <div className="units-stat-card">
             <span>Vacant</span>
             <strong>{loading ? "—" : vacantUnits}</strong>
           </div>
+
           <div className="units-stat-card">
             <span>Occupancy Rate</span>
             <strong>{loading ? "—" : formatPercent(occupancyRate)}</strong>
@@ -434,23 +463,20 @@ export default function UnitsPage() {
           <span>Monthly Rent Potential</span>
           <strong>{formatCurrency(monthlyPotential)}</strong>
         </div>
+
         <div className="units-overview-item">
-          <span>Visible Properties</span>
-          <strong>{properties.length}</strong>
+          <span>Current Rent</span>
+          <strong>{formatCurrency(currentRent)}</strong>
         </div>
+
         <div className="units-overview-item">
-          <span>Vacancy Pressure</span>
-          <strong>{vacantUnits > 0 ? `${vacantUnits} open` : "Fully occupied"}</strong>
+          <span>Vacancy Loss</span>
+          <strong>{formatCurrency(vacancyLoss)}</strong>
         </div>
+
         <div className="units-overview-item">
-          <span>Inventory Health</span>
-          <strong>
-            {occupancyRate >= 80
-              ? "Strong"
-              : occupancyRate >= 50
-              ? "Stable"
-              : "Needs attention"}
-          </strong>
+          <span>Outstanding Rent</span>
+          <strong>{formatCurrency(summary.totalInvoiceExposure)}</strong>
         </div>
       </section>
 
@@ -490,7 +516,10 @@ export default function UnitsPage() {
                   <select
                     value={form.propertyId}
                     onChange={(e) =>
-                      setForm((prev) => ({ ...prev, propertyId: e.target.value }))
+                      setForm((prev) => ({
+                        ...prev,
+                        propertyId: e.target.value,
+                      }))
                     }
                   >
                     {properties.map((property) => (
@@ -520,18 +549,27 @@ export default function UnitsPage() {
                     min="0"
                     value={form.rentAmount}
                     onChange={(e) =>
-                      setForm((prev) => ({ ...prev, rentAmount: e.target.value }))
+                      setForm((prev) => ({
+                        ...prev,
+                        rentAmount: e.target.value,
+                      }))
                     }
                     placeholder="e.g. 1200000"
                   />
                 </label>
               </div>
 
-              {message ? <div className="units-message success">{message}</div> : null}
+              {message ? (
+                <div className="units-message success">{message}</div>
+              ) : null}
               {error ? <div className="units-message error">{error}</div> : null}
 
               <div className="units-actions">
-                <button type="submit" className="units-primary-btn" disabled={saving}>
+                <button
+                  type="submit"
+                  className="units-primary-btn"
+                  disabled={saving}
+                >
                   {saving ? "Creating..." : "Create Unit"}
                 </button>
               </div>
@@ -542,9 +580,9 @@ export default function UnitsPage() {
         <div className="units-section">
           <div className="units-section-head">
             <div>
-              <h2 className="units-section-title">Occupancy Snapshot</h2>
+              <h2 className="units-section-title">Rent Performance Snapshot</h2>
               <p className="units-section-subtitle">
-                Operational summary of current rentable stock
+                Simple monthly rent story across visible units
               </p>
             </div>
             <span className="units-chip">Live</span>
@@ -552,27 +590,27 @@ export default function UnitsPage() {
 
           <div className="units-metric-stack">
             <div className="units-metric-card">
-              <span>Occupied Inventory</span>
-              <strong>{occupiedUnits}</strong>
-              <small>Units currently carrying active occupancy</small>
-            </div>
-
-            <div className="units-metric-card">
-              <span>Vacant Inventory</span>
-              <strong>{vacantUnits}</strong>
-              <small>Units available for assignment or leasing</small>
-            </div>
-
-            <div className="units-metric-card">
-              <span>Rent Potential</span>
+              <span>Monthly Potential</span>
               <strong>{formatCurrency(monthlyPotential)}</strong>
-              <small>Total gross monthly rent across visible units</small>
+              <small>Total possible rent if every unit is occupied</small>
             </div>
 
             <div className="units-metric-card">
-              <span>Invoice Exposure</span>
+              <span>Current Rent</span>
+              <strong>{formatCurrency(currentRent)}</strong>
+              <small>Rent attached to occupied units only</small>
+            </div>
+
+            <div className="units-metric-card">
+              <span>Vacancy Loss</span>
+              <strong>{formatCurrency(vacancyLoss)}</strong>
+              <small>Rent currently not earned because units are vacant</small>
+            </div>
+
+            <div className="units-metric-card">
+              <span>Outstanding Rent</span>
               <strong>{formatCurrency(summary.totalInvoiceExposure)}</strong>
-              <small>Outstanding receivable pressure across unit invoices</small>
+              <small>Unpaid invoice exposure across visible units</small>
             </div>
           </div>
         </div>
@@ -634,10 +672,16 @@ export default function UnitsPage() {
                 <div className="units-property-head">
                   <div>
                     <h3>{group.property.title}</h3>
-                    <p>{group.property.location || "No location"}</p>
+                    <p>
+                      {group.property.location || "No location"} •{" "}
+                      {group.units.length}{" "}
+                      {group.units.length === 1 ? "unit" : "units"}
+                    </p>
                   </div>
+
                   <span className="units-property-badge">
-                    {group.units.length} units
+                    {group.units.length}{" "}
+                    {group.units.length === 1 ? "unit" : "units"}
                   </span>
                 </div>
 
@@ -654,7 +698,9 @@ export default function UnitsPage() {
                   <div className="units-table-body">
                     {group.units.map((unit) => {
                       const activeResident =
-                        unit.activeResident?.user || unit.residents?.[0]?.user || null;
+                        unit.activeResident?.user ||
+                        unit.residents?.[0]?.user ||
+                        null;
 
                       return (
                         <div key={unit.id} className="units-table-row">
@@ -672,7 +718,9 @@ export default function UnitsPage() {
                           </span>
 
                           <div>
-                            <strong>{activeResident?.name || "No active resident"}</strong>
+                            <strong>
+                              {activeResident?.name || "No active resident"}
+                            </strong>
                             <p>{activeResident?.email || "Available"}</p>
                           </div>
 
@@ -686,7 +734,7 @@ export default function UnitsPage() {
                             {getHealthLabel(unit)}
                           </span>
 
-                          {(role === "ADMIN" || role === "MANAGER") ? (
+                          {role === "ADMIN" || role === "MANAGER" ? (
                             <button
                               type="button"
                               className="units-delete-btn"

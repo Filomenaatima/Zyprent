@@ -22,8 +22,7 @@ body {
   background: rgba(255, 255, 255, 0.98);
   border: 1px solid #dbe7f5;
   border-radius: 28px;
-  box-shadow:
-    0 18px 48px rgba(15, 23, 42, 0.06),
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06),
     0 4px 14px rgba(15, 23, 42, 0.03);
   flex-shrink: 0;
 }
@@ -35,9 +34,16 @@ body {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
   gap: 20px;
-  background:
-    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 34%),
-    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.05), transparent 26%),
+  background: radial-gradient(
+      circle at top left,
+      rgba(37, 99, 235, 0.08),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(59, 130, 246, 0.05),
+      transparent 26%
+    ),
     linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
 }
 
@@ -100,11 +106,8 @@ body {
   font-weight: 700;
   width: fit-content;
   white-space: nowrap;
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    border-color 0.18s ease,
-    background 0.18s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
+    border-color 0.18s ease, background 0.18s ease;
 }
 
 .invoices-tag:hover,
@@ -128,9 +131,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
     border-color 0.18s ease;
 }
 
@@ -179,9 +180,7 @@ body {
   border: 1px solid #dbe7f5;
   background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
   padding: 16px;
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
     border-color 0.18s ease;
 }
 
@@ -258,9 +257,7 @@ body {
   outline: none;
   font-size: 14px;
   color: #081a3a;
-  transition:
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
+  transition: border-color 0.18s ease, box-shadow 0.18s ease,
     background 0.18s ease;
 }
 
@@ -274,7 +271,7 @@ body {
   color: #8aa0bb;
 }
 
-/* WORKSPACE FIX */
+/* WORKSPACE */
 
 .invoices-workspace {
   padding: 0;
@@ -296,8 +293,7 @@ body {
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
   padding: 18px;
   align-self: start;
-  box-shadow:
-    0 18px 48px rgba(15, 23, 42, 0.06),
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06),
     0 4px 14px rgba(15, 23, 42, 0.03);
 }
 
@@ -359,11 +355,8 @@ body {
   background: #ffffff;
   padding: 16px;
   cursor: pointer;
-  transition:
-    transform 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    background 0.18s ease;
+  transition: transform 0.18s ease, border-color 0.18s ease,
+    box-shadow 0.18s ease, background 0.18s ease;
 }
 
 .invoices-registry-row:hover {
@@ -412,11 +405,20 @@ body {
   flex-wrap: wrap;
 }
 
-.invoices-registry-row-bottom .danger {
+/* BALANCE COLORS */
+
+.invoices-registry-row-bottom .danger,
+.invoices-balance.danger {
   color: #b42318;
 }
 
-.invoices-registry-row-bottom .success {
+.invoices-registry-row-bottom .warning,
+.invoices-balance.warning {
+  color: #b45309;
+}
+
+.invoices-registry-row-bottom .success,
+.invoices-balance.success {
   color: #15803d;
 }
 
@@ -543,9 +545,7 @@ body {
   border: 1px solid #dbe7f5;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
   padding: 20px;
-  transition:
-    box-shadow 0.18s ease,
-    border-color 0.18s ease,
+  transition: box-shadow 0.18s ease, border-color 0.18s ease,
     transform 0.18s ease;
 }
 
@@ -595,9 +595,7 @@ body {
   background: #ffffff;
   padding: 14px 16px;
   min-width: 0;
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
     border-color 0.18s ease;
 }
 
@@ -724,11 +722,8 @@ body {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    opacity 0.18s ease,
-    border-color 0.18s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
+    opacity 0.18s ease, border-color 0.18s ease;
 }
 
 .invoices-primary-btn:hover,

@@ -3,6 +3,7 @@
 import "@/styles/maintenance.css";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/services/api";
+import { useAuthStore } from "@/store/auth";
 
 type Role =
   | "ADMIN"
@@ -85,6 +86,11 @@ type MaintenanceRequestItem = {
       phone?: string | null;
     } | null;
   } | null;
+  photos?: {
+    id: string;
+    url: string;
+    createdAt?: string;
+  }[];
   quotes?: {
     id: string;
     providerId: string;
@@ -96,6 +102,13 @@ type MaintenanceRequestItem = {
     status: QuoteStatus;
     createdAt: string;
     acceptedAt: string | null;
+    items?: {
+      id: string;
+      description: string;
+      quantity: number;
+      unitPrice: number;
+      total: number;
+    }[];
     provider?: {
       id: string;
       companyName: string | null;
@@ -135,6 +148,33 @@ type MaintenanceRequestItem = {
     reviewedAt?: string | null;
     paidAt?: string | null;
     paymentReference?: string | null;
+  }[];
+  payouts?: {
+    id: string;
+    totalAmount: number;
+    platformFee: number;
+    providerEarning: number;
+    status: PayoutStatus;
+    createdAt: string;
+    paidAt?: string | null;
+    paymentReference?: string | null;
+    provider?: {
+      id: string;
+      companyName: string | null;
+      type?: string | null;
+      user?: {
+        id: string;
+        name: string | null;
+        email: string | null;
+      } | null;
+    } | null;
+  }[];
+  reviews?: {
+    id: string;
+    rating: number;
+    comment: string | null;
+    createdAt: string;
+    residentId?: string;
   }[];
 };
 
@@ -246,20 +286,23 @@ function toNumber(value: number | string | null | undefined) {
 }
 
 function formatCurrency(value: number | string | null | undefined) {
-  return `UGX ${toNumber(value).toLocaleString()}`;
+  const amount = toNumber(value);
+
+  if (!Number.isFinite(amount)) {
+    return "UGX 0";
+  }
+
+  return `UGX ${Math.round(amount).toLocaleString("en-UG")}`;
 }
 
-function formatCompactCurrency(value: number | string | null | undefined) {
-  const num = toNumber(value);
-  if (num >= 1_000_000_000) return `UGX ${(num / 1_000_000_000).toFixed(1)}B`;
-  if (num >= 1_000_000) return `UGX ${(num / 1_000_000).toFixed(1)}M`;
-  if (num >= 1_000) return `UGX ${(num / 1_000).toFixed(0)}K`;
-  return `UGX ${num.toLocaleString()}`;
-}
 
 function formatDateTime(value?: string | null) {
   if (!value) return "—";
-  return new Date(value).toLocaleString("en-UG", {
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleString("en-UG", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -270,7 +313,11 @@ function formatDateTime(value?: string | null) {
 
 function formatDate(value?: string | null) {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString("en-UG", {
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleDateString("en-UG", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -430,6 +477,39 @@ function getNextActionLabel(request: MaintenanceRequestItem | null) {
   }
 }
 
+function getManagerNextActionLabel(request: MaintenanceRequestItem | null) {
+  if (!request) return "Select request";
+
+  const latestExpense = request.expenses?.[0];
+  const hasAcceptedQuote = request.quotes?.some((quote) => quote.status === "ACCEPTED");
+  const hasAnyQuote = request.quotes?.some((quote) => quote.status === "PENDING" || quote.status === "ACCEPTED");
+
+  switch (request.status) {
+    case "PENDING":
+      return request.assignedProviderId ? "Wait for provider response" : "Assign service provider";
+    case "ASSIGNED":
+      return request.requiresInspection ? "Schedule inspection" : "Wait for provider quote";
+    case "INSPECTION_REQUIRED":
+      return request.inspectionScheduledAt ? "Wait for inspection/quote" : "Schedule inspection";
+    case "QUOTED":
+      if (!hasAcceptedQuote && hasAnyQuote) return "Review and accept quote";
+      if (!request.paymentResponsibility) return "Set payment responsibility";
+      if (latestExpense?.status === "SUBMITTED") return "Await investor approval";
+      if (latestExpense?.status === "REJECTED") return "Quote expense rejected";
+      return "Confirm approval and schedule work";
+    case "APPROVED":
+      return request.workScheduledAt ? "Start repair" : "Schedule work date";
+    case "IN_PROGRESS":
+      return request.workCompletedAt ? "Await resident confirmation" : "Record work finished";
+    case "COMPLETED":
+      return "Completed";
+    case "CANCELLED":
+      return "Cancelled";
+    default:
+      return "Review request";
+  }
+}
+
 function getResidentStage(request: MaintenanceRequestItem) {
   if (request.status === "COMPLETED") return 6;
   if (request.status === "IN_PROGRESS" && request.workCompletedAt) return 5;
@@ -445,16 +525,17 @@ function getResidentStage(request: MaintenanceRequestItem) {
   return 1;
 }
 
-function decodeRoleFromToken(): Role {
+function getRoleFromStoredUser(): Role {
   if (typeof window === "undefined") return null;
-  const token = localStorage.getItem("token");
-  if (!token) return null;
+
+  const storedUser = localStorage.getItem("user");
+  if (!storedUser || storedUser === "undefined" || storedUser === "null") {
+    return null;
+  }
 
   try {
-    const payload = token.split(".")[1];
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const decoded = JSON.parse(window.atob(normalized));
-    return (decoded?.role as Role) || null;
+    const parsedUser = JSON.parse(storedUser) as { role?: Role };
+    return parsedUser?.role || null;
   } catch {
     return null;
   }
@@ -471,6 +552,204 @@ const RESIDENT_CATEGORIES = [
   "SECURITY",
   "GENERAL",
 ];
+
+function toDateTimeInputValue(value?: string | null) {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const pad = (num: number) => String(num).padStart(2, "0");
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate(),
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function sortMaintenanceRequests(rows: MaintenanceRequestItem[]) {
+  const priorityWeight: Record<MaintenancePriority, number> = {
+    EMERGENCY: 4,
+    HIGH: 3,
+    MEDIUM: 2,
+    LOW: 1,
+  };
+
+  const statusWeight: Record<MaintenanceStatus, number> = {
+    PENDING: 7,
+    ASSIGNED: 6,
+    INSPECTION_REQUIRED: 5,
+    QUOTED: 8,
+    APPROVED: 4,
+    IN_PROGRESS: 3,
+    COMPLETED: 1,
+    CANCELLED: 0,
+  };
+
+  return [...rows].sort((a, b) => {
+    const statusDifference = statusWeight[b.status] - statusWeight[a.status];
+    if (statusDifference !== 0) return statusDifference;
+
+    const priorityDifference = priorityWeight[b.priority] - priorityWeight[a.priority];
+    if (priorityDifference !== 0) return priorityDifference;
+
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+}
+
+function sortByNewest<T extends { createdAt?: string; sentAt?: string }>(rows: T[]) {
+  return [...rows].sort(
+    (a, b) =>
+      new Date(b.createdAt || b.sentAt || 0).getTime() -
+      new Date(a.createdAt || a.sentAt || 0).getTime(),
+  );
+}
+
+function requestHasAcceptedQuote(request: MaintenanceRequestItem | null) {
+  return !!request?.quotes?.some((quote) => quote.status === "ACCEPTED");
+}
+
+function requestPropertySideCleared(request: MaintenanceRequestItem | null) {
+  if (!request) return false;
+
+  const propertyShare = getComputedShares(request).propertyShare;
+  const needsPropertyApproval =
+    (request.paymentResponsibility === "PROPERTY" ||
+      request.paymentResponsibility === "SHARED") &&
+    propertyShare > 0;
+
+  if (!needsPropertyApproval) return true;
+
+  const latestExpense = getLatestExpense(request);
+  return latestExpense?.status === "APPROVED" || latestExpense?.status === "PAID";
+}
+
+function getAcceptedQuote(request: MaintenanceRequestItem | null) {
+  return request?.quotes?.find((quote) => quote.status === "ACCEPTED") || null;
+}
+
+function getPrimaryQuote(request: MaintenanceRequestItem | null) {
+  if (!request?.quotes?.length) return null;
+  const acceptedQuote = getAcceptedQuote(request);
+  if (acceptedQuote) return acceptedQuote;
+  return [...request.quotes].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  )[0];
+}
+
+function getLatestExpense(request: MaintenanceRequestItem | null) {
+  if (!request?.expenses?.length) return null;
+  return [...request.expenses].sort(
+    (a, b) =>
+      new Date(b.submittedAt || b.reviewedAt || b.paidAt || 0).getTime() -
+      new Date(a.submittedAt || a.reviewedAt || a.paidAt || 0).getTime(),
+  )[0];
+}
+
+function getLatestPayout(request: MaintenanceRequestItem | null) {
+  if (!request?.payouts?.length) return null;
+  return [...request.payouts].sort(
+    (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime(),
+  )[0];
+}
+
+function getComputedShares(request: MaintenanceRequestItem | null) {
+  if (!request) return { total: 0, propertyShare: 0, residentShare: 0 };
+
+  const quoteTotal = toNumber(getAcceptedQuote(request)?.totalAmount);
+  const estimatedTotal = toNumber(request.estimatedCost);
+  const total = quoteTotal || estimatedTotal;
+  const existingPropertyShare = toNumber(request.propertyShare);
+  const existingResidentShare = toNumber(request.residentShare);
+
+  if (existingPropertyShare > 0 || existingResidentShare > 0) {
+    return {
+      total,
+      propertyShare: existingPropertyShare,
+      residentShare: existingResidentShare,
+    };
+  }
+
+  if (request.paymentResponsibility === "PROPERTY") {
+    return { total, propertyShare: total, residentShare: 0 };
+  }
+
+  if (request.paymentResponsibility === "RESIDENT") {
+    return { total, propertyShare: 0, residentShare: total };
+  }
+
+  if (request.paymentResponsibility === "SHARED") {
+    const propertyShare = Math.round(total / 2);
+    return {
+      total,
+      propertyShare,
+      residentShare: Math.max(0, total - propertyShare),
+    };
+  }
+
+  return { total, propertyShare: 0, residentShare: 0 };
+}
+
+function getPropertyPaymentLabel(request: MaintenanceRequestItem | null) {
+  const latestExpense = getLatestExpense(request);
+  const propertyShare = getComputedShares(request).propertyShare;
+
+  if (propertyShare <= 0) return "Not required";
+  if (!latestExpense) return "Expense not created";
+  if (latestExpense.status === "PAID") {
+    return latestExpense.paidAt ? `Paid ${formatDateTime(latestExpense.paidAt)}` : "Paid";
+  }
+  if (latestExpense.status === "APPROVED") return "Approved, awaiting payment";
+  if (latestExpense.status === "SUBMITTED") return "Submitted for approval";
+  if (latestExpense.status === "REJECTED") return "Rejected";
+  return latestExpense.status;
+}
+
+function getResidentPaymentLabel(request: MaintenanceRequestItem | null) {
+  if (!request) return "—";
+
+  const residentShare = getComputedShares(request).residentShare;
+  if (residentShare <= 0) return "Not required";
+  if (request.paidAt) return `Paid ${formatDateTime(request.paidAt)}`;
+  if (request.status === "COMPLETED") return "Due now";
+  if (request.workCompletedAt) return "Awaiting resident confirmation";
+  return "Not due yet";
+}
+
+function getResidentChargeLabel(request: MaintenanceRequestItem | null) {
+  const residentShare = getComputedShares(request).residentShare;
+
+  if (!request || residentShare <= 0) return "No charge assigned";
+  return formatCurrency(residentShare);
+}
+
+function getResidentPaymentStatusLabel(request: MaintenanceRequestItem | null) {
+  if (!request) return "—";
+
+  const residentShare = getComputedShares(request).residentShare;
+  if (residentShare <= 0) return "No charge due";
+  if (request.paidAt) return "Paid";
+  if (request.status === "COMPLETED") return "Payment due";
+  if (request.workCompletedAt) return "Awaiting confirmation";
+  return "Not due yet";
+}
+
+function getResidentScheduleLabel(value: string | null | undefined, pendingLabel: string) {
+  if (value) return formatDateTime(value);
+  return pendingLabel;
+}
+
+function getWorkFinishedLabel(request: MaintenanceRequestItem | null) {
+  if (!request?.workCompletedAt) return "Not finished";
+  if (request.status === "COMPLETED") return `Completed ${formatDateTime(request.workCompletedAt)}`;
+  return `Finished ${formatDateTime(request.workCompletedAt)}`;
+}
+
+function canAcceptMaintenanceQuote(request: MaintenanceRequestItem | null, quote: { status: QuoteStatus }) {
+  if (!request) return false;
+  if (request.status === "COMPLETED" || request.status === "CANCELLED") return false;
+  if (requestHasAcceptedQuote(request)) return false;
+  return quote.status === "PENDING";
+}
 
 function ResidentMaintenanceView({
   requests,
@@ -685,14 +964,16 @@ function ResidentMaintenanceView({
     selectedRequest.status === "IN_PROGRESS" &&
     !!selectedRequest.workCompletedAt;
 
+  const currentResidentStage = selectedRequest ? getResidentStage(selectedRequest) : 0;
+
   const residentTimeline = selectedRequest
     ? [
-        { label: "Reported", done: getResidentStage(selectedRequest) >= 1 },
-        { label: "Assigned", done: getResidentStage(selectedRequest) >= 2 },
-        { label: "Reviewed", done: getResidentStage(selectedRequest) >= 3 },
-        { label: "Scheduled", done: getResidentStage(selectedRequest) >= 4 },
-        { label: "Repairing", done: getResidentStage(selectedRequest) >= 5 },
-        { label: "Completed", done: getResidentStage(selectedRequest) >= 6 },
+        { label: "Reported", done: currentResidentStage >= 1, current: currentResidentStage === 1 },
+        { label: "Assigned", done: currentResidentStage >= 2, current: currentResidentStage === 2 },
+        { label: "Reviewed", done: currentResidentStage >= 3, current: currentResidentStage === 3 },
+        { label: "Scheduled", done: currentResidentStage >= 4, current: currentResidentStage === 4 },
+        { label: "Repairing", done: currentResidentStage >= 5, current: currentResidentStage === 5 },
+        { label: "Completed", done: currentResidentStage >= 6, current: currentResidentStage === 6 },
       ]
     : [];
 
@@ -792,11 +1073,11 @@ function ResidentMaintenanceView({
         <div className="resident-maintenance-hero-copy">
           <p className="resident-maintenance-eyebrow">Resident Maintenance</p>
           <h1 className="resident-maintenance-title">
-            Report issues, track repairs, and pay any maintenance charges without leaving this page
+            Report issues and track repairs in real time
           </h1>
           <p className="resident-maintenance-text">
-            A calm resident service desk for repairs, scheduling, updates, and
-            payment once your maintenance work is completed.
+            Follow progress, receive updates, and only pay when work is completed
+            and confirmed.
           </p>
 
           <div className="resident-maintenance-actions">
@@ -836,8 +1117,8 @@ function ResidentMaintenanceView({
               <span>Charges due</span>
               <strong>
                 {summary.unpaidResidentCharges > 0
-                  ? formatCompactCurrency(summary.unpaidResidentCharges)
-                  : "None"}
+                  ? formatCurrency(summary.unpaidResidentCharges)
+                  : "No charges yet"}
               </strong>
             </div>
             <div className="resident-maintenance-glass-card">
@@ -854,9 +1135,9 @@ function ResidentMaintenanceView({
           <strong>
             {summary.residentCharges > 0
               ? formatCurrency(summary.residentCharges)
-              : "No charge assigned"}
+              : "No charges yet"}
           </strong>
-          <small>Only costs allocated to the resident side appear here.</small>
+          <small>You’ll only be billed after work is completed and approved.</small>
         </div>
 
         <div className="resident-maintenance-overview-card">
@@ -866,7 +1147,7 @@ function ResidentMaintenanceView({
               ? formatCurrency(summary.unpaidResidentCharges)
               : "Nothing due"}
           </strong>
-          <small>Charges only become payable after resident confirmation.</small>
+          <small>Charges only become payable after completion is confirmed.</small>
         </div>
 
         <div className="resident-maintenance-overview-card">
@@ -911,7 +1192,7 @@ function ResidentMaintenanceView({
             className="resident-maintenance-search-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by issue, category, unit, or status..."
+            placeholder="Search by issue, category, unit, or status."
           />
         </div>
       </section>
@@ -954,15 +1235,10 @@ function ResidentMaintenanceView({
                     }`}
                     onClick={() => setSelectedId(item.id)}
                   >
-                    <div className="resident-maintenance-request-top">
+                    <h3>{item.title}</h3>
+
+                    <div className="resident-maintenance-request-top polished">
                       <div className="resident-maintenance-request-badges">
-                        <span
-                          className={`maintenance-badge ${getPriorityTone(
-                            item.priority,
-                          )}`}
-                        >
-                          {item.priority}
-                        </span>
                         <span
                           className={`maintenance-badge ${getStatusTone(
                             item.status,
@@ -970,13 +1246,18 @@ function ResidentMaintenanceView({
                         >
                           {formatStatusLabel(item.status)}
                         </span>
+                        <span
+                          className={`maintenance-badge ${getPriorityTone(
+                            item.priority,
+                          )}`}
+                        >
+                          {item.priority}
+                        </span>
                       </div>
                       <span className="resident-maintenance-request-date">
                         {formatDate(item.createdAt)}
                       </span>
                     </div>
-
-                    <h3>{item.title}</h3>
 
                     <p>
                       {item.property?.title || "Property"} • Unit{" "}
@@ -985,11 +1266,7 @@ function ResidentMaintenanceView({
 
                     <div className="resident-maintenance-request-bottom">
                       <span>{item.category || "General"}</span>
-                      <strong>
-                        {requestHasCharge
-                          ? formatCurrency(item.residentShare)
-                          : "No charge assigned"}
-                      </strong>
+                      <strong>{getResidentChargeLabel(item)}</strong>
                     </div>
                   </button>
                 );
@@ -1059,14 +1336,14 @@ function ResidentMaintenanceView({
                 {residentTimeline.map((step, index) => (
                   <div
                     key={step.label}
-                    className={`resident-progress-step ${step.done ? "done" : ""}`}
+                    className={`resident-progress-step ${step.done ? "done" : ""} ${step.current ? "current" : ""}`}
                   >
                     <div className="resident-progress-step-number">
                       {index + 1}
                     </div>
                     <div className="resident-progress-step-copy">
                       <strong>{step.label}</strong>
-                      <span>{step.done ? "Done" : "Waiting"}</span>
+                      <span>{step.current ? "Current step" : step.done ? "Done" : "Waiting"}</span>
                     </div>
                   </div>
                 ))}
@@ -1095,19 +1372,28 @@ function ResidentMaintenanceView({
                       <div className="resident-maintenance-info-row">
                         <span>Inspection</span>
                         <strong>
-                          {formatDateTime(selectedRequest.inspectionScheduledAt)}
+                          {getResidentScheduleLabel(
+                            selectedRequest.inspectionScheduledAt,
+                            "Not scheduled yet",
+                          )}
                         </strong>
                       </div>
                       <div className="resident-maintenance-info-row">
                         <span>Work scheduled</span>
                         <strong>
-                          {formatDateTime(selectedRequest.workScheduledAt)}
+                          {getResidentScheduleLabel(
+                            selectedRequest.workScheduledAt,
+                            "Pending",
+                          )}
                         </strong>
                       </div>
                       <div className="resident-maintenance-info-row">
                         <span>Work finished</span>
                         <strong>
-                          {formatDateTime(selectedRequest.workCompletedAt)}
+                          {getResidentScheduleLabel(
+                            selectedRequest.workCompletedAt,
+                            "—",
+                          )}
                         </strong>
                       </div>
                     </div>
@@ -1141,15 +1427,13 @@ function ResidentMaintenanceView({
                 <div className="resident-maintenance-payment-panel">
                   <div className="resident-maintenance-mini-head">
                     <h3>Maintenance payment</h3>
-                    <p>Resident payment only becomes due after completion is confirmed.</p>
+                    <p>Costs appear here only if responsibility is assigned to you.</p>
                   </div>
 
                   <div className="resident-maintenance-payment-amount">
                     <span>Your charge</span>
                     <strong>
-                      {hasCharge
-                        ? formatCurrency(selectedRequest.residentShare)
-                        : "No charge assigned"}
+                      {getResidentChargeLabel(selectedRequest)}
                     </strong>
                   </div>
 
@@ -1163,7 +1447,7 @@ function ResidentMaintenanceView({
                     <div className="resident-maintenance-info-row">
                       <span>Payment status</span>
                       <strong>
-                        {selectedRequest.paidAt ? "Paid" : "Not yet paid"}
+                        {getResidentPaymentStatusLabel(selectedRequest)}
                       </strong>
                     </div>
                     <div className="resident-maintenance-info-row">
@@ -1214,6 +1498,13 @@ function ResidentMaintenanceView({
                         ? "Confirming..."
                         : "Confirm work completion"}
                     </button>
+                  ) : null}
+
+                  {selectedRequest.status === "QUOTED" && !canPayCharge ? (
+                    <div className="resident-maintenance-payment-note">
+                      Quote is being reviewed. Payment will only appear here if a
+                      resident charge is assigned after approval and completion.
+                    </div>
                   ) : null}
                 </div>
               </div>
@@ -1478,10 +1769,12 @@ function ManagerMaintenanceView() {
 
   async function reloadRequests() {
     const res = await api.get<MaintenanceRequestItem[]>("/maintenance/manager/me");
-    const rows = (res.data ?? []).sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+    const rows = sortMaintenanceRequests(res.data ?? []);
     setRequests(rows);
+    setSelectedId((current) => {
+      if (current && rows.some((item) => item.id === current)) return current;
+      return rows[0]?.id ?? null;
+    });
   }
 
   useEffect(() => {
@@ -1492,9 +1785,7 @@ function ManagerMaintenanceView() {
         setLoading(true);
         const res = await api.get<MaintenanceRequestItem[]>("/maintenance/manager/me");
         if (!mounted) return;
-        const rows = (res.data ?? []).sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
+        const rows = sortMaintenanceRequests(res.data ?? []);
         setRequests(rows);
         if (rows.length > 0) setSelectedId((current) => current ?? rows[0].id);
       } finally {
@@ -1561,22 +1852,14 @@ function ManagerMaintenanceView() {
     filteredRequests[0] ||
     null;
 
-  const latestExpense = selectedRequest?.expenses?.[0] || null;
+  const latestExpense = getLatestExpense(selectedRequest);
 
   useEffect(() => {
     if (!selectedRequest) return;
     setAssigningProviderId(selectedRequest.assignedProviderId || "");
     setPaymentResponsibility(selectedRequest.paymentResponsibility || null);
-    setSchedulingInspection(
-      selectedRequest.inspectionScheduledAt
-        ? new Date(selectedRequest.inspectionScheduledAt).toISOString().slice(0, 16)
-        : "",
-    );
-    setSchedulingWork(
-      selectedRequest.workScheduledAt
-        ? new Date(selectedRequest.workScheduledAt).toISOString().slice(0, 16)
-        : "",
-    );
+    setSchedulingInspection(toDateTimeInputValue(selectedRequest.inspectionScheduledAt));
+    setSchedulingWork(toDateTimeInputValue(selectedRequest.workScheduledAt));
   }, [selectedRequest?.id]);
 
   const summary = useMemo(() => {
@@ -1603,46 +1886,74 @@ function ManagerMaintenanceView() {
     [providers],
   );
 
+  const isFinalRequest =
+    selectedRequest?.status === "COMPLETED" || selectedRequest?.status === "CANCELLED";
+
   const canAssignProvider =
     !!selectedRequest &&
-    selectedRequest.status !== "COMPLETED" &&
+    !isFinalRequest &&
     !!assigningProviderId &&
     assigningProviderId !== selectedRequest.assignedProviderId;
 
   const canScheduleInspection =
     !!selectedRequest &&
-    selectedRequest.status !== "COMPLETED" &&
-    !!schedulingInspection;
+    !isFinalRequest &&
+    !!selectedRequest.assignedProviderId &&
+    !!schedulingInspection &&
+    schedulingInspection !== toDateTimeInputValue(selectedRequest.inspectionScheduledAt);
 
   const canSetResponsibility =
     !!selectedRequest &&
-    selectedRequest.status !== "COMPLETED" &&
-    !!paymentResponsibility;
+    !isFinalRequest &&
+    requestHasAcceptedQuote(selectedRequest) &&
+    !!paymentResponsibility &&
+    paymentResponsibility !== selectedRequest.paymentResponsibility;
 
   const canScheduleWork =
     !!selectedRequest &&
     selectedRequest.status === "APPROVED" &&
-    !!schedulingWork;
+    !!selectedRequest.paymentResponsibility &&
+    requestPropertySideCleared(selectedRequest) &&
+    !!schedulingWork &&
+    schedulingWork !== toDateTimeInputValue(selectedRequest.workScheduledAt);
 
   const canStartRepair =
     !!selectedRequest &&
     selectedRequest.status === "APPROVED" &&
     !!selectedRequest.workScheduledAt &&
-    !!selectedRequest.paymentResponsibility;
+    !!selectedRequest.paymentResponsibility &&
+    requestPropertySideCleared(selectedRequest);
 
   const canRecordFinished =
     !!selectedRequest &&
     selectedRequest.status === "IN_PROGRESS" &&
     !selectedRequest.workCompletedAt;
 
+
+  function applyRequestUpdate(updated: MaintenanceRequestItem | null | undefined) {
+    if (!updated?.id) return;
+
+    setRequests((current) =>
+      sortMaintenanceRequests(
+        current.map((item) => (item.id === updated.id ? updated : item)),
+      ),
+    );
+    setSelectedId(updated.id);
+  }
+
+  async function reloadAfterAction(responseData?: MaintenanceRequestItem | null) {
+    applyRequestUpdate(responseData);
+    await reloadRequests();
+  }
+
   async function handleAssignProvider() {
     if (!selectedRequest || !canAssignProvider) return;
     try {
       setBusyAction("assign");
-      await api.patch(
+      const res = await api.patch<MaintenanceRequestItem>(
         `/maintenance/request/${selectedRequest.id}/assign/${assigningProviderId}`,
       );
-      await reloadRequests();
+      await reloadAfterAction(res.data);
     } finally {
       setBusyAction(null);
     }
@@ -1652,10 +1963,11 @@ function ManagerMaintenanceView() {
     if (!selectedRequest || !canScheduleInspection) return;
     try {
       setBusyAction("inspection");
-      await api.patch(`/maintenance/request/${selectedRequest.id}/inspection`, {
-        date: new Date(schedulingInspection).toISOString(),
-      });
-      await reloadRequests();
+      const res = await api.patch<MaintenanceRequestItem>(
+        `/maintenance/request/${selectedRequest.id}/inspection`,
+        { date: new Date(schedulingInspection).toISOString() },
+      );
+      await reloadAfterAction(res.data);
     } finally {
       setBusyAction(null);
     }
@@ -1665,11 +1977,11 @@ function ManagerMaintenanceView() {
     if (!selectedRequest || !canSetResponsibility) return;
     try {
       setBusyAction("responsibility");
-      await api.patch(
+      const res = await api.patch<MaintenanceRequestItem>(
         `/maintenance/request/${selectedRequest.id}/payment-responsibility`,
         { responsibility: paymentResponsibility },
       );
-      await reloadRequests();
+      await reloadAfterAction(res.data);
     } finally {
       setBusyAction(null);
     }
@@ -1679,10 +1991,11 @@ function ManagerMaintenanceView() {
     if (!selectedRequest || !canScheduleWork) return;
     try {
       setBusyAction("schedule-work");
-      await api.patch(`/maintenance/${selectedRequest.id}/schedule-work`, {
-        date: new Date(schedulingWork).toISOString(),
-      });
-      await reloadRequests();
+      const res = await api.patch<MaintenanceRequestItem>(
+        `/maintenance/${selectedRequest.id}/schedule-work`,
+        { date: new Date(schedulingWork).toISOString() },
+      );
+      await reloadAfterAction(res.data);
     } finally {
       setBusyAction(null);
     }
@@ -1692,8 +2005,8 @@ function ManagerMaintenanceView() {
     if (!selectedRequest || !canStartRepair) return;
     try {
       setBusyAction("start");
-      await api.patch(`/maintenance/${selectedRequest.id}/start`);
-      await reloadRequests();
+      const res = await api.patch<MaintenanceRequestItem>(`/maintenance/${selectedRequest.id}/start`);
+      await reloadAfterAction(res.data);
     } finally {
       setBusyAction(null);
     }
@@ -1703,8 +2016,8 @@ function ManagerMaintenanceView() {
     if (!selectedRequest || !canRecordFinished) return;
     try {
       setBusyAction("complete");
-      await api.patch(`/maintenance/${selectedRequest.id}/complete`);
-      await reloadRequests();
+      const res = await api.patch<MaintenanceRequestItem>(`/maintenance/${selectedRequest.id}/complete`);
+      await reloadAfterAction(res.data);
     } finally {
       setBusyAction(null);
     }
@@ -1713,12 +2026,25 @@ function ManagerMaintenanceView() {
   async function handleAcceptQuote(quoteId: string) {
     try {
       setBusyAction(`quote-${quoteId}`);
-      await api.patch(`/maintenance/quote/${quoteId}/accept`);
-      await reloadRequests();
+      const res = await api.patch<MaintenanceRequestItem>(`/maintenance/quote/${quoteId}/accept`);
+      await reloadAfterAction(res.data);
     } finally {
       setBusyAction(null);
     }
   }
+
+  const latestPayout = getLatestPayout(selectedRequest);
+  const managerPhotos = selectedRequest?.photos ?? [];
+  const managerDispatches = selectedRequest?.dispatches ?? [];
+  const managerReviews = selectedRequest?.reviews ?? [];
+  const acceptedQuote = getAcceptedQuote(selectedRequest);
+  const primaryQuote = getPrimaryQuote(selectedRequest);
+  const computedShares = getComputedShares(selectedRequest);
+  const effectiveEstimatedCost =
+    computedShares.total || toNumber(selectedRequest?.estimatedCost);
+  const propertyPaymentLabel = getPropertyPaymentLabel(selectedRequest);
+  const residentPaymentLabel = getResidentPaymentLabel(selectedRequest);
+  const workFinishedLabel = getWorkFinishedLabel(selectedRequest);
 
   const awaitingResidentConfirmation =
     !!selectedRequest &&
@@ -1890,7 +2216,7 @@ function ManagerMaintenanceView() {
                       {selectedRequest.category || "General"}
                     </span>
                     <span className="maintenance-badge workflow">
-                      Next: {getNextActionLabel(selectedRequest)}
+                      Next: {getManagerNextActionLabel(selectedRequest)}
                     </span>
                   </div>
 
@@ -1904,7 +2230,7 @@ function ManagerMaintenanceView() {
 
                 <div className="maintenance-cost-box">
                   <span>Estimated Cost</span>
-                  <strong>{formatCurrency(selectedRequest.estimatedCost)}</strong>
+                  <strong>{formatCurrency(effectiveEstimatedCost)}</strong>
                 </div>
               </div>
 
@@ -1940,6 +2266,84 @@ function ManagerMaintenanceView() {
 
               <section className="maintenance-detail-section">
                 <div className="maintenance-section-head">
+                  <h3>Photos & Dispatch History</h3>
+                  <span>Evidence, provider outreach, and response trail</span>
+                </div>
+
+                <div className="maintenance-info-grid two">
+                  <div className="maintenance-info-card">
+                    <span>Photos attached</span>
+                    <strong>{managerPhotos.length}</strong>
+                  </div>
+                  <div className="maintenance-info-card">
+                    <span>Dispatch attempts</span>
+                    <strong>{managerDispatches.length}</strong>
+                  </div>
+                </div>
+
+                {managerPhotos.length ? (
+                  <div className="maintenance-quote-list">
+                    {managerPhotos.map((photo) => (
+                      <a
+                        key={photo.id}
+                        className="maintenance-quote-card"
+                        href={photo.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <div className="maintenance-quote-top">
+                          <div>
+                            <h4>Request photo</h4>
+                            <p>{photo.url}</p>
+                          </div>
+                          <span className="maintenance-badge blue">Open</span>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="maintenance-empty mini">No photos attached yet.</div>
+                )}
+
+                {managerDispatches.length ? (
+                  <div className="maintenance-quote-list">
+                    {managerDispatches.map((dispatch) => (
+                      <div key={dispatch.id} className="maintenance-quote-card">
+                        <div className="maintenance-quote-top">
+                          <div>
+                            <h4>
+                              {dispatch.provider?.companyName ||
+                                dispatch.provider?.user?.name ||
+                                "Provider"}
+                            </h4>
+                            <p>
+                              Sent {formatDateTime(dispatch.sentAt)} • Viewed {formatDateTime(dispatch.viewedAt)} • Responded {formatDateTime(dispatch.respondedAt)}
+                            </p>
+                          </div>
+                          <span
+                            className={`maintenance-badge ${
+                              dispatch.status === "DECLINED"
+                                ? "slate"
+                                : dispatch.status === "QUOTED"
+                                  ? "success"
+                                  : dispatch.status === "VIEWED"
+                                    ? "blue"
+                                    : "amber"
+                            }`}
+                          >
+                            {getDispatchLabel(dispatch.status)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="maintenance-empty mini">No dispatch history yet.</div>
+                )}
+              </section>
+
+              <section className="maintenance-detail-section">
+                <div className="maintenance-section-head">
                   <h3>Workflow Actions</h3>
                   <span>Move the issue through operations</span>
                 </div>
@@ -1951,7 +2355,7 @@ function ManagerMaintenanceView() {
                       className="maintenance-input"
                       value={assigningProviderId}
                       onChange={(e) => setAssigningProviderId(e.target.value)}
-                      disabled={loadingProviders || selectedRequest.status === "COMPLETED"}
+                      disabled={loadingProviders || isFinalRequest}
                     >
                       <option value="">Select provider</option>
                       {providerOptions.map((provider) => (
@@ -1978,7 +2382,7 @@ function ManagerMaintenanceView() {
                       type="datetime-local"
                       value={schedulingInspection}
                       onChange={(e) => setSchedulingInspection(e.target.value)}
-                      disabled={selectedRequest.status === "COMPLETED"}
+                      disabled={isFinalRequest}
                     />
                     <button
                       type="button"
@@ -2000,7 +2404,7 @@ function ManagerMaintenanceView() {
                           (e.target.value || null) as PaymentResponsibility,
                         )
                       }
-                      disabled={selectedRequest.status === "COMPLETED"}
+                      disabled={isFinalRequest}
                     >
                       <option value="">Select responsibility</option>
                       <option value="PROPERTY">Property</option>
@@ -2024,7 +2428,7 @@ function ManagerMaintenanceView() {
                       type="datetime-local"
                       value={schedulingWork}
                       onChange={(e) => setSchedulingWork(e.target.value)}
-                      disabled={selectedRequest.status === "COMPLETED"}
+                      disabled={isFinalRequest}
                     />
                     <button
                       type="button"
@@ -2081,11 +2485,17 @@ function ManagerMaintenanceView() {
                   </div>
                   <div className="maintenance-info-card">
                     <span>Inspection</span>
-                    <strong>{formatDateTime(selectedRequest.inspectionScheduledAt)}</strong>
+                    <strong>{getResidentScheduleLabel(
+                            selectedRequest.inspectionScheduledAt,
+                            "Not scheduled yet",
+                          )}</strong>
                   </div>
                   <div className="maintenance-info-card">
                     <span>Work Scheduled</span>
-                    <strong>{formatDateTime(selectedRequest.workScheduledAt)}</strong>
+                    <strong>{getResidentScheduleLabel(
+                            selectedRequest.workScheduledAt,
+                            "Pending",
+                          )}</strong>
                   </div>
                   <div className="maintenance-info-card">
                     <span>Payment Responsibility</span>
@@ -2093,11 +2503,29 @@ function ManagerMaintenanceView() {
                   </div>
                   <div className="maintenance-info-card">
                     <span>Property Share</span>
-                    <strong>{formatCurrency(selectedRequest.propertyShare)}</strong>
+                    <strong>{formatCurrency(computedShares.propertyShare)}</strong>
                   </div>
                   <div className="maintenance-info-card">
                     <span>Resident Share</span>
-                    <strong>{formatCurrency(selectedRequest.residentShare)}</strong>
+                    <strong>{formatCurrency(computedShares.residentShare)}</strong>
+                  </div>
+                  <div className="maintenance-info-card">
+                    <span>Accepted Quote</span>
+                    <strong>
+                      {acceptedQuote
+                        ? formatCurrency(acceptedQuote.totalAmount)
+                        : "Not accepted"}
+                    </strong>
+                  </div>
+                  <div className="maintenance-info-card">
+                    <span>Active Quote</span>
+                    <strong>
+                      {primaryQuote ? getQuoteLabel(primaryQuote.status) : "No quote"}
+                    </strong>
+                  </div>
+                  <div className="maintenance-info-card">
+                    <span>Property Payment</span>
+                    <strong>{propertyPaymentLabel}</strong>
                   </div>
                 </div>
 
@@ -2113,11 +2541,7 @@ function ManagerMaintenanceView() {
                     </div>
                     <div className="maintenance-info-card">
                       <span>Property payment</span>
-                      <strong>
-                        {latestExpense.paidAt
-                          ? `Paid ${formatDateTime(latestExpense.paidAt)}`
-                          : "Not paid yet"}
-                      </strong>
+                      <strong>{propertyPaymentLabel}</strong>
                     </div>
                   </div>
                 ) : null}
@@ -2133,7 +2557,7 @@ function ManagerMaintenanceView() {
                   <div className="maintenance-empty mini">No quotes submitted yet.</div>
                 ) : (
                   <div className="maintenance-quote-list">
-                    {selectedRequest.quotes.map((quote) => (
+                    {sortByNewest(selectedRequest.quotes).map((quote) => (
                       <div
                         key={quote.id}
                         className={`maintenance-quote-card ${
@@ -2183,6 +2607,20 @@ function ManagerMaintenanceView() {
                           </div>
                         </div>
 
+                        {quote.items?.length ? (
+                          <div className="maintenance-info-grid three compact">
+                            {quote.items.map((item) => (
+                              <div key={item.id} className="maintenance-info-card">
+                                <span>{item.description}</span>
+                                <strong>{formatCurrency(item.total)}</strong>
+                                <small>
+                                  Qty {item.quantity} × {formatCurrency(item.unitPrice)}
+                                </small>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+
                         <div className="maintenance-quote-bottom">
                           <p>{quote.notes || "No notes added."}</p>
                           {quote.status !== "ACCEPTED" ? (
@@ -2192,7 +2630,7 @@ function ManagerMaintenanceView() {
                               onClick={() => handleAcceptQuote(quote.id)}
                               disabled={
                                 busyAction === `quote-${quote.id}` ||
-                                selectedRequest.status === "COMPLETED"
+                                !canAcceptMaintenanceQuote(selectedRequest, quote)
                               }
                             >
                               {busyAction === `quote-${quote.id}`
@@ -2220,17 +2658,65 @@ function ManagerMaintenanceView() {
                 <div className="maintenance-info-grid three">
                   <div className="maintenance-info-card">
                     <span>Work finished</span>
-                    <strong>{formatDateTime(selectedRequest.workCompletedAt)}</strong>
+                    <strong>{workFinishedLabel}</strong>
                   </div>
                   <div className="maintenance-info-card">
                     <span>Resident payment</span>
-                    <strong>{formatDateTime(selectedRequest.paidAt)}</strong>
+                    <strong>{residentPaymentLabel}</strong>
                   </div>
                   <div className="maintenance-info-card">
                     <span>Reference</span>
-                    <strong>{selectedRequest.paymentReference || "Not recorded"}</strong>
+                    <strong>
+                      {selectedRequest.paymentReference ||
+                        latestExpense?.paymentReference ||
+                        "Not recorded"}
+                    </strong>
                   </div>
                 </div>
+              </section>
+
+              <section className="maintenance-detail-section">
+                <div className="maintenance-section-head">
+                  <h3>Provider Payout & Review</h3>
+                  <span>Provider earnings, platform fee, and resident feedback</span>
+                </div>
+
+                {latestPayout ? (
+                  <div className="maintenance-info-grid three">
+                    <div className="maintenance-info-card">
+                      <span>Payout status</span>
+                      <strong>{getPayoutLabel(latestPayout.status)}</strong>
+                    </div>
+                    <div className="maintenance-info-card">
+                      <span>Provider earning</span>
+                      <strong>{formatCurrency(latestPayout.providerEarning)}</strong>
+                    </div>
+                    <div className="maintenance-info-card">
+                      <span>Platform fee</span>
+                      <strong>{formatCurrency(latestPayout.platformFee)}</strong>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="maintenance-empty mini">No provider payout has been created yet. It will appear after resident confirmation and payout creation.</div>
+                )}
+
+                {managerReviews.length ? (
+                  <div className="maintenance-quote-list">
+                    {managerReviews.map((review) => (
+                      <div key={review.id} className="maintenance-quote-card">
+                        <div className="maintenance-quote-top">
+                          <div>
+                            <h4>{Number(review.rating || 0).toFixed(1)}★ resident review</h4>
+                            <p>{review.comment || "No comment added."}</p>
+                          </div>
+                          <span className="maintenance-badge success">Reviewed</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="maintenance-empty mini">No resident review has been submitted yet.</div>
+                )}
               </section>
             </>
           )}
@@ -2272,10 +2758,17 @@ function ProviderMaintenanceView() {
         api.get<ProviderPayoutItem[]>("/maintenance/provider/payouts"),
       ]);
 
-      setDispatches(dispatchRes.data ?? []);
-      setJobs(jobsRes.data ?? []);
-      setQuotes(quotesRes.data ?? []);
-      setPayouts(payoutsRes.data ?? []);
+      const sortByLatest = <T extends { createdAt?: string; sentAt?: string }>(items: T[]) =>
+        [...items].sort(
+          (a, b) =>
+            new Date(b.createdAt || b.sentAt || 0).getTime() -
+            new Date(a.createdAt || a.sentAt || 0).getTime(),
+        );
+
+      setDispatches(sortByLatest(dispatchRes.data ?? []));
+      setJobs(sortByLatest(jobsRes.data ?? []));
+      setQuotes(sortByLatest(quotesRes.data ?? []));
+      setPayouts(sortByLatest(payoutsRes.data ?? []));
     } finally {
       setLoading(false);
     }
@@ -2418,7 +2911,7 @@ function ProviderMaintenanceView() {
           </div>
           <div className="maintenance-stat-card">
             <span>Pending Payouts</span>
-            <strong>{formatCompactCurrency(summary.pendingPayouts)}</strong>
+            <strong>{formatCurrency(summary.pendingPayouts)}</strong>
           </div>
         </div>
       </section>
@@ -2837,6 +3330,8 @@ function AdminMaintenanceView() {
     filteredRequests[0] ||
     null;
 
+  const computedShares = getComputedShares(selectedRequest);
+
   return (
     <div className="maintenance-shell">
       <section className="maintenance-hero">
@@ -2873,7 +3368,7 @@ function AdminMaintenanceView() {
           </div>
           <div className="maintenance-stat-card">
             <span>Platform Fee</span>
-            <strong>{formatCompactCurrency(analytics?.totalPlatformFee ?? 0)}</strong>
+            <strong>{formatCurrency(analytics?.totalPlatformFee ?? 0)}</strong>
           </div>
         </div>
       </section>
@@ -2893,7 +3388,7 @@ function AdminMaintenanceView() {
         </div>
         <div className="maintenance-overview-box">
           <span>Linked expenses</span>
-          <strong>{formatCompactCurrency(analytics?.linkedExpenseAmount ?? 0)}</strong>
+          <strong>{formatCurrency(analytics?.linkedExpenseAmount ?? 0)}</strong>
         </div>
       </section>
 
@@ -3102,11 +3597,11 @@ function AdminMaintenanceView() {
                     </div>
                     <div className="maintenance-info-card">
                       <span>Property Share</span>
-                      <strong>{formatCurrency(selectedRequest.propertyShare)}</strong>
+                      <strong>{formatCurrency(computedShares.propertyShare)}</strong>
                     </div>
                     <div className="maintenance-info-card">
                       <span>Resident Share</span>
-                      <strong>{formatCurrency(selectedRequest.residentShare)}</strong>
+                      <strong>{formatCurrency(computedShares.residentShare)}</strong>
                     </div>
                   </div>
 
@@ -3183,7 +3678,8 @@ function AdminMaintenanceView() {
 }
 
 export default function MaintenancePage() {
-  const [role, setRole] = useState<Role>(null);
+  const { user } = useAuthStore();
+  const [role, setRole] = useState<Role>((user?.role as Role) || null);
   const [residentRequests, setResidentRequests] = useState<MaintenanceRequestItem[]>([]);
   const [residentLoading, setResidentLoading] = useState(true);
 
@@ -3191,20 +3687,25 @@ export default function MaintenancePage() {
     try {
       setResidentLoading(true);
       const res = await api.get<MaintenanceRequestItem[]>("/maintenance/resident/me");
-      setResidentRequests(res.data ?? []);
+      setResidentRequests(
+        (res.data ?? []).sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        ),
+      );
     } finally {
       setResidentLoading(false);
     }
   }
 
   useEffect(() => {
-    const resolvedRole = decodeRoleFromToken();
+    const resolvedRole = (user?.role as Role) || getRoleFromStoredUser();
     setRole(resolvedRole);
 
     if (resolvedRole === "RESIDENT") {
       reloadResident();
     }
-  }, []);
+  }, [user?.role]);
 
   if (role === "RESIDENT") {
     return (

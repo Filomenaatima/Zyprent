@@ -26,6 +26,7 @@ type NotificationSummary = {
   unread: number;
   read: number;
   byType: Record<string, number>;
+  latestActivity?: string | null;
 };
 
 type ActiveFilter =
@@ -37,11 +38,6 @@ type ActiveFilter =
   | "WITHDRAWAL_APPROVED"
   | "MAINTENANCE"
   | "RENT_PAYMENT";
-
-type NotificationGroup = {
-  label: string;
-  items: NotificationItem[];
-};
 
 const filterOptions: { key: ActiveFilter; label: string }[] = [
   { key: "all", label: "All" },
@@ -64,36 +60,61 @@ function formatDateTime(value: string) {
   });
 }
 
-function isSameDay(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
+function getRoleFromStorage() {
+  if (typeof window === "undefined") return "USER";
+  return localStorage.getItem("role") || "USER";
 }
 
-function getGroupLabel(dateValue: string) {
-  const itemDate = new Date(dateValue);
-  const now = new Date();
-
-  const yesterday = new Date();
-  yesterday.setDate(now.getDate() - 1);
-
-  if (isSameDay(itemDate, now)) return "Today";
-  if (isSameDay(itemDate, yesterday)) return "Yesterday";
-  return "Earlier";
+function getRoleContent(role: string) {
+  switch (role) {
+    case "ADMIN":
+      return {
+        eyebrow: "Admin Notifications",
+        title: "Track system activity, approvals, and platform alerts",
+        subtitle:
+          "Monitor operations, approvals, maintenance, payments, and system-wide activity in one place.",
+      };
+    case "MANAGER":
+      return {
+        eyebrow: "Manager Notifications",
+        title: "Stay on top of properties, maintenance, and operations",
+        subtitle:
+          "Track maintenance updates, resident issues, payments, and portfolio performance.",
+      };
+    case "SERVICE_PROVIDER":
+      return {
+        eyebrow: "Service Notifications",
+        title: "Track jobs, updates, and communication",
+        subtitle:
+          "Stay updated on assigned jobs, approvals, and communication with managers.",
+      };
+    case "RESIDENT":
+      return {
+        eyebrow: "Resident Notifications",
+        title: "Stay updated on your unit, payments, and maintenance",
+        subtitle:
+          "Track rent, maintenance updates, and communication with your property team.",
+      };
+    default:
+      return {
+        eyebrow: "Investor Notifications",
+        title: "Stay updated on portfolio events, payouts, requests, and alerts",
+        subtitle:
+          "Review profits, withdrawals, and important updates across your investments.",
+      };
+  }
 }
 
-function formatTypeLabel(type: NotificationItem["type"]) {
+function typeLabel(type: NotificationItem["type"]) {
   switch (type) {
+    case "RENT_PAYMENT":
+      return "Rent";
     case "PROFIT_DISTRIBUTION":
       return "Profit";
     case "WITHDRAWAL_REQUEST":
       return "Withdrawal Request";
     case "WITHDRAWAL_APPROVED":
       return "Withdrawal Approved";
-    case "RENT_PAYMENT":
-      return "Rent";
     case "MAINTENANCE":
       return "Maintenance";
     default:
@@ -101,36 +122,19 @@ function formatTypeLabel(type: NotificationItem["type"]) {
   }
 }
 
-function getTypeTone(type: NotificationItem["type"]) {
+function typeColor(type: NotificationItem["type"]) {
   switch (type) {
+    case "RENT_PAYMENT":
     case "PROFIT_DISTRIBUTION":
       return "green";
     case "WITHDRAWAL_REQUEST":
-    case "WITHDRAWAL_APPROVED":
-      return "blue";
-    case "MAINTENANCE":
       return "orange";
-    case "RENT_PAYMENT":
+    case "WITHDRAWAL_APPROVED":
       return "purple";
+    case "MAINTENANCE":
+      return "blue";
     default:
       return "slate";
-  }
-}
-
-function getNotificationTarget(type: NotificationItem["type"]) {
-  switch (type) {
-    case "PROFIT_DISTRIBUTION":
-      return "/profit-center";
-    case "WITHDRAWAL_REQUEST":
-    case "WITHDRAWAL_APPROVED":
-      return "/wallet";
-    case "MAINTENANCE":
-      return "/maintenance";
-    case "RENT_PAYMENT":
-      return "/transactions";
-    case "SYSTEM":
-    default:
-      return "/dashboard";
   }
 }
 
@@ -146,25 +150,28 @@ export default function NotificationsPage() {
   const [markingAll, setMarkingAll] = useState(false);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
 
+  const roleContent = getRoleContent(getRoleFromStorage());
+
   async function loadNotifications(silent = false) {
     try {
-      if (!silent) {
-        setLoading(true);
-      } else {
-        setRefreshing(true);
-      }
+      if (!silent) setLoading(true);
+      else setRefreshing(true);
 
       const params: Record<string, string> = {};
+
       if (activeFilter === "unread") {
         params.status = "unread";
       } else if (activeFilter !== "all") {
         params.type = activeFilter;
       }
 
-      const [feedRes, summaryRes] = await Promise.all([
-        api.get<NotificationItem[]>("/notifications/me", { params }),
-        api.get<NotificationSummary>("/notifications/me/summary"),
-      ]);
+      const feedRes = await api.get<NotificationItem[]>("/notifications/me", {
+        params,
+      });
+
+      const summaryRes = await api.get<NotificationSummary>(
+        "/notifications/me/summary"
+      );
 
       setNotifications(feedRes.data ?? []);
       setSummary(summaryRes.data);
@@ -189,12 +196,7 @@ export default function NotificationsPage() {
     return () => window.clearInterval(interval);
   }, [activeFilter]);
 
-  const latestDate = useMemo(() => {
-    if (!notifications.length) return "No activity";
-    return formatDateTime(notifications[0].createdAt);
-  }, [notifications]);
-
-  const groupedNotifications = useMemo<NotificationGroup[]>(() => {
+  const groupedNotifications = useMemo(() => {
     const groups: Record<string, NotificationItem[]> = {
       Today: [],
       Yesterday: [],
@@ -202,15 +204,24 @@ export default function NotificationsPage() {
     };
 
     notifications.forEach((item) => {
-      const label = getGroupLabel(item.createdAt);
-      groups[label].push(item);
+      const date = new Date(item.createdAt);
+      const now = new Date();
+      const yesterday = new Date();
+
+      yesterday.setDate(now.getDate() - 1);
+
+      if (date.toDateString() === now.toDateString()) {
+        groups.Today.push(item);
+      } else if (date.toDateString() === yesterday.toDateString()) {
+        groups.Yesterday.push(item);
+      } else {
+        groups.Earlier.push(item);
+      }
     });
 
-    return [
-      { label: "Today", items: groups.Today },
-      { label: "Yesterday", items: groups.Yesterday },
-      { label: "Earlier", items: groups.Earlier },
-    ].filter((group) => group.items.length > 0);
+    return Object.entries(groups)
+      .filter(([, items]) => items.length)
+      .map(([label, items]) => ({ label, items }));
   }, [notifications]);
 
   async function handleMarkOneAsRead(id: string) {
@@ -219,22 +230,13 @@ export default function NotificationsPage() {
       await api.patch(`/notifications/${id}/read`);
 
       setNotifications((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, isRead: true } : item,
-        ),
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
       );
 
-      setSummary((prev) =>
-        prev
-          ? {
-              ...prev,
-              unread: Math.max(0, prev.unread - 1),
-              read: prev.read + 1,
-            }
-          : prev,
+      const summaryRes = await api.get<NotificationSummary>(
+        "/notifications/me/summary"
       );
-    } catch (error) {
-      console.error("Failed to mark notification as read", error);
+      setSummary(summaryRes.data);
     } finally {
       setBusyId(null);
     }
@@ -245,35 +247,14 @@ export default function NotificationsPage() {
       setMarkingAll(true);
       await api.patch("/notifications/me/read-all");
 
-      setNotifications((prev) =>
-        prev.map((item) => ({ ...item, isRead: true })),
-      );
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
 
-      setSummary((prev) =>
-        prev
-          ? {
-              ...prev,
-              unread: 0,
-              read: prev.total,
-            }
-          : prev,
+      const summaryRes = await api.get<NotificationSummary>(
+        "/notifications/me/summary"
       );
-
-      setLastUpdatedAt(new Date().toISOString());
-    } catch (error) {
-      console.error("Failed to mark all notifications as read", error);
+      setSummary(summaryRes.data);
     } finally {
       setMarkingAll(false);
-    }
-  }
-
-  async function handleOpenNotification(item: NotificationItem) {
-    try {
-      if (!item.isRead) {
-        await handleMarkOneAsRead(item.id);
-      }
-    } finally {
-      router.push(getNotificationTarget(item.type));
     }
   }
 
@@ -281,30 +262,15 @@ export default function NotificationsPage() {
     <div className="notifications-shell">
       <section className="notifications-hero">
         <div className="notifications-hero-copy">
-          <p className="notifications-eyebrow">Investor Notifications</p>
-          <h1 className="notifications-title">
-            Stay updated on portfolio events, payouts, requests, and platform alerts
-          </h1>
-          <p className="notifications-text">
-            Review every important account signal in one secure activity center.
-            Track unread updates, portfolio alerts, withdrawal progress, and system
-            communication without leaving your workspace.
-          </p>
-
-          <div className="notifications-tags">
-            <span className="notifications-tag">Unread tracking</span>
-            <span className="notifications-tag">Portfolio events</span>
-            <span className="notifications-tag">Withdrawal visibility</span>
-            <span className="notifications-tag">Stored audit trail</span>
-          </div>
+          <p className="notifications-eyebrow">{roleContent.eyebrow}</p>
+          <h1 className="notifications-title">{roleContent.title}</h1>
+          <p className="notifications-text">{roleContent.subtitle}</p>
         </div>
 
         <div className="notifications-hero-grid">
           <div className="notifications-stat-card dark">
-            <p className="notifications-stat-label">Total Notifications</p>
-            <h3 className="notifications-stat-value">
-              {summary?.total ?? notifications.length}
-            </h3>
+            <p className="notifications-stat-label">Total</p>
+            <h3 className="notifications-stat-value">{summary?.total ?? 0}</h3>
           </div>
 
           <div className="notifications-stat-card">
@@ -319,7 +285,11 @@ export default function NotificationsPage() {
 
           <div className="notifications-stat-card">
             <p className="notifications-stat-label">Latest Activity</p>
-            <h3 className="notifications-stat-value small">{latestDate}</h3>
+            <h3 className="notifications-stat-value small">
+              {summary?.latestActivity
+                ? formatDateTime(summary.latestActivity)
+                : "—"}
+            </h3>
           </div>
         </div>
       </section>
@@ -341,13 +311,11 @@ export default function NotificationsPage() {
         </div>
 
         <div className="notifications-toolbar-actions">
-          <span className="notifications-refresh-text">
-            {refreshing
-              ? "Refreshing..."
-              : lastUpdatedAt
-              ? `Updated ${formatDateTime(lastUpdatedAt)}`
-              : "Waiting for first sync"}
-          </span>
+          {lastUpdatedAt ? (
+            <span className="notifications-refresh-text">
+              Updated {formatDateTime(lastUpdatedAt)}
+            </span>
+          ) : null}
 
           <button
             type="button"
@@ -365,98 +333,98 @@ export default function NotificationsPage() {
           <div>
             <h2 className="notifications-panel-title">Notification Feed</h2>
             <p className="notifications-panel-subtitle">
-              Newest updates first across your investor account
+              Newest updates first across your account
             </p>
           </div>
+
           <span className="notifications-chip">
-            {loading ? "Loading..." : `${notifications.length} items`}
+            {notifications.length} {notifications.length === 1 ? "item" : "items"}
           </span>
         </div>
 
         {loading ? (
-          <div className="notifications-empty">
-            Loading notifications...
-          </div>
+          <div className="notifications-empty">Loading...</div>
         ) : notifications.length === 0 ? (
-          <div className="notifications-empty">
-            No notifications found.
-            <br />
-            <span>
-              New alerts about profits, withdrawals, messages, maintenance, and
-              system events will appear here.
-            </span>
-          </div>
+          <div className="notifications-empty">No notifications yet.</div>
         ) : (
           <div className="notifications-list">
             {groupedNotifications.map((group) => (
-              <div key={group.label} className="notifications-group">
+              <div className="notifications-group" key={group.label}>
                 <div className="notifications-group-header">
                   <span>{group.label}</span>
                 </div>
 
                 <div className="notifications-group-list">
-                  {group.items.map((item) => (
-                    <article
-                      key={item.id}
-                      className={`notifications-row ${
-                        item.isRead ? "read" : "unread"
-                      }`}
-                    >
-                      <div className="notifications-row-left">
-                        <div
-                          className={`notifications-type-dot ${getTypeTone(item.type)}`}
-                        />
+                  {group.items.map((item) => {
+                    const color = typeColor(item.type);
 
-                        <div className="notifications-copy">
-                          <div className="notifications-meta-top">
-                            <span
-                              className={`notifications-type-pill ${getTypeTone(
-                                item.type,
-                              )}`}
-                            >
-                              {formatTypeLabel(item.type)}
-                            </span>
-                            <span
-                              className={`notifications-read-pill ${
-                                item.isRead ? "read" : "unread"
-                              }`}
-                            >
-                              {item.isRead ? "Read" : "Unread"}
-                            </span>
+                    return (
+                      <article
+                        key={item.id}
+                        className={`notifications-row ${
+                          item.isRead ? "read" : "unread"
+                        }`}
+                      >
+                        <div className="notifications-row-left">
+                          <span
+                            className={`notifications-type-dot ${color}`}
+                            aria-hidden="true"
+                          />
+
+                          <div className="notifications-copy">
+                            <div className="notifications-meta-top">
+                              <span className={`notifications-type-pill ${color}`}>
+                                {typeLabel(item.type)}
+                              </span>
+
+                              <span
+                                className={`notifications-read-pill ${
+                                  item.isRead ? "read" : "unread"
+                                }`}
+                              >
+                                {item.isRead ? "Read" : "Unread"}
+                              </span>
+                            </div>
+
+                            <h3 className="notifications-row-title">
+                              {item.title}
+                            </h3>
+
+                            <p className="notifications-row-message">
+                              {item.message}
+                            </p>
+
+                            <p className="notifications-row-time">
+                              {formatDateTime(item.createdAt)}
+                            </p>
                           </div>
-
-                          <h3 className="notifications-row-title">{item.title}</h3>
-                          <p className="notifications-row-message">{item.message}</p>
-                          <p className="notifications-row-time">
-                            {formatDateTime(item.createdAt)}
-                          </p>
                         </div>
-                      </div>
 
-                      <div className="notifications-row-actions">
-                        {!item.isRead ? (
+                        <div className="notifications-row-actions">
+                          {!item.isRead ? (
+                            <button
+                              type="button"
+                              className="notifications-mark-btn"
+                              disabled={busyId === item.id}
+                              onClick={() => handleMarkOneAsRead(item.id)}
+                            >
+                              {busyId === item.id ? "Marking..." : "Mark read"}
+                            </button>
+                          ) : (
+                            <span className="notifications-read-text">Read</span>
+                          )}
+
                           <button
                             type="button"
-                            className="notifications-mark-btn"
-                            onClick={() => handleMarkOneAsRead(item.id)}
-                            disabled={busyId === item.id}
+                            className="notifications-open-btn"
+                            onClick={() => router.push("/dashboard")}
                           >
-                            {busyId === item.id ? "Updating..." : "Mark read"}
+                            Open
                           </button>
-                        ) : (
-                          <span className="notifications-read-text">Opened</span>
-                        )}
-
-                        <button
-                          type="button"
-                          className="notifications-open-btn"
-                          onClick={() => handleOpenNotification(item)}
-                        >
-                          Open
-                        </button>
-                      </div>
-                    </article>
-                  ))}
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
               </div>
             ))}

@@ -102,21 +102,19 @@ type InvoiceResponse = {
 };
 
 function toNumber(value: string | number | null | undefined) {
-  return Number(value || 0);
+  const amount = Number(value ?? 0);
+  return Number.isFinite(amount) ? amount : 0;
 }
 
-function formatCurrency(value: string | number) {
-  return `UGX ${toNumber(value).toLocaleString()}`;
+function getBalance(invoice: InvoiceItem) {
+  return Math.max(
+    0,
+    toNumber(invoice.totalAmount) - toNumber(invoice.paidAmount),
+  );
 }
 
-function formatCompactCurrency(value: number) {
-  const num = Number(value || 0);
-
-  if (num >= 1_000_000_000) return `UGX ${(num / 1_000_000_000).toFixed(1)}B`;
-  if (num >= 1_000_000) return `UGX ${(num / 1_000_000).toFixed(1)}M`;
-  if (num >= 1_000) return `UGX ${(num / 1_000).toFixed(0)}K`;
-
-  return `UGX ${num.toLocaleString()}`;
+function formatCurrency(value: string | number | null | undefined) {
+  return `UGX ${Math.round(toNumber(value)).toLocaleString("en-UG")}`;
 }
 
 function formatDate(value?: string | null) {
@@ -157,12 +155,51 @@ function getStatusTone(status: InvoiceStatus) {
   }
 }
 
+function getBalanceTone(status: InvoiceStatus, balance: number) {
+  if (balance <= 0) return "success";
+  if (status === "OVERDUE") return "danger";
+  return "warning";
+}
+
+function getStatusPriority(status: InvoiceStatus) {
+  switch (status) {
+    case "OVERDUE":
+      return 1;
+    case "PARTIALLY_PAID":
+      return 2;
+    case "ISSUED":
+      return 3;
+    case "PAID":
+      return 4;
+    default:
+      return 5;
+  }
+}
+
+function sortInvoices(items: InvoiceItem[]) {
+  return [...items].sort((a, b) => {
+    const priorityDiff = getStatusPriority(a.status) - getStatusPriority(b.status);
+    if (priorityDiff !== 0) return priorityDiff;
+
+    const balanceDiff = getBalance(b) - getBalance(a);
+    if (balanceDiff !== 0) return balanceDiff;
+
+    const dueDiff =
+      new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    if (dueDiff !== 0) return dueDiff;
+
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+}
+
 function getStatusNote(status: InvoiceStatus, balance: number) {
   if (status === "PAID") return "This invoice has been fully cleared.";
-  if (status === "OVERDUE")
+  if (status === "OVERDUE") {
     return `Outstanding balance is ${formatCurrency(balance)}.`;
-  if (status === "PARTIALLY_PAID")
+  }
+  if (status === "PARTIALLY_PAID") {
     return `Part payment received. Balance left is ${formatCurrency(balance)}.`;
+  }
   return `Invoice is awaiting payment of ${formatCurrency(balance)}.`;
 }
 
@@ -176,13 +213,14 @@ export default function InvoicesPage() {
   const { user } = useAuthStore();
   const role = user?.role as AppRole | undefined;
   const isAdmin = role === "ADMIN";
-  const isManager = role === "MANAGER";
 
   const [response, setResponse] = useState<InvoiceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<InvoiceFilter>("all");
   const [search, setSearch] = useState("");
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
+    null,
+  );
   const [page, setPage] = useState(1);
   const [busyAction, setBusyAction] = useState<
     "settle" | "remind" | "download" | null
@@ -228,7 +266,11 @@ export default function InvoicesPage() {
 
         if (!mounted) return;
 
-        const data = res.data;
+        const data = {
+          ...res.data,
+          items: sortInvoices(res.data.items ?? []),
+        };
+
         setResponse(data);
 
         if (data.items.length > 0) {
@@ -255,7 +297,11 @@ export default function InvoicesPage() {
     };
   }, [endpoint, activeFilter, search, page]);
 
-  const invoices = response?.items ?? [];
+  const invoices = useMemo(
+    () => sortInvoices(response?.items ?? []),
+    [response?.items],
+  );
+
   const summary = response?.summary ?? {
     total: 0,
     paid: 0,
@@ -267,6 +313,7 @@ export default function InvoicesPage() {
     outstanding: 0,
     latestPeriod: "",
   };
+
   const pagination = response?.pagination ?? {
     page: 1,
     limit: 12,
@@ -275,15 +322,11 @@ export default function InvoicesPage() {
   };
 
   const selectedInvoice =
-    invoices.find((item) => item.id === selectedInvoiceId) || invoices[0] || null;
+    invoices.find((item) => item.id === selectedInvoiceId) ||
+    invoices[0] ||
+    null;
 
-  const selectedBalance = selectedInvoice
-    ? Math.max(
-        0,
-        toNumber(selectedInvoice.totalAmount) - toNumber(selectedInvoice.paidAmount),
-      )
-    : 0;
-
+  const selectedBalance = selectedInvoice ? getBalance(selectedInvoice) : 0;
   const latestPeriod = summary.latestPeriod || "No invoices yet";
 
   async function refreshCurrentPage() {
@@ -309,7 +352,10 @@ export default function InvoicesPage() {
       },
     });
 
-    setResponse(res.data);
+    setResponse({
+      ...res.data,
+      items: sortInvoices(res.data.items ?? []),
+    });
   }
 
   async function handleSendReminder() {
@@ -340,41 +386,50 @@ export default function InvoicesPage() {
       win.document.write(`
         <html>
           <head>
-            <title>Invoice ${data.invoiceNumber}</title>
+            <title>Zyrent Invoice ${data.invoiceNumber}</title>
             <style>
-              body { font-family: Arial, sans-serif; padding: 32px; color: #0f172a; }
-              h1 { margin-bottom: 8px; }
-              h2 { margin-top: 28px; margin-bottom: 10px; }
-              .row { margin: 6px 0; }
-              .box { border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px; margin-top: 16px; }
+              body { font-family: Arial, sans-serif; padding: 32px; color: #0f172a; background: #f8fafc; }
+              .invoice { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 18px; padding: 28px; max-width: 820px; margin: 0 auto; }
+              h1 { font-size: 22px; margin: 0 0 8px; }
+              h2 { font-size: 16px; margin-top: 28px; margin-bottom: 10px; }
+              .muted { color: #64748b; margin-bottom: 20px; }
+              .row { margin: 7px 0; }
+              .box { border: 1px solid #dbeafe; border-radius: 14px; padding: 16px; margin-top: 16px; background: #f8fbff; }
+              .total { font-size: 18px; }
             </style>
           </head>
           <body>
-            <h1>Invoice</h1>
-            <div class="row"><strong>Invoice ID:</strong> ${data.invoiceNumber}</div>
-            <div class="row"><strong>Period:</strong> ${data.period}</div>
-            <div class="row"><strong>Status:</strong> ${data.status}</div>
-            <div class="row"><strong>Due Date:</strong> ${formatDate(data.dueDate)}</div>
+            <div class="invoice">
+              <h1>Zyrent Invoice</h1>
+              <div class="muted">Resident billing record</div>
 
-            <div class="box">
-              <h2>Resident</h2>
-              <div class="row"><strong>Name:</strong> ${data.resident?.name ?? "—"}</div>
-              <div class="row"><strong>Email:</strong> ${data.resident?.email ?? "—"}</div>
-              <div class="row"><strong>Phone:</strong> ${data.resident?.phone ?? "—"}</div>
-            </div>
+              <div class="row"><strong>Invoice ID:</strong> ${data.invoiceNumber}</div>
+              <div class="row"><strong>Invoice Type:</strong> ${data.kindLabel ?? data.kind ?? "Invoice"}</div>
+              <div class="row"><strong>Period:</strong> ${data.period}</div>
+              <div class="row"><strong>Status:</strong> ${data.status}</div>
+              <div class="row"><strong>Due Date:</strong> ${formatDate(data.dueDate)}</div>
+              <div class="row"><strong>Generated:</strong> ${formatDate(data.createdAt)}</div>
 
-            <div class="box">
-              <h2>Property</h2>
-              <div class="row"><strong>Property:</strong> ${data.property?.title ?? "—"}</div>
-              <div class="row"><strong>Location:</strong> ${data.property?.location ?? "—"}</div>
-              <div class="row"><strong>Unit:</strong> ${data.property?.unitNumber ?? "—"}</div>
-            </div>
+              <div class="box">
+                <h2>Resident</h2>
+                <div class="row"><strong>Name:</strong> ${data.resident?.name ?? "—"}</div>
+                <div class="row"><strong>Email:</strong> ${data.resident?.email ?? "—"}</div>
+                <div class="row"><strong>Phone:</strong> ${data.resident?.phone ?? "—"}</div>
+              </div>
 
-            <div class="box">
-              <h2>Totals</h2>
-              <div class="row"><strong>Total:</strong> ${formatCurrency(data.totals.totalAmount)}</div>
-              <div class="row"><strong>Paid:</strong> ${formatCurrency(data.totals.paidAmount)}</div>
-              <div class="row"><strong>Outstanding:</strong> ${formatCurrency(data.totals.outstanding)}</div>
+              <div class="box">
+                <h2>Property</h2>
+                <div class="row"><strong>Property:</strong> ${data.property?.title ?? "—"}</div>
+                <div class="row"><strong>Location:</strong> ${data.property?.location ?? "—"}</div>
+                <div class="row"><strong>Unit:</strong> ${data.property?.unitNumber ?? "—"}</div>
+              </div>
+
+              <div class="box">
+                <h2>Totals</h2>
+                <div class="row total"><strong>Total:</strong> ${formatCurrency(data.totals.totalAmount)}</div>
+                <div class="row"><strong>Paid:</strong> ${formatCurrency(data.totals.paidAmount)}</div>
+                <div class="row"><strong>Outstanding:</strong> ${formatCurrency(data.totals.outstanding)}</div>
+              </div>
             </div>
           </body>
         </html>
@@ -409,7 +464,8 @@ export default function InvoicesPage() {
     }
   }
 
-  const propertyOwnerName = selectedInvoice?.unit?.property?.owner?.name || "No owner";
+  const propertyOwnerName =
+    selectedInvoice?.unit?.property?.owner?.name || "No owner";
   const propertyManagerName =
     selectedInvoice?.unit?.property?.manager?.name || "No manager";
 
@@ -420,15 +476,17 @@ export default function InvoicesPage() {
           <p className="invoices-eyebrow">
             {isAdmin ? "Admin Invoices" : "Manager Invoices"}
           </p>
+
           <h1 className="invoices-title">
             {isAdmin
-              ? "Platform billing command center for issued, paid, partial, and overdue rent invoices"
-              : "Billing command center for issued, paid, partial, and overdue rent invoices"}
+              ? "Monitor all rent invoices, collections, and outstanding balances across the platform"
+              : "Track rent invoices, payments, and outstanding balances in one place"}
           </h1>
+
           <p className="invoices-text">
             {isAdmin
               ? "Review invoice periods, due dates, balances, payment progress, and account standing across the full platform from one finance-focused admin workspace."
-              : "Review invoice periods, due dates, balances, payment progress, and account standing from one finance-focused workspace built for manager operations."}
+              : "Review invoice periods, due dates, balances, payment progress, and resident account standing from one finance-focused workspace built for manager operations."}
           </p>
 
           <div className="invoices-tags">
@@ -446,17 +504,17 @@ export default function InvoicesPage() {
         <div className="invoices-hero-grid">
           <div className="invoices-stat-card dark">
             <span>Total Billed</span>
-            <strong>{formatCompactCurrency(summary.totalBilled)}</strong>
+            <strong>{formatCurrency(summary.totalBilled)}</strong>
           </div>
 
           <div className="invoices-stat-card">
             <span>Collected</span>
-            <strong>{formatCompactCurrency(summary.totalCollected)}</strong>
+            <strong>{formatCurrency(summary.totalCollected)}</strong>
           </div>
 
           <div className="invoices-stat-card">
             <span>Outstanding</span>
-            <strong>{formatCompactCurrency(summary.outstanding)}</strong>
+            <strong>{formatCurrency(summary.outstanding)}</strong>
           </div>
 
           <div className="invoices-stat-card">
@@ -487,56 +545,28 @@ export default function InvoicesPage() {
 
       <section className="invoices-toolbar">
         <div className="invoices-filter-row">
-          <button
-            type="button"
-            className={`invoices-filter-pill ${activeFilter === "all" ? "active" : ""}`}
-            onClick={() => {
-              setPage(1);
-              setActiveFilter("all");
-            }}
-          >
-            All
-          </button>
-          <button
-            type="button"
-            className={`invoices-filter-pill ${activeFilter === "overdue" ? "active" : ""}`}
-            onClick={() => {
-              setPage(1);
-              setActiveFilter("overdue");
-            }}
-          >
-            Overdue
-          </button>
-          <button
-            type="button"
-            className={`invoices-filter-pill ${activeFilter === "issued" ? "active" : ""}`}
-            onClick={() => {
-              setPage(1);
-              setActiveFilter("issued");
-            }}
-          >
-            Issued
-          </button>
-          <button
-            type="button"
-            className={`invoices-filter-pill ${activeFilter === "partial" ? "active" : ""}`}
-            onClick={() => {
-              setPage(1);
-              setActiveFilter("partial");
-            }}
-          >
-            Partial
-          </button>
-          <button
-            type="button"
-            className={`invoices-filter-pill ${activeFilter === "paid" ? "active" : ""}`}
-            onClick={() => {
-              setPage(1);
-              setActiveFilter("paid");
-            }}
-          >
-            Paid
-          </button>
+          {[
+            ["all", "All"],
+            ["overdue", "Overdue"],
+            ["issued", "Issued"],
+            ["partial", "Partial"],
+            ["paid", "Paid"],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              className={`invoices-filter-pill ${
+                activeFilter === key ? "active" : ""
+              }`}
+              onClick={() => {
+                setPage(1);
+                setActiveFilter(key as InvoiceFilter);
+                setSelectedInvoiceId(null);
+              }}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
         <div className="invoices-toolbar-search">
@@ -546,6 +576,7 @@ export default function InvoicesPage() {
             onChange={(event) => {
               setPage(1);
               setSearch(event.target.value);
+              setSelectedInvoiceId(null);
             }}
             placeholder={
               isAdmin
@@ -580,24 +611,25 @@ export default function InvoicesPage() {
               <div className="invoices-empty">
                 No invoices found.
                 <br />
-                <span>Your generated invoices will appear here once available.</span>
+                <span>
+                  Your generated invoices will appear here once available.
+                </span>
               </div>
             ) : (
               <>
                 <div className="invoices-registry-list">
                   {invoices.map((item) => {
-                    const balance = Math.max(
-                      0,
-                      toNumber(item.totalAmount) - toNumber(item.paidAmount),
-                    );
-
+                    const balance = getBalance(item);
                     const selected = selectedInvoice?.id === item.id;
+                    const balanceTone = getBalanceTone(item.status, balance);
 
                     return (
                       <button
                         key={item.id}
                         type="button"
-                        className={`invoices-registry-row ${selected ? "selected" : ""}`}
+                        className={`invoices-registry-row ${
+                          selected ? "selected" : ""
+                        }`}
                         onClick={() => setSelectedInvoiceId(item.id)}
                       >
                         <div className="invoices-registry-row-top">
@@ -610,7 +642,9 @@ export default function InvoicesPage() {
                           </div>
 
                           <span
-                            className={`invoices-status-pill ${getStatusTone(item.status)}`}
+                            className={`invoices-status-pill ${getStatusTone(
+                              item.status,
+                            )}`}
                           >
                             {getStatusLabel(item.status)}
                           </span>
@@ -618,7 +652,7 @@ export default function InvoicesPage() {
 
                         <div className="invoices-registry-row-bottom">
                           <span>{formatCurrency(item.totalAmount)}</span>
-                          <span className={balance > 0 ? "danger" : "success"}>
+                          <span className={`invoices-balance ${balanceTone}`}>
                             {balance > 0 ? formatCurrency(balance) : "Cleared"}
                           </span>
                         </div>
@@ -627,7 +661,10 @@ export default function InvoicesPage() {
                   })}
                 </div>
 
-                <div className="invoices-detail-actions" style={{ marginTop: 16 }}>
+                <div
+                  className="invoices-detail-actions"
+                  style={{ marginTop: 16 }}
+                >
                   <button
                     type="button"
                     className="invoices-secondary-btn"
@@ -636,7 +673,11 @@ export default function InvoicesPage() {
                   >
                     Previous
                   </button>
-                  <button type="button" className="invoices-secondary-btn" disabled>
+                  <button
+                    type="button"
+                    className="invoices-secondary-btn"
+                    disabled
+                  >
                     Page {pagination.page} of {pagination.totalPages}
                   </button>
                   <button
@@ -644,7 +685,9 @@ export default function InvoicesPage() {
                     className="invoices-secondary-btn"
                     disabled={page >= pagination.totalPages}
                     onClick={() =>
-                      setPage((prev) => Math.min(pagination.totalPages, prev + 1))
+                      setPage((prev) =>
+                        Math.min(pagination.totalPages, prev + 1),
+                      )
                     }
                   >
                     Next
@@ -664,20 +707,25 @@ export default function InvoicesPage() {
                 <div className="invoices-detail-hero">
                   <div>
                     <div className="invoices-detail-topline">
-                      <span className="invoices-detail-tag">{selectedInvoice.period}</span>
+                      <span className="invoices-detail-tag">
+                        {selectedInvoice.period}
+                      </span>
                       <span
-                        className={`invoices-detail-tag ${getStatusTone(selectedInvoice.status)}`}
+                        className={`invoices-detail-tag ${getStatusTone(
+                          selectedInvoice.status,
+                        )}`}
                       >
                         {getStatusLabel(selectedInvoice.status)}
                       </span>
                     </div>
 
                     <h2 className="invoices-detail-title">
-                      {selectedInvoice.resident?.user?.name || "Invoice Billing Record"}
+                      {selectedInvoice.resident?.user?.name ||
+                        "Invoice Billing Record"}
                     </h2>
                     <p className="invoices-detail-subtitle">
-                      {selectedInvoice.unit?.property?.title || "Property"} • Unit{" "}
-                      {selectedInvoice.unit?.number || "—"} • Due{" "}
+                      {selectedInvoice.unit?.property?.title || "Property"} •
+                      Unit {selectedInvoice.unit?.number || "—"} • Due{" "}
                       {formatDate(selectedInvoice.dueDate)}
                     </p>
                   </div>
@@ -750,11 +798,15 @@ export default function InvoicesPage() {
                   <div className="invoices-detail-grid three">
                     <div className="invoices-info-card">
                       <span>Total Amount</span>
-                      <strong>{formatCurrency(selectedInvoice.totalAmount)}</strong>
+                      <strong>
+                        {formatCurrency(selectedInvoice.totalAmount)}
+                      </strong>
                     </div>
                     <div className="invoices-info-card">
                       <span>Paid Amount</span>
-                      <strong>{formatCurrency(selectedInvoice.paidAmount)}</strong>
+                      <strong>
+                        {formatCurrency(selectedInvoice.paidAmount)}
+                      </strong>
                     </div>
                     <div className="invoices-info-card">
                       <span>Outstanding</span>
@@ -771,7 +823,9 @@ export default function InvoicesPage() {
 
                   <div className="invoices-standing-panel">
                     <div
-                      className={`invoices-standing-note ${getStatusTone(selectedInvoice.status)}`}
+                      className={`invoices-standing-note ${getStatusTone(
+                        selectedInvoice.status,
+                      )}`}
                     >
                       <span className="badge">
                         {selectedInvoice.status === "PAID"
@@ -782,7 +836,12 @@ export default function InvoicesPage() {
                               ? "Partial payment"
                               : "Awaiting payment"}
                       </span>
-                      <p>{getStatusNote(selectedInvoice.status, selectedBalance)}</p>
+                      <p>
+                        {getStatusNote(
+                          selectedInvoice.status,
+                          selectedBalance,
+                        )}
+                      </p>
                     </div>
 
                     <div className="invoices-standing-table">
@@ -813,7 +872,9 @@ export default function InvoicesPage() {
                     onClick={handleDownloadInvoice}
                     disabled={busyAction !== null}
                   >
-                    {busyAction === "download" ? "Preparing..." : "Download Invoice"}
+                    {busyAction === "download"
+                      ? "Preparing..."
+                      : "Download Invoice"}
                   </button>
 
                   <button
@@ -837,8 +898,8 @@ export default function InvoicesPage() {
 
                 <p className="invoices-action-note">
                   {isAdmin
-                    ? "This invoice workspace is now admin-ready, platform-wide, paginated, and action-ready."
-                    : "This invoice workspace is now manager-scoped, paginated, and action-ready."}
+                    ? "This invoice workspace is admin-ready, platform-wide, paginated, and action-ready."
+                    : "This invoice workspace is manager-scoped, paginated, and action-ready."}
                 </p>
               </>
             )}

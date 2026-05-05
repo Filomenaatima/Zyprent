@@ -75,18 +75,14 @@ type LeaderboardItem = {
   roi: number;
 };
 
-function formatCurrency(value: number) {
-  return `UGX ${Number(value || 0).toLocaleString()}`;
-}
+function formatCurrency(value: number | string | null | undefined) {
+  const amount = Number(value ?? 0);
 
-function formatCompactCurrency(value: number) {
-  const num = Number(value || 0);
+  if (!Number.isFinite(amount)) {
+    return "UGX 0";
+  }
 
-  if (num >= 1_000_000_000) return `UGX ${(num / 1_000_000_000).toFixed(1)}B`;
-  if (num >= 1_000_000) return `UGX ${(num / 1_000_000).toFixed(1)}M`;
-  if (num >= 1_000) return `UGX ${(num / 1_000).toFixed(0)}K`;
-
-  return `UGX ${num.toLocaleString()}`;
+  return `UGX ${Math.round(amount).toLocaleString("en-UG")}`;
 }
 
 function formatPercent(value: number) {
@@ -235,11 +231,11 @@ export default function PortfolioPage() {
     },
     {
       label: "Wallet Balance",
-      value: formatCompactCurrency(walletBalance),
+      value: formatCurrency(walletBalance),
     },
     {
       label: "Total Profit Earned",
-      value: formatCompactCurrency(totalProfitEarned),
+      value: formatCurrency(totalProfitEarned),
     },
   ];
 
@@ -256,7 +252,7 @@ export default function PortfolioPage() {
       label: "Avg Entry Price",
       value:
         Number(data?.portfolioSignals?.avgEntryPrice ?? 0) > 0
-          ? formatCompactCurrency(Number(data?.portfolioSignals?.avgEntryPrice ?? 0))
+          ? formatCurrency(Number(data?.portfolioSignals?.avgEntryPrice ?? 0))
           : "UGX 0",
     },
     {
@@ -435,8 +431,8 @@ export default function PortfolioPage() {
                             {item.title || "Untitled Property"}
                           </p>
                           <p className="portfolio-performance-subtitle">
-                            Invested {formatCompactCurrency(item.invested)} · Current{" "}
-                            {formatCompactCurrency(item.currentValue)}
+                            Invested {formatCurrency(item.invested)} · Current{" "}
+                            {formatCurrency(item.currentValue)}
                           </p>
                         </div>
 
@@ -447,7 +443,7 @@ export default function PortfolioPage() {
                             }`}
                           >
                             {item.totalReturn >= 0 ? "+" : "-"}{" "}
-                            {formatCompactCurrency(Math.abs(item.totalReturn))}
+                            {formatCurrency(Math.abs(item.totalReturn))}
                           </p>
                           <p className="portfolio-performance-roi">
                             {formatPercent(item.roi)}
@@ -469,10 +465,10 @@ export default function PortfolioPage() {
                           {getMovementSymbol(movement)} {getMovementLabel(movement)}
                         </span>
                         <span>
-                          Share price {formatCompactCurrency(item.currentPricePerShare)}
+                          Share price {formatCurrency(item.currentPricePerShare)}
                         </span>
                         <span>
-                          Payouts {formatCompactCurrency(item.totalProfitEarned)}
+                          Payouts {formatCurrency(item.totalProfitEarned)}
                         </span>
                       </div>
                     </div>
@@ -530,7 +526,7 @@ export default function PortfolioPage() {
                         </div>
 
                         <p className="portfolio-leaderboard-meta">
-                          Invested {formatCompactCurrency(item.totalInvested)}
+                          Invested {formatCurrency(item.totalInvested)}
                         </p>
                       </div>
                     </div>
@@ -540,7 +536,7 @@ export default function PortfolioPage() {
                         {formatPercent(item.roi)}
                       </p>
                       <p className="portfolio-leaderboard-return">
-                        {formatCompactCurrency(item.totalReturn)}
+                        {formatCurrency(item.totalReturn)}
                       </p>
                     </div>
                   </div>
@@ -614,7 +610,7 @@ export default function PortfolioPage() {
                         Current Value
                       </p>
                       <p className="portfolio-investment-meta-value">
-                        {formatCompactCurrency(currentValue)}
+                        {formatCurrency(currentValue)}
                       </p>
                     </div>
 
@@ -623,7 +619,7 @@ export default function PortfolioPage() {
                         Cash Payouts
                       </p>
                       <p className="portfolio-investment-meta-value">
-                        {formatCompactCurrency(item.totalProfitEarned)}
+                        {formatCurrency(item.totalProfitEarned)}
                       </p>
                     </div>
 
@@ -632,7 +628,7 @@ export default function PortfolioPage() {
                         Share Price
                       </p>
                       <p className="portfolio-investment-meta-value">
-                        {formatCompactCurrency(item.currentPricePerShare)}
+                        {formatCurrency(item.currentPricePerShare)}
                       </p>
                     </div>
 
@@ -653,7 +649,7 @@ export default function PortfolioPage() {
                       </p>
                       <p className="portfolio-investment-meta-value">
                         {item.unrealizedReturn >= 0 ? "+" : "-"}{" "}
-                        {formatCompactCurrency(Math.abs(item.unrealizedReturn))}
+                        {formatCurrency(Math.abs(item.unrealizedReturn))}
                       </p>
                     </div>
 

@@ -12,6 +12,9 @@ type AppRole =
   | "RESIDENT"
   | "SERVICE_PROVIDER";
 
+type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED";
+type InvoiceStatus = "ISSUED" | "PARTIALLY_PAID" | "PAID" | "OVERDUE";
+
 type ResidentPaymentItem = {
   id: string;
   createdAt: string;
@@ -19,15 +22,17 @@ type ResidentPaymentItem = {
   channel: string;
   provider: string;
   providerRef: string;
-  status: "PENDING" | "SUCCESS" | "FAILED";
+  status: PaymentStatus;
   invoiceId: string;
   invoice: {
     id: string;
+    kind?: string;
+    kindLabel?: string;
     period: string;
     dueDate: string;
     totalAmount: number;
     paidAmount: number;
-    status: "ISSUED" | "PARTIALLY_PAID" | "PAID" | "OVERDUE";
+    status: InvoiceStatus;
     unitNumber: string | null;
     propertyTitle: string | null;
     propertyLocation: string | null;
@@ -50,18 +55,21 @@ type ResidentPaymentsResponse = {
 type ResidentPaymentSummaryResponse = {
   totalPaid: number;
   successfulPaymentsCount: number;
-  currentInvoice: {
+  currentInvoices: {
     id: string;
+    kind: string;
+    kindLabel: string;
     period: string;
     dueDate: string;
-    status: "ISSUED" | "PARTIALLY_PAID" | "PAID" | "OVERDUE";
+    status: InvoiceStatus;
     totalAmount: number;
     paidAmount: number;
     outstandingAmount: number;
     unitNumber: string | null;
     propertyTitle: string | null;
     propertyLocation: string | null;
-  } | null;
+  }[];
+  totalOutstanding: number;
   latestPayment: {
     id: string;
     createdAt: string;
@@ -69,8 +77,10 @@ type ResidentPaymentSummaryResponse = {
     channel: string;
     provider: string;
     providerRef: string;
-    status: "PENDING" | "SUCCESS" | "FAILED";
+    status: PaymentStatus;
     invoiceId: string;
+    invoiceKind?: string | null;
+    invoiceKindLabel?: string | null;
     propertyTitle: string | null;
     unitNumber: string | null;
     period: string | null;
@@ -87,7 +97,7 @@ type CurrentResidentInvoiceResponse = {
   dueDate: string;
   totalAmount: number;
   paidAmount: number;
-  status: "ISSUED" | "PARTIALLY_PAID" | "PAID" | "OVERDUE";
+  status: InvoiceStatus;
   unit: {
     number: string;
     property: {
@@ -111,15 +121,17 @@ type PlatformPaymentItem = {
   channel: string;
   provider: string;
   providerRef: string;
-  status: "PENDING" | "SUCCESS" | "FAILED";
+  status: PaymentStatus;
   invoiceId: string;
   invoice: {
     id: string;
+    kind?: string;
+    kindLabel?: string;
     period: string;
     dueDate: string;
     totalAmount: number;
     paidAmount: number;
-    status: "ISSUED" | "PARTIALLY_PAID" | "PAID" | "OVERDUE";
+    status: InvoiceStatus;
     resident?: {
       id: string;
       user?: {
@@ -170,67 +182,174 @@ type PlatformPaymentsResponse = {
   audience: "admin" | "manager";
 };
 
+type StatusFilter = "ALL" | PaymentStatus;
+type InvoiceKindFilter = "ALL" | "RENT" | "SERVICE_CHARGE" | "GARBAGE" | "OTHER";
+
 function toNumber(value: number | string | null | undefined) {
-  return Number(value || 0);
+  const amount = Number(value ?? 0);
+  return Number.isFinite(amount) ? amount : 0;
 }
 
 function formatMoney(value: number | string | null | undefined) {
-  return `UGX ${toNumber(value).toLocaleString()}`;
-}
-
-function formatCompactMoney(value: number | string | null | undefined) {
-  const num = toNumber(value);
-  if (Math.abs(num) >= 1_000_000_000) return `UGX ${(num / 1_000_000_000).toFixed(1)}B`;
-  if (Math.abs(num) >= 1_000_000) return `UGX ${(num / 1_000_000).toFixed(1)}M`;
-  if (Math.abs(num) >= 1_000) return `UGX ${(num / 1_000).toFixed(0)}K`;
-  return `UGX ${num.toLocaleString()}`;
+  return `UGX ${Math.round(toNumber(value)).toLocaleString("en-UG")}`;
 }
 
 function formatDate(date: string | null | undefined) {
   if (!date) return "—";
-  return new Date(date).toLocaleDateString("en-UG", {
+
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return "—";
+
+  return parsed.toLocaleDateString("en-UG", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 }
 
-function formatStatusLabel(status: string) {
-  return status.replace(/_/g, " ");
+function formatDateTime(date: string | null | undefined) {
+  if (!date) return "—";
+
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return "—";
+
+  return parsed.toLocaleString("en-UG", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
-function getPaymentBadgeClass(status: string) {
-  const normalized = status.toLowerCase();
+function formatStatusLabel(status: string | null | undefined) {
+  if (!status) return "—";
+
+  return status
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function cleanProviderLabel(
+  channel: string | null | undefined,
+  provider: string | null | undefined,
+) {
+  const safeChannel = channel || "—";
+  const safeProvider = provider || "—";
+
+  if (safeChannel === "WALLET" || safeProvider === "INTERNAL_WALLET") {
+    return "Wallet";
+  }
+
+  if (safeProvider === "FLUTTERWAVE") {
+    return safeChannel === "MOBILE_MONEY"
+      ? "Mobile Money • Flutterwave"
+      : `${formatStatusLabel(safeChannel)} • Flutterwave`;
+  }
+
+  if (safeProvider === "ONAFRIQ") {
+    return safeChannel === "MOBILE_MONEY"
+      ? "Mobile Money • Onafriq"
+      : `${formatStatusLabel(safeChannel)} • Onafriq`;
+  }
+
+  if (safeProvider === "STRIPE") {
+    return "Card • Stripe";
+  }
+
+  return `${formatStatusLabel(safeChannel)} • ${formatStatusLabel(safeProvider)}`;
+}
+
+function getPaymentBadgeClass(status: string | null | undefined) {
+  const normalized = String(status || "").toLowerCase();
+
   if (normalized === "success") return "payment-success";
   if (normalized === "pending") return "payment-pending";
   if (normalized === "failed") return "payment-failed";
+
   return "payment-pending";
 }
 
-function getInvoiceBadgeClass(status: string) {
-  const normalized = status.toLowerCase();
+function getInvoiceBadgeClass(status: string | null | undefined) {
+  const normalized = String(status || "").toLowerCase();
+
   if (normalized === "paid") return "invoice-paid";
   if (normalized === "partially_paid") return "invoice-partially_paid";
   if (normalized === "issued") return "invoice-issued";
   if (normalized === "overdue") return "invoice-overdue";
+
   return "invoice-issued";
 }
 
 function getPlatformEndpoint(role: AppRole | undefined) {
   if (role === "ADMIN") return "/payments";
   if (role === "MANAGER") return "/payments/manager/me";
+
   return null;
+}
+
+function getInvoiceOutstanding(
+  invoice: PlatformPaymentItem["invoice"] | ResidentPaymentItem["invoice"],
+) {
+  if (!invoice) return 0;
+
+  return Math.max(0, toNumber(invoice.totalAmount) - toNumber(invoice.paidAmount));
+}
+
+function getInvoiceKind(payment: PlatformPaymentItem) {
+  return payment.invoice?.kind || "OTHER";
+}
+
+function getInvoiceKindLabel(payment: PlatformPaymentItem) {
+  return payment.invoice?.kindLabel || formatStatusLabel(payment.invoice?.kind || "Invoice");
+}
+
+function getResidentName(payment: PlatformPaymentItem) {
+  return (
+    payment.invoice?.resident?.user?.name ||
+    payment.invoice?.resident?.user?.email ||
+    "Resident"
+  );
+}
+
+function getPropertyTitle(payment: PlatformPaymentItem) {
+  return payment.invoice?.unit?.property?.title || "Property";
+}
+
+function getPropertyLocation(payment: PlatformPaymentItem) {
+  return payment.invoice?.unit?.property?.location || "No location";
+}
+
+function getUnitNumber(payment: PlatformPaymentItem) {
+  return payment.invoice?.unit?.number || "—";
+}
+
+function sortPlatformPayments(items: PlatformPaymentItem[]) {
+  return [...items].sort((a, b) => {
+    const statusWeight: Record<PaymentStatus, number> = {
+      PENDING: 3,
+      FAILED: 2,
+      SUCCESS: 1,
+    };
+
+    const statusDifference = statusWeight[b.status] - statusWeight[a.status];
+
+    if (statusDifference !== 0) return statusDifference;
+
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 }
 
 export default function PaymentsPage() {
   const { user } = useAuthStore();
+
   const role = user?.role as AppRole | undefined;
   const isResident = role === "RESIDENT";
   const isAdmin = role === "ADMIN";
   const isManager = role === "MANAGER";
 
   const [loading, setLoading] = useState(true);
-
   const [payments, setPayments] = useState<ResidentPaymentItem[]>([]);
   const [summary, setSummary] = useState<ResidentPaymentSummaryResponse | null>(null);
   const [currentInvoiceDetails, setCurrentInvoiceDetails] =
@@ -238,9 +357,13 @@ export default function PaymentsPage() {
 
   const [platformResponse, setPlatformResponse] =
     useState<PlatformPaymentsResponse | null>(null);
+
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
+  const [invoiceKindFilter, setInvoiceKindFilter] =
+    useState<InvoiceKindFilter>("ALL");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -255,7 +378,9 @@ export default function PaymentsPage() {
           const [paymentsRes, summaryRes, invoiceRes] = await Promise.all([
             api.get<ResidentPaymentsResponse>("/payments/resident/me"),
             api.get<ResidentPaymentSummaryResponse>("/payments/resident/summary"),
-            api.get<CurrentResidentInvoiceResponse>("/invoices/resident/me/current"),
+            api
+              .get<CurrentResidentInvoiceResponse>("/invoices/resident/me/current")
+              .catch(() => ({ data: null })),
           ]);
 
           if (!mounted) return;
@@ -265,24 +390,29 @@ export default function PaymentsPage() {
           setCurrentInvoiceDetails(invoiceRes.data || null);
           setPlatformResponse(null);
           setSelectedPaymentId(null);
+
           return;
         }
 
         const endpoint = getPlatformEndpoint(role);
+
         if (!endpoint) {
           if (!mounted) return;
+
           setError("This payments view is not available for your account.");
           setPayments([]);
           setSummary(null);
           setCurrentInvoiceDetails(null);
           setPlatformResponse(null);
+          setSelectedPaymentId(null);
+
           return;
         }
 
         const res = await api.get<PlatformPaymentsResponse>(endpoint, {
           params: {
             page,
-            limit: 12,
+            limit: 30,
             search: search.trim() || undefined,
           },
         });
@@ -293,24 +423,17 @@ export default function PaymentsPage() {
         setPayments([]);
         setSummary(null);
         setCurrentInvoiceDetails(null);
-
-        const items = res.data?.items || [];
-        if (items.length > 0) {
-          setSelectedPaymentId((current) => {
-            const exists = items.some((item) => item.id === current);
-            return exists ? current : items[0].id;
-          });
-        } else {
-          setSelectedPaymentId(null);
-        }
       } catch (err) {
         console.error("Failed to load payments", err);
+
         if (!mounted) return;
+
         setError("Failed to load payments.");
         setPayments([]);
         setSummary(null);
         setCurrentInvoiceDetails(null);
         setPlatformResponse(null);
+        setSelectedPaymentId(null);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -323,30 +446,47 @@ export default function PaymentsPage() {
     };
   }, [isResident, role, page, search]);
 
-  const metrics = useMemo(() => {
-    const totalPaid = Number(summary?.totalPaid ?? 0);
-    const currentInvoice = summary?.currentInvoice;
-    const outstanding = Number(currentInvoice?.outstandingAmount ?? 0);
-    const totalCurrentInvoice = Number(currentInvoice?.totalAmount ?? 0);
-    const paymentCount = Number(summary?.successfulPaymentsCount ?? 0);
+  const residentInvoices = summary?.currentInvoices || [];
+
+  const residentCurrentInvoice = useMemo(() => {
+    if (!residentInvoices.length) return null;
+
+    const overdueInvoice = residentInvoices.find(
+      (invoice) => invoice.status === "OVERDUE",
+    );
+
+    return overdueInvoice || residentInvoices[0];
+  }, [residentInvoices]);
+
+  const residentMetrics = useMemo(() => {
+    const totalPaid = toNumber(summary?.totalPaid);
+    const outstanding = toNumber(summary?.totalOutstanding);
+    const openInvoiceCount = residentInvoices.length;
+    const paymentCount = toNumber(summary?.successfulPaymentsCount);
 
     return {
       totalPaid,
       outstanding,
-      totalCurrentInvoice,
+      openInvoiceCount,
       paymentCount,
     };
-  }, [summary]);
+  }, [summary, residentInvoices.length]);
 
   const feeBreakdown = useMemo(() => {
     if (!currentInvoiceDetails) {
       return {
-        rentAmount: 0,
-        serviceCharge: 0,
-        garbageFee: 0,
-        totalAmount: 0,
+        rentAmount: residentInvoices
+          .filter((invoice) => invoice.kind === "RENT")
+          .reduce((sum, invoice) => sum + toNumber(invoice.outstandingAmount), 0),
+        serviceCharge: residentInvoices
+          .filter((invoice) => invoice.kind === "SERVICE_CHARGE")
+          .reduce((sum, invoice) => sum + toNumber(invoice.outstandingAmount), 0),
+        garbageFee: residentInvoices
+          .filter((invoice) => invoice.kind === "GARBAGE")
+          .reduce((sum, invoice) => sum + toNumber(invoice.outstandingAmount), 0),
+        totalAmount: toNumber(summary?.totalOutstanding),
         paidAmount: 0,
-        outstandingAmount: 0,
+        outstandingAmount: toNumber(summary?.totalOutstanding),
       };
     }
 
@@ -358,31 +498,93 @@ export default function PaymentsPage() {
       paidAmount: toNumber(currentInvoiceDetails.paidAmount),
       outstandingAmount: toNumber(currentInvoiceDetails.outstandingAmount),
     };
-  }, [currentInvoiceDetails]);
+  }, [currentInvoiceDetails, residentInvoices, summary]);
 
-  const platformItems = platformResponse?.items || [];
+  const platformRawItems = platformResponse?.items || [];
+
+  const filteredPlatformItems = useMemo(() => {
+    const filtered = platformRawItems.filter((payment) => {
+      const matchesStatus =
+        statusFilter === "ALL" ? true : payment.status === statusFilter;
+
+      const kind = getInvoiceKind(payment);
+
+      const matchesKind =
+        invoiceKindFilter === "ALL"
+          ? true
+          : invoiceKindFilter === "OTHER"
+            ? !["RENT", "SERVICE_CHARGE", "GARBAGE"].includes(kind)
+            : kind === invoiceKindFilter;
+
+      return matchesStatus && matchesKind;
+    });
+
+    return sortPlatformPayments(filtered);
+  }, [platformRawItems, statusFilter, invoiceKindFilter]);
+
+  useEffect(() => {
+    if (isResident) return;
+
+    if (filteredPlatformItems.length === 0) {
+      setSelectedPaymentId(null);
+      return;
+    }
+
+    setSelectedPaymentId((current) => {
+      const exists = filteredPlatformItems.some((payment) => payment.id === current);
+
+      return exists ? current : filteredPlatformItems[0].id;
+    });
+  }, [filteredPlatformItems, isResident]);
+
+  const selectedPlatformPayment =
+    filteredPlatformItems.find((payment) => payment.id === selectedPaymentId) ||
+    filteredPlatformItems[0] ||
+    null;
+
   const platformSummary = platformResponse?.summary || {
     totalPayments: 0,
     totalSuccessfulAmount: 0,
   };
 
-  const selectedPlatformPayment =
-    platformItems.find((item) => item.id === selectedPaymentId) || platformItems[0] || null;
-
   const platformSuccessCount = useMemo(
-    () => platformItems.filter((item) => item.status === "SUCCESS").length,
-    [platformItems],
+    () => platformRawItems.filter((item) => item.status === "SUCCESS").length,
+    [platformRawItems],
   );
 
   const platformPendingCount = useMemo(
-    () => platformItems.filter((item) => item.status === "PENDING").length,
-    [platformItems],
+    () => platformRawItems.filter((item) => item.status === "PENDING").length,
+    [platformRawItems],
   );
 
   const platformFailedCount = useMemo(
-    () => platformItems.filter((item) => item.status === "FAILED").length,
-    [platformItems],
+    () => platformRawItems.filter((item) => item.status === "FAILED").length,
+    [platformRawItems],
   );
+
+  const platformOutstanding = useMemo(
+    () =>
+      platformRawItems.reduce(
+        (sum, payment) => sum + getInvoiceOutstanding(payment.invoice),
+        0,
+      ),
+    [platformRawItems],
+  );
+
+  const visibleCollected = useMemo(
+    () =>
+      filteredPlatformItems
+        .filter((payment) => payment.status === "SUCCESS")
+        .reduce((sum, payment) => sum + toNumber(payment.amount), 0),
+    [filteredPlatformItems],
+  );
+
+  const resetFilters = () => {
+    setStatusFilter("ALL");
+    setInvoiceKindFilter("ALL");
+    setSearch("");
+    setPage(1);
+  };
 
   if (isResident) {
     return (
@@ -391,15 +593,15 @@ export default function PaymentsPage() {
           <div className="payments-hero-copy">
             <p className="payments-eyebrow">Resident Payments</p>
             <h1 className="payments-title">
-              Keep track of your rent payments and current invoice
+              Keep track of your rent payments and open bills
             </h1>
             <p className="payments-text">
-              See what you have paid, what is still outstanding, and exactly how
-              your current invoice is made up.
+              See what you have paid, what is still outstanding, and how your
+              current rent, service charge, and garbage bills are structured.
             </p>
 
             <div className="payments-tags">
-              <span className="payments-tag">Current invoice</span>
+              <span className="payments-tag">Open bills</span>
               <span className="payments-tag">Outstanding balance</span>
               <span className="payments-tag">Fee breakdown</span>
               <span className="payments-tag">Payment history</span>
@@ -409,22 +611,22 @@ export default function PaymentsPage() {
           <div className="payments-summary-grid resident-payments-summary-grid">
             <div className="payments-summary-card dark">
               <span>Total Paid</span>
-              <strong>{formatMoney(metrics.totalPaid)}</strong>
+              <strong>{formatMoney(residentMetrics.totalPaid)}</strong>
             </div>
 
             <div className="payments-summary-card">
               <span>Outstanding</span>
-              <strong>{formatMoney(metrics.outstanding)}</strong>
+              <strong>{formatMoney(residentMetrics.outstanding)}</strong>
             </div>
 
             <div className="payments-summary-card">
-              <span>Current Invoice</span>
-              <strong>{formatMoney(metrics.totalCurrentInvoice)}</strong>
+              <span>Open Bills</span>
+              <strong>{residentMetrics.openInvoiceCount}</strong>
             </div>
 
             <div className="payments-summary-card">
               <span>Successful Payments</span>
-              <strong>{metrics.paymentCount}</strong>
+              <strong>{residentMetrics.paymentCount}</strong>
             </div>
           </div>
         </section>
@@ -432,24 +634,24 @@ export default function PaymentsPage() {
         <section className="payments-card resident-payments-current-card">
           <div className="payments-card-head">
             <div>
-              <h2 className="payments-card-title">Current Invoice Snapshot</h2>
+              <h2 className="payments-card-title">Open Bills Snapshot</h2>
               <p className="payments-card-subtitle">
-                Your latest rent invoice and payment standing
+                Your latest active bills and payment standing
               </p>
             </div>
 
             <span className="payments-chip">
               {loading
                 ? "Loading..."
-                : summary?.currentInvoice
-                  ? formatStatusLabel(summary.currentInvoice.status)
-                  : "No active invoice"}
+                : residentCurrentInvoice
+                  ? formatStatusLabel(residentCurrentInvoice.status)
+                  : "No active bill"}
             </span>
           </div>
 
-          {!summary?.currentInvoice ? (
+          {!residentCurrentInvoice ? (
             <div className="payments-empty">
-              No active invoice right now.
+              No active bill right now.
               <br />
               <span>Your next billing update will appear here.</span>
             </div>
@@ -458,35 +660,35 @@ export default function PaymentsPage() {
               <div className="resident-payments-current-panel">
                 <p className="resident-payments-current-label">Property</p>
                 <h3 className="resident-payments-current-title">
-                  {summary.currentInvoice.propertyTitle || "—"}
+                  {residentCurrentInvoice.propertyTitle || "—"}
                 </h3>
                 <p className="resident-payments-current-text">
-                  {summary.currentInvoice.propertyLocation || "No location"} · Unit{" "}
-                  {summary.currentInvoice.unitNumber || "—"}
+                  {residentCurrentInvoice.propertyLocation || "No location"} ·
+                  Unit {residentCurrentInvoice.unitNumber || "—"}
                 </p>
 
                 <div className="resident-payments-current-meta">
                   <div className="resident-payments-current-stat">
-                    <span>Period</span>
-                    <strong>{summary.currentInvoice.period}</strong>
+                    <span>Next Bill</span>
+                    <strong>{residentCurrentInvoice.kindLabel || "Bill"}</strong>
                   </div>
                   <div className="resident-payments-current-stat">
                     <span>Due Date</span>
-                    <strong>{formatDate(summary.currentInvoice.dueDate)}</strong>
+                    <strong>{formatDate(residentCurrentInvoice.dueDate)}</strong>
                   </div>
                 </div>
 
                 <div className="resident-payments-breakdown-light">
                   <div className="resident-payments-breakdown-light-row">
-                    <span>Rent</span>
+                    <span>Rent outstanding</span>
                     <strong>{formatMoney(feeBreakdown.rentAmount)}</strong>
                   </div>
                   <div className="resident-payments-breakdown-light-row">
-                    <span>Service charge</span>
+                    <span>Service charge outstanding</span>
                     <strong>{formatMoney(feeBreakdown.serviceCharge)}</strong>
                   </div>
                   <div className="resident-payments-breakdown-light-row">
-                    <span>Garbage fee</span>
+                    <span>Garbage fee outstanding</span>
                     <strong>{formatMoney(feeBreakdown.garbageFee)}</strong>
                   </div>
                 </div>
@@ -494,19 +696,20 @@ export default function PaymentsPage() {
 
               <div className="resident-payments-breakdown-card">
                 <div className="resident-payments-breakdown-row">
-                  <span>Total invoice</span>
-                  <strong>{formatMoney(feeBreakdown.totalAmount)}</strong>
+                  <span>Total outstanding</span>
+                  <strong>{formatMoney(residentMetrics.outstanding)}</strong>
                 </div>
                 <div className="resident-payments-breakdown-row">
-                  <span>Paid so far</span>
-                  <strong>{formatMoney(feeBreakdown.paidAmount)}</strong>
+                  <span>Total paid</span>
+                  <strong>{formatMoney(residentMetrics.totalPaid)}</strong>
                 </div>
                 <div className="resident-payments-breakdown-row highlight">
-                  <span>Outstanding</span>
-                  <strong>{formatMoney(feeBreakdown.outstandingAmount)}</strong>
+                  <span>Open bills</span>
+                  <strong>{residentMetrics.openInvoiceCount}</strong>
                 </div>
                 <div className="resident-payments-breakdown-note">
-                  Payments are settled from your wallet balance.
+                  Payments can be settled from wallet, mobile money, card, or
+                  bank depending on the selected payment channel.
                 </div>
               </div>
             </div>
@@ -541,13 +744,16 @@ export default function PaymentsPage() {
                 <span>Unit / Period</span>
                 <span>Amount</span>
                 <span>Payment</span>
-                <span>Invoice</span>
+                <span>Bill</span>
                 <span>Date</span>
               </div>
 
               <div className="payments-body">
                 {payments.map((payment) => (
-                  <div key={payment.id} className="payments-row resident-payments-row">
+                  <div
+                    key={payment.id}
+                    className="payments-row resident-payments-row"
+                  >
                     <div className="payments-cell-main">
                       <strong>{payment.invoice?.propertyTitle || "Property"}</strong>
                       <p>{payment.invoice?.propertyLocation || "No location"}</p>
@@ -560,7 +766,7 @@ export default function PaymentsPage() {
 
                     <div className="payments-cell-main">
                       <strong>{formatMoney(payment.amount)}</strong>
-                      <p>{payment.provider || payment.channel}</p>
+                      <p>{cleanProviderLabel(payment.channel, payment.provider)}</p>
                     </div>
 
                     <div className="payments-cell-main payments-cell-stack">
@@ -580,7 +786,8 @@ export default function PaymentsPage() {
                           payment.invoice?.status || "ISSUED",
                         )}`}
                       >
-                        Invoice {formatStatusLabel(payment.invoice?.status || "ISSUED")}
+                        {payment.invoice?.kindLabel || "Bill"}{" "}
+                        {formatStatusLabel(payment.invoice?.status || "ISSUED")}
                       </span>
                       <p className="payments-stack-text">
                         Due {formatDate(payment.invoice?.dueDate)}
@@ -634,16 +841,19 @@ export default function PaymentsPage() {
         <div className="payments-summary-grid platform-payments-summary-grid">
           <div className="payments-summary-card dark">
             <span>Total Collected</span>
-            <strong>{formatCompactMoney(platformSummary.totalSuccessfulAmount)}</strong>
+            <strong>{formatMoney(platformSummary.totalSuccessfulAmount)}</strong>
           </div>
+
           <div className="payments-summary-card">
             <span>Total Payments</span>
             <strong>{platformSummary.totalPayments}</strong>
           </div>
+
           <div className="payments-summary-card">
             <span>Successful</span>
             <strong>{platformSuccessCount}</strong>
           </div>
+
           <div className="payments-summary-card">
             <span>Pending / Failed</span>
             <strong>{platformPendingCount + platformFailedCount}</strong>
@@ -651,14 +861,43 @@ export default function PaymentsPage() {
         </div>
       </section>
 
-      <section className="payments-toolbar">
+      <section className="payments-toolbar platform-payments-toolbar">
         <div className="payments-toolbar-note">
           {loading
             ? "Loading payments..."
             : `${platformResponse?.pagination.total ?? 0} total payment records`}
         </div>
 
-        <div className="payments-toolbar-search">
+        <div className="payments-toolbar-actions">
+          <select
+            className="payments-filter-select"
+            value={statusFilter}
+            onChange={(event) => {
+              setStatusFilter(event.target.value as StatusFilter);
+              setSelectedPaymentId(null);
+            }}
+          >
+            <option value="ALL">All statuses</option>
+            <option value="SUCCESS">Successful</option>
+            <option value="PENDING">Pending</option>
+            <option value="FAILED">Failed</option>
+          </select>
+
+          <select
+            className="payments-filter-select"
+            value={invoiceKindFilter}
+            onChange={(event) => {
+              setInvoiceKindFilter(event.target.value as InvoiceKindFilter);
+              setSelectedPaymentId(null);
+            }}
+          >
+            <option value="ALL">All invoice types</option>
+            <option value="RENT">Rent</option>
+            <option value="SERVICE_CHARGE">Service charge</option>
+            <option value="GARBAGE">Garbage</option>
+            <option value="OTHER">Other</option>
+          </select>
+
           <input
             type="text"
             value={search}
@@ -668,11 +907,41 @@ export default function PaymentsPage() {
             }}
             placeholder={
               isAdmin
-                ? "Search by payment, resident, invoice, unit, property, reference..."
-                : "Search by payment, resident, invoice, unit, property..."
+                ? "Search payment, resident, invoice, unit, property, reference..."
+                : "Search payment, resident, invoice, unit, property..."
             }
             className="payments-search-input"
           />
+
+          <button
+            type="button"
+            className="payments-secondary-btn"
+            onClick={resetFilters}
+          >
+            Reset
+          </button>
+        </div>
+      </section>
+
+      <section className="payments-mini-metrics">
+        <div className="payments-mini-card">
+          <span>Visible collected</span>
+          <strong>{formatMoney(visibleCollected)}</strong>
+        </div>
+
+        <div className="payments-mini-card">
+          <span>Visible records</span>
+          <strong>{filteredPlatformItems.length}</strong>
+        </div>
+
+        <div className="payments-mini-card">
+          <span>Outstanding exposure</span>
+          <strong>{formatMoney(platformOutstanding)}</strong>
+        </div>
+
+        <div className="payments-mini-card">
+          <span>View</span>
+          <strong>{isManager ? "Manager scoped" : "Platform wide"}</strong>
         </div>
       </section>
 
@@ -688,14 +957,15 @@ export default function PaymentsPage() {
                   Select a payment to inspect collection details
                 </p>
               </div>
+
               <span className="payments-chip">
-                {loading ? "Loading..." : `${platformItems.length} visible`}
+                {loading ? "Loading..." : `${filteredPlatformItems.length} visible`}
               </span>
             </div>
 
             {loading ? (
               <div className="payments-empty">Loading payments...</div>
-            ) : platformItems.length === 0 ? (
+            ) : filteredPlatformItems.length === 0 ? (
               <div className="payments-empty">
                 No payments found.
                 <br />
@@ -704,7 +974,7 @@ export default function PaymentsPage() {
             ) : (
               <>
                 <div className="payments-registry-list">
-                  {platformItems.map((payment) => (
+                  {filteredPlatformItems.map((payment) => (
                     <button
                       key={payment.id}
                       type="button"
@@ -715,20 +985,22 @@ export default function PaymentsPage() {
                     >
                       <div className="payments-registry-top">
                         <div>
-                          <h3>
-                            {payment.invoice?.resident?.user?.name ||
-                              payment.invoice?.resident?.user?.email ||
-                              "Payment record"}
-                          </h3>
+                          <h3>{getResidentName(payment)}</h3>
                           <p>
-                            {payment.invoice?.unit?.property?.title || "Property"} • Unit{" "}
-                            {payment.invoice?.unit?.number || "—"}
+                            {getPropertyTitle(payment)} • Unit {getUnitNumber(payment)}
                           </p>
                         </div>
 
-                        <span className={`status ${getPaymentBadgeClass(payment.status)}`}>
+                        <span
+                          className={`status ${getPaymentBadgeClass(payment.status)}`}
+                        >
                           {formatStatusLabel(payment.status)}
                         </span>
+                      </div>
+
+                      <div className="payments-registry-meta">
+                        <span>{getInvoiceKindLabel(payment)}</span>
+                        <span>{formatDate(payment.createdAt)}</span>
                       </div>
 
                       <div className="payments-registry-bottom">
@@ -748,17 +1020,22 @@ export default function PaymentsPage() {
                   >
                     Previous
                   </button>
+
                   <button type="button" className="payments-secondary-btn" disabled>
                     Page {platformResponse?.pagination.page || 1} of{" "}
                     {platformResponse?.pagination.totalPages || 1}
                   </button>
+
                   <button
                     type="button"
                     className="payments-secondary-btn"
                     disabled={!platformResponse?.pagination.hasNextPage}
                     onClick={() =>
                       setPage((prev) =>
-                        Math.min(platformResponse?.pagination.totalPages || prev, prev + 1),
+                        Math.min(
+                          platformResponse?.pagination.totalPages || prev,
+                          prev + 1,
+                        ),
                       )
                     }
                   >
@@ -779,22 +1056,37 @@ export default function PaymentsPage() {
                 <div className="payments-detail-hero">
                   <div>
                     <div className="payments-detail-tags">
-                      <span className={`status ${getPaymentBadgeClass(selectedPlatformPayment.status)}`}>
+                      <span
+                        className={`status ${getPaymentBadgeClass(
+                          selectedPlatformPayment.status,
+                        )}`}
+                      >
                         {formatStatusLabel(selectedPlatformPayment.status)}
                       </span>
-                      <span className={`status ${getInvoiceBadgeClass(selectedPlatformPayment.invoice?.status || "ISSUED")}`}>
-                        Invoice {formatStatusLabel(selectedPlatformPayment.invoice?.status || "ISSUED")}
+
+                      <span
+                        className={`status ${getInvoiceBadgeClass(
+                          selectedPlatformPayment.invoice?.status || "ISSUED",
+                        )}`}
+                      >
+                        Invoice{" "}
+                        {formatStatusLabel(
+                          selectedPlatformPayment.invoice?.status || "ISSUED",
+                        )}
+                      </span>
+
+                      <span className="status invoice-issued">
+                        {getInvoiceKindLabel(selectedPlatformPayment)}
                       </span>
                     </div>
 
                     <h2 className="payments-detail-title">
-                      {selectedPlatformPayment.invoice?.resident?.user?.name ||
-                        selectedPlatformPayment.invoice?.resident?.user?.email ||
-                        "Payment Detail"}
+                      {getResidentName(selectedPlatformPayment)}
                     </h2>
+
                     <p className="payments-detail-subtitle">
-                      {selectedPlatformPayment.invoice?.unit?.property?.title || "Property"} •
-                      Unit {selectedPlatformPayment.invoice?.unit?.number || "—"} •
+                      {getPropertyTitle(selectedPlatformPayment)} • Unit{" "}
+                      {getUnitNumber(selectedPlatformPayment)} •{" "}
                       {formatDate(selectedPlatformPayment.createdAt)}
                     </p>
                   </div>
@@ -813,6 +1105,10 @@ export default function PaymentsPage() {
                         Core collection references
                       </p>
                     </div>
+
+                    <span className="payments-chip">
+                      {formatDateTime(selectedPlatformPayment.createdAt)}
+                    </span>
                   </div>
 
                   <div className="payments-detail-grid two">
@@ -820,16 +1116,22 @@ export default function PaymentsPage() {
                       <span>Payment ID</span>
                       <strong>{selectedPlatformPayment.id}</strong>
                     </div>
+
                     <div className="payments-info-box">
                       <span>Provider Reference</span>
                       <strong>{selectedPlatformPayment.providerRef || "—"}</strong>
                     </div>
+
                     <div className="payments-info-box">
                       <span>Channel / Provider</span>
                       <strong>
-                        {selectedPlatformPayment.channel} • {selectedPlatformPayment.provider}
+                        {cleanProviderLabel(
+                          selectedPlatformPayment.channel,
+                          selectedPlatformPayment.provider,
+                        )}
                       </strong>
                     </div>
+
                     <div className="payments-info-box">
                       <span>Invoice Period</span>
                       <strong>{selectedPlatformPayment.invoice?.period || "—"}</strong>
@@ -850,18 +1152,25 @@ export default function PaymentsPage() {
                   <div className="payments-detail-grid two">
                     <div className="payments-info-box">
                       <span>Resident</span>
-                      <strong>
-                        {selectedPlatformPayment.invoice?.resident?.user?.name ||
-                          selectedPlatformPayment.invoice?.resident?.user?.email ||
-                          "—"}
-                      </strong>
+                      <strong>{getResidentName(selectedPlatformPayment)}</strong>
                     </div>
+
                     <div className="payments-info-box">
                       <span>Property / Unit</span>
                       <strong>
-                        {selectedPlatformPayment.invoice?.unit?.property?.title || "—"} • Unit{" "}
-                        {selectedPlatformPayment.invoice?.unit?.number || "—"}
+                        {getPropertyTitle(selectedPlatformPayment)} • Unit{" "}
+                        {getUnitNumber(selectedPlatformPayment)}
                       </strong>
+                    </div>
+
+                    <div className="payments-info-box">
+                      <span>Location</span>
+                      <strong>{getPropertyLocation(selectedPlatformPayment)}</strong>
+                    </div>
+
+                    <div className="payments-info-box">
+                      <span>Invoice Type</span>
+                      <strong>{getInvoiceKindLabel(selectedPlatformPayment)}</strong>
                     </div>
 
                     {isAdmin && (
@@ -869,13 +1178,16 @@ export default function PaymentsPage() {
                         <div className="payments-info-box">
                           <span>Property Owner</span>
                           <strong>
-                            {selectedPlatformPayment.invoice?.unit?.property?.owner?.name || "No owner"}
+                            {selectedPlatformPayment.invoice?.unit?.property?.owner
+                              ?.name || "No owner"}
                           </strong>
                         </div>
+
                         <div className="payments-info-box">
                           <span>Property Manager</span>
                           <strong>
-                            {selectedPlatformPayment.invoice?.unit?.property?.manager?.name || "No manager"}
+                            {selectedPlatformPayment.invoice?.unit?.property?.manager
+                              ?.name || "No manager"}
                           </strong>
                         </div>
                       </>
@@ -896,22 +1208,22 @@ export default function PaymentsPage() {
                   <div className="payments-detail-grid three">
                     <div className="payments-info-box">
                       <span>Invoice Total</span>
-                      <strong>{formatMoney(selectedPlatformPayment.invoice?.totalAmount || 0)}</strong>
+                      <strong>
+                        {formatMoney(selectedPlatformPayment.invoice?.totalAmount || 0)}
+                      </strong>
                     </div>
+
                     <div className="payments-info-box">
                       <span>Invoice Paid</span>
-                      <strong>{formatMoney(selectedPlatformPayment.invoice?.paidAmount || 0)}</strong>
+                      <strong>
+                        {formatMoney(selectedPlatformPayment.invoice?.paidAmount || 0)}
+                      </strong>
                     </div>
+
                     <div className="payments-info-box">
                       <span>Outstanding</span>
                       <strong>
-                        {formatMoney(
-                          Math.max(
-                            0,
-                            toNumber(selectedPlatformPayment.invoice?.totalAmount) -
-                              toNumber(selectedPlatformPayment.invoice?.paidAmount),
-                          ),
-                        )}
+                        {formatMoney(getInvoiceOutstanding(selectedPlatformPayment.invoice))}
                       </strong>
                     </div>
                   </div>

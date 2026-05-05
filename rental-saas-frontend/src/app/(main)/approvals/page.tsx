@@ -4,9 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import "@/styles/approvals.css";
 import { api } from "@/services/api";
 
+type ApprovalType =
+  | "KYC"
+  | "PROVIDER"
+  | "EXPENSE"
+  | "PROFIT_REQUEST"
+  | "WITHDRAWAL";
+
 type ApprovalQueueItem = {
   id: string;
-  type: "KYC" | "PROVIDER" | "EXPENSE" | "PROFIT_REQUEST";
+  type: ApprovalType;
   status: string;
   title: string;
   subtitle: string;
@@ -22,6 +29,7 @@ type ApprovalSummary = {
   submittedExpenses: number;
   pendingProfitRequests: number;
   approvedTodayExpenses: number;
+  pendingWithdrawals?: number;
 };
 
 function formatDate(value?: string) {
@@ -33,12 +41,42 @@ function formatDate(value?: string) {
   });
 }
 
+function formatMoney(value: number) {
+  return `UGX ${Number(value || 0).toLocaleString("en-UG")}`;
+}
+
 function getStatusTone(status: string) {
-  const normalized = status.toUpperCase();
-  if (["APPROVED", "VERIFIED"].includes(normalized)) return "approved";
-  if (["REJECTED"].includes(normalized)) return "rejected";
-  if (["SUBMITTED", "PENDING"].includes(normalized)) return "pending";
+  const normalized = String(status || "").toUpperCase();
+
+  if (["APPROVED", "VERIFIED", "COMPLETED"].includes(normalized)) {
+    return "approved";
+  }
+
+  if (["REJECTED", "DECLINED", "FAILED"].includes(normalized)) {
+    return "rejected";
+  }
+
+  if (["SUBMITTED", "PENDING", "PROCESSING"].includes(normalized)) {
+    return "pending";
+  }
+
   return "neutral";
+}
+
+function getWithdrawalDestination(item: any) {
+  const method = String(item?.method || "MOBILE_MONEY").replace("_", " ");
+
+  if (item?.phoneNumber) return `${method} • ${item.phoneNumber}`;
+
+  if (item?.bankName || item?.accountNumber) {
+    return `${method} • ${item.bankName || "Bank"} • ${
+      item.accountNumber || "—"
+    }`;
+  }
+
+  if (item?.cardLast4) return `${method} • Card ending ${item.cardLast4}`;
+
+  return method;
 }
 
 export default function ApprovalsPage() {
@@ -55,24 +93,89 @@ export default function ApprovalsPage() {
     try {
       setLoading(true);
 
-      const [summaryRes, queueRes] = await Promise.all([
-        api.get("/approvals/summary"),
-        api.get("/approvals/queue", {
-          params: {
-            type: typeFilter,
-            search: search || undefined,
-          },
-        }),
-      ]);
+      const [summaryResult, queueResult, withdrawalsResult] =
+        await Promise.allSettled([
+          api.get("/approvals/summary"),
+          api.get("/approvals/queue", {
+            params: {
+              type: typeFilter === "WITHDRAWAL" ? "ALL" : typeFilter,
+              search: search || undefined,
+            },
+          }),
+          api.get("/wallet/withdrawals"),
+        ]);
 
-      setSummary(summaryRes.data);
-      setQueue(queueRes.data || []);
+      const summaryData =
+        summaryResult.status === "fulfilled"
+          ? summaryResult.value.data || {}
+          : {};
+
+      const baseQueue: ApprovalQueueItem[] =
+        queueResult.status === "fulfilled" ? queueResult.value.data || [] : [];
+
+      const withdrawalsData =
+        withdrawalsResult.status === "fulfilled"
+          ? withdrawalsResult.value.data || []
+          : [];
+
+      const actionableWithdrawalStatuses = [
+        "PENDING",
+        "APPROVED",
+        "PROCESSING",
+      ];
+
+      const withdrawalItems: ApprovalQueueItem[] = withdrawalsData
+        .filter((item: any) =>
+          actionableWithdrawalStatuses.includes(
+            String(item.status).toUpperCase(),
+          ),
+        )
+        .map((item: any) => ({
+          id: item.id,
+          type: "WITHDRAWAL",
+          status: item.status,
+          title:
+            String(item.status).toUpperCase() === "PENDING"
+              ? "Withdrawal Request"
+              : String(item.status).toUpperCase() === "APPROVED"
+                ? "Approved Withdrawal"
+                : "Processing Withdrawal",
+          subtitle: `${
+            item.investor?.name || item.investor?.email || "Investor"
+          } • ${formatMoney(Number(item.amount || 0))}`,
+          meta: getWithdrawalDestination(item),
+          updatedAt: item.updatedAt || item.createdAt,
+          raw: item,
+        }));
+
+      const mergedQueue =
+        typeFilter === "WITHDRAWAL"
+          ? withdrawalItems
+          : typeFilter === "ALL"
+            ? [...withdrawalItems, ...baseQueue]
+            : baseQueue;
+
+      mergedQueue.sort(
+        (a, b) =>
+          new Date(b.updatedAt || 0).getTime() -
+          new Date(a.updatedAt || 0).getTime(),
+      );
+
+      setSummary({
+        ...summaryData,
+        pendingWithdrawals: withdrawalItems.length,
+        totalPending:
+          Number(summaryData.totalPending || 0) + withdrawalItems.length,
+      });
+
+      setQueue(mergedQueue);
 
       setSelected((current) => {
-        const items = queueRes.data || [];
-        if (!items.length) return null;
-        if (!current) return items[0];
-        return items.find((item: ApprovalQueueItem) => item.id === current.id) || items[0];
+        if (!mergedQueue.length) return null;
+        if (!current) return mergedQueue[0];
+        return (
+          mergedQueue.find((item) => item.id === current.id) || mergedQueue[0]
+        );
       });
     } catch (error) {
       console.error("Failed to load approvals", error);
@@ -83,14 +186,19 @@ export default function ApprovalsPage() {
 
   useEffect(() => {
     loadApprovals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typeFilter]);
 
   const filteredQueue = useMemo(() => {
     if (!search.trim()) return queue;
 
     const term = search.toLowerCase().trim();
+
     return queue.filter((item) =>
-      [item.title, item.subtitle, item.meta].join(" ").toLowerCase().includes(term),
+      [item.title, item.subtitle, item.meta]
+        .join(" ")
+        .toLowerCase()
+        .includes(term),
     );
   }, [queue, search]);
 
@@ -105,12 +213,29 @@ export default function ApprovalsPage() {
     try {
       setBusyId(selectedItem.id);
 
+      if (selectedItem.type === "WITHDRAWAL") {
+        if (action === "REJECT") {
+          const reason = window.prompt("Enter rejection reason") || undefined;
+
+          await api.post(`/wallet/withdraw/${selectedItem.id}/reject`, {
+            reason,
+          });
+
+          await loadApprovals();
+          return;
+        }
+
+        await api.post(`/wallet/withdraw/${selectedItem.id}/approve`);
+        await loadApprovals();
+        return;
+      }
+
       const reason =
         action === "REJECT"
           ? window.prompt("Enter rejection reason (optional)") || undefined
           : undefined;
 
-      const routeMap: Record<string, string> = {
+      const routeMap: Record<Exclude<ApprovalType, "WITHDRAWAL">, string> = {
         KYC: `/approvals/kyc/${selectedItem.id}/review`,
         PROVIDER: `/approvals/provider/${selectedItem.id}/review`,
         EXPENSE: `/approvals/expense/${selectedItem.id}/review`,
@@ -130,17 +255,80 @@ export default function ApprovalsPage() {
     }
   };
 
+  const completePayout = async () => {
+    if (!selectedItem || selectedItem.type !== "WITHDRAWAL") return;
+
+    try {
+      setBusyId(selectedItem.id);
+
+      await api.post(`/wallet/withdraw/${selectedItem.id}/complete`, {});
+
+      await loadApprovals();
+    } catch (error: any) {
+      console.error("Failed to complete payout", error);
+      window.alert(
+        error?.response?.data?.message || "Failed to complete payout.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const processPayout = async () => {
+    if (!selectedItem || selectedItem.type !== "WITHDRAWAL") return;
+
+    try {
+      setBusyId(selectedItem.id);
+      await api.post(`/wallet/withdraw/${selectedItem.id}/process`);
+      await loadApprovals();
+    } catch (error: any) {
+      console.error("Failed to mark payout as processing", error);
+      window.alert(
+        error?.response?.data?.message || "Failed to mark payout as processing.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const failPayout = async () => {
+    if (!selectedItem || selectedItem.type !== "WITHDRAWAL") return;
+
+    try {
+      setBusyId(selectedItem.id);
+
+      const reason = window.prompt("Enter failure reason") || undefined;
+
+      await api.post(`/wallet/withdraw/${selectedItem.id}/fail`, {
+        reason,
+      });
+
+      await loadApprovals();
+    } catch (error: any) {
+      console.error("Failed to fail payout", error);
+      window.alert(error?.response?.data?.message || "Failed to fail payout.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const selectedWithdrawalStatus =
+    selectedItem?.type === "WITHDRAWAL"
+      ? String(selectedItem.status || "").toUpperCase()
+      : "";
+
   return (
     <div className="approvals-page-shell">
       <section className="approvals-hero">
         <div className="approvals-hero-copy">
           <p className="approvals-label">ADMIN APPROVALS</p>
           <h1>
-            Review platform approvals across KYC, providers, expenses, and profit requests
+            Review platform approvals across KYC, providers, expenses, profit
+            requests, and withdrawals
           </h1>
           <p className="approvals-sub">
-            A centralized workspace for processing sensitive approval queues and keeping
-            operational control across the platform.
+            A centralized workspace for processing sensitive approval queues and
+            keeping operational control across the platform.
           </p>
 
           <div className="approvals-tags">
@@ -148,6 +336,7 @@ export default function ApprovalsPage() {
             <span>Provider verification</span>
             <span>Expense approval</span>
             <span>Profit governance</span>
+            <span>Withdrawals</span>
           </div>
         </div>
 
@@ -165,20 +354,20 @@ export default function ApprovalsPage() {
             <h3>{summary?.pendingProviders ?? 0}</h3>
           </div>
           <div className="approvals-metric-card">
-            <span>Expenses</span>
-            <h3>{summary?.submittedExpenses ?? 0}</h3>
+            <span>Withdrawals</span>
+            <h3>{summary?.pendingWithdrawals ?? 0}</h3>
           </div>
         </div>
       </section>
 
       <section className="approvals-summary-strip">
         <div className="approvals-summary-card">
-          <span>Profit Requests</span>
-          <strong>{summary?.pendingProfitRequests ?? 0}</strong>
+          <span>Expenses</span>
+          <strong>{summary?.submittedExpenses ?? 0}</strong>
         </div>
         <div className="approvals-summary-card">
-          <span>Approved Today</span>
-          <strong>{summary?.approvedTodayExpenses ?? 0}</strong>
+          <span>Profit Requests</span>
+          <strong>{summary?.pendingProfitRequests ?? 0}</strong>
         </div>
         <div className="approvals-summary-card">
           <span>Queue Visible</span>
@@ -211,6 +400,7 @@ export default function ApprovalsPage() {
                   onChange={(e) => setTypeFilter(e.target.value)}
                 >
                   <option value="ALL">All approvals</option>
+                  <option value="WITHDRAWAL">Withdrawals</option>
                   <option value="KYC">KYC</option>
                   <option value="PROVIDER">Providers</option>
                   <option value="EXPENSE">Expenses</option>
@@ -234,7 +424,7 @@ export default function ApprovalsPage() {
               ) : (
                 filteredQueue.map((item) => (
                   <button
-                    key={item.id}
+                    key={`${item.type}-${item.id}`}
                     type="button"
                     className={`approvals-record-card ${
                       selectedItem?.id === item.id ? "active" : ""
@@ -246,7 +436,11 @@ export default function ApprovalsPage() {
                         <h4>{item.title}</h4>
                         <p>{item.subtitle}</p>
                       </div>
-                      <span className={`approvals-badge ${getStatusTone(item.status)}`}>
+                      <span
+                        className={`approvals-badge ${getStatusTone(
+                          item.status,
+                        )}`}
+                      >
                         {item.status}
                       </span>
                     </div>
@@ -280,7 +474,11 @@ export default function ApprovalsPage() {
                       <span className="approvals-type-pill">
                         {selectedItem.type.replace("_", " ")}
                       </span>
-                      <span className={`approvals-badge ${getStatusTone(selectedItem.status)}`}>
+                      <span
+                        className={`approvals-badge ${getStatusTone(
+                          selectedItem.status,
+                        )}`}
+                      >
                         {selectedItem.status}
                       </span>
                     </div>
@@ -289,7 +487,11 @@ export default function ApprovalsPage() {
                     <p>{selectedItem.subtitle}</p>
                   </div>
 
-                  <div className={`approvals-status-box ${getStatusTone(selectedItem.status)}`}>
+                  <div
+                    className={`approvals-status-box ${getStatusTone(
+                      selectedItem.status,
+                    )}`}
+                  >
                     <span>Status</span>
                     <strong>{selectedItem.status}</strong>
                   </div>
@@ -311,6 +513,39 @@ export default function ApprovalsPage() {
                     <p>{formatDate(selectedItem.updatedAt)}</p>
                   </div>
 
+                  {selectedItem.type === "WITHDRAWAL" && (
+                    <>
+                      <div className="approvals-detail-card full">
+                        <span>Withdrawal Amount</span>
+                        <p>
+                          {formatMoney(Number(selectedItem.raw?.amount || 0))}
+                        </p>
+                      </div>
+
+                      <div className="approvals-detail-card">
+                        <span>Method</span>
+                        <p>
+                          {String(selectedItem.raw?.method || "—").replace(
+                            "_",
+                            " ",
+                          )}
+                        </p>
+                      </div>
+
+                      <div className="approvals-detail-card">
+                        <span>Destination</span>
+                        <p>{getWithdrawalDestination(selectedItem.raw)}</p>
+                      </div>
+
+                      {selectedItem.raw?.payoutReference && (
+                        <div className="approvals-detail-card full">
+                          <span>Payout Reference</span>
+                          <p>{selectedItem.raw.payoutReference}</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+
                   <div className="approvals-detail-card full">
                     <span>Raw Detail Snapshot</span>
                     <pre className="approvals-json-block">
@@ -320,21 +555,95 @@ export default function ApprovalsPage() {
                 </div>
 
                 <div className="approvals-actions">
-                  <button
-                    className="approvals-btn approve"
-                    disabled={busyId === selectedItem.id}
-                    onClick={() => review("APPROVE")}
-                  >
-                    {busyId === selectedItem.id ? "Processing..." : "Approve"}
-                  </button>
+                  {selectedItem.type === "WITHDRAWAL" ? (
+                    <>
+                      {selectedWithdrawalStatus === "PENDING" && (
+                        <>
+                          <button
+                            className="approvals-btn approve"
+                            disabled={busyId === selectedItem.id}
+                            onClick={() => review("APPROVE")}
+                          >
+                            {busyId === selectedItem.id
+                              ? "Processing..."
+                              : "Approve"}
+                          </button>
 
-                  <button
-                    className="approvals-btn reject"
-                    disabled={busyId === selectedItem.id}
-                    onClick={() => review("REJECT")}
-                  >
-                    {busyId === selectedItem.id ? "Processing..." : "Reject"}
-                  </button>
+                          <button
+                            className="approvals-btn reject"
+                            disabled={busyId === selectedItem.id}
+                            onClick={() => review("REJECT")}
+                          >
+                            {busyId === selectedItem.id
+                              ? "Processing..."
+                              : "Reject"}
+                          </button>
+                        </>
+                      )}
+
+                      {selectedWithdrawalStatus === "APPROVED" && (
+                        <>
+                          <button
+                            className="approvals-btn approve"
+                            disabled={busyId === selectedItem.id}
+                            onClick={completePayout}
+                          >
+                            {busyId === selectedItem.id
+                              ? "Completing..."
+                              : "Complete Payout"}
+                          </button>
+
+                          <button
+                            className="approvals-btn reject"
+                            disabled={busyId === selectedItem.id}
+                            onClick={processPayout}
+                          >
+                            Mark Processing
+                          </button>
+                        </>
+                      )}
+
+                      {selectedWithdrawalStatus === "PROCESSING" && (
+                        <>
+                          <button
+                            className="approvals-btn approve"
+                            disabled={busyId === selectedItem.id}
+                            onClick={completePayout}
+                          >
+                            {busyId === selectedItem.id
+                              ? "Completing..."
+                              : "Complete Payout"}
+                          </button>
+
+                          <button
+                            className="approvals-btn reject"
+                            disabled={busyId === selectedItem.id}
+                            onClick={failPayout}
+                          >
+                            Mark Failed
+                          </button>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="approvals-btn approve"
+                        disabled={busyId === selectedItem.id}
+                        onClick={() => review("APPROVE")}
+                      >
+                        {busyId === selectedItem.id ? "Processing..." : "Approve"}
+                      </button>
+
+                      <button
+                        className="approvals-btn reject"
+                        disabled={busyId === selectedItem.id}
+                        onClick={() => review("REJECT")}
+                      >
+                        {busyId === selectedItem.id ? "Processing..." : "Reject"}
+                      </button>
+                    </>
+                  )}
                 </div>
               </>
             )}

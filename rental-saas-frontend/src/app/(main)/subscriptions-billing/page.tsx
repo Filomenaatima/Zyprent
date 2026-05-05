@@ -96,18 +96,14 @@ type InvestorOption = {
   role?: string;
 };
 
-function formatCurrency(value?: number | null) {
-  return `UGX ${Number(value || 0).toLocaleString()}`;
-}
+function formatCurrency(value?: number | string | null) {
+  const amount = Number(value ?? 0);
 
-function formatCompactCurrency(value?: number | null) {
-  const num = Number(value || 0);
+  if (!Number.isFinite(amount)) {
+    return "UGX 0";
+  }
 
-  if (num >= 1_000_000_000) return `UGX ${(num / 1_000_000_000).toFixed(1)}B`;
-  if (num >= 1_000_000) return `UGX ${(num / 1_000_000).toFixed(1)}M`;
-  if (num >= 1_000) return `UGX ${(num / 1_000).toFixed(0)}K`;
-
-  return `UGX ${num.toLocaleString()}`;
+  return `UGX ${Math.round(amount).toLocaleString("en-UG")}`;
 }
 
 function formatDate(value?: string | null) {
@@ -469,11 +465,11 @@ export default function SubscriptionsBillingPage() {
         </div>
         <div className="subscriptions-summary-card">
           <span>Billed Revenue</span>
-          <strong>{formatCompactCurrency(overview?.totalRevenueBilled ?? 0)}</strong>
+          <strong>{formatCurrency(overview?.totalRevenueBilled ?? 0)}</strong>
         </div>
         <div className="subscriptions-summary-card">
           <span>Paid Revenue</span>
-          <strong>{formatCompactCurrency(overview?.paidRevenue ?? 0)}</strong>
+          <strong>{formatCurrency(overview?.paidRevenue ?? 0)}</strong>
         </div>
       </section>
 
@@ -770,7 +766,7 @@ export default function SubscriptionsBillingPage() {
 
                   <div className="subscriptions-status-box">
                     <span>Current Price</span>
-                    <strong>{formatCompactCurrency(selectedSubscription.plan?.price || 0)}</strong>
+                    <strong>{formatCurrency(selectedSubscription.plan?.price || 0)}</strong>
                   </div>
                 </div>
 
@@ -913,7 +909,7 @@ export default function SubscriptionsBillingPage() {
                         {platformInvoices.map((item) => (
                           <div key={item.id} className="subscriptions-activity-card">
                             <div>
-                              <strong>{formatCompactCurrency(item.amountDue)}</strong>
+                              <strong>{formatCurrency(item.amountDue)}</strong>
                               <p>Due {formatDate(item.dueDate)}</p>
                             </div>
                             <span

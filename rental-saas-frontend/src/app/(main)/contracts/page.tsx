@@ -108,24 +108,14 @@ function toNumber(value: string | number | null | undefined) {
   return Number(value || 0);
 }
 
-function formatCurrency(value: string | number) {
-  return `UGX ${toNumber(value).toLocaleString()}`;
-}
+function formatCurrency(value: string | number | null | undefined) {
+  const amount = toNumber(value);
 
-function formatCompactCurrency(value: string | number) {
-  const num = toNumber(value);
-
-  if (Math.abs(num) >= 1_000_000_000) {
-    return `UGX ${(num / 1_000_000_000).toFixed(1)}B`;
-  }
-  if (Math.abs(num) >= 1_000_000) {
-    return `UGX ${(num / 1_000_000).toFixed(1)}M`;
-  }
-  if (Math.abs(num) >= 1_000) {
-    return `UGX ${(num / 1_000).toFixed(0)}K`;
+  if (!Number.isFinite(amount)) {
+    return "UGX 0";
   }
 
-  return `UGX ${num.toLocaleString()}`;
+  return `UGX ${Math.round(amount).toLocaleString("en-UG")}`;
 }
 
 function formatDate(value?: string | Date | null) {
@@ -152,7 +142,8 @@ function getLatestInvoice(item: ContractListItem | ContractDetailItem) {
 
   return [...item.invoices].sort(
     (a, b) =>
-      new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime(),
+      new Date(b.createdAt || 0).getTime() -
+      new Date(a.createdAt || 0).getTime(),
   )[0];
 }
 
@@ -346,12 +337,28 @@ export default function ContractsPage() {
 
   const activeSummary = summary.totalContracts ? summary : derivedSummary;
 
+  const nextBillingDue = useMemo(() => {
+    const activeContracts = contracts
+      .filter((item) => item.isActive && item.nextBillingDate)
+      .sort(
+        (a, b) =>
+          new Date(a.nextBillingDate).getTime() -
+          new Date(b.nextBillingDate).getTime(),
+      );
+
+    return activeContracts[0]?.nextBillingDate ?? null;
+  }, [contracts]);
+
   const filteredContracts = useMemo(() => {
     const q = query.trim().toLowerCase();
 
     return contracts.filter((item) => {
       const filterPass =
-        filter === "all" ? true : filter === "active" ? item.isActive : !item.isActive;
+        filter === "all"
+          ? true
+          : filter === "active"
+            ? item.isActive
+            : !item.isActive;
 
       if (!filterPass) return false;
       if (!q) return true;
@@ -401,7 +408,9 @@ export default function ContractsPage() {
         setDetailLoading(true);
         setDetailError("");
 
-        const res = await api.get<ContractDetailItem>(`/rent-contracts/${selectedId}`);
+        const res = await api.get<ContractDetailItem>(
+          `/rent-contracts/${selectedId}`,
+        );
 
         if (!mounted) return;
         setSelectedContract(res.data);
@@ -426,7 +435,9 @@ export default function ContractsPage() {
     try {
       setTerminatingId(id);
 
-      const res = await api.patch<ContractDetailItem>(`/rent-contracts/${id}/terminate`);
+      const res = await api.patch<ContractDetailItem>(
+        `/rent-contracts/${id}/terminate`,
+      );
 
       const terminated = res.data;
 
@@ -495,7 +506,7 @@ export default function ContractsPage() {
           </div>
           <div className="contracts-stat-card">
             <span>Monthly Rent</span>
-            <strong>{formatCompactCurrency(activeSummary.totalRentRoll)}</strong>
+            <strong>{formatCurrency(activeSummary.totalRentRoll)}</strong>
           </div>
         </div>
       </section>
@@ -511,14 +522,18 @@ export default function ContractsPage() {
           </button>
           <button
             type="button"
-            className={`contracts-filter-pill ${filter === "active" ? "active" : ""}`}
+            className={`contracts-filter-pill ${
+              filter === "active" ? "active" : ""
+            }`}
             onClick={() => setFilter("active")}
           >
             Active
           </button>
           <button
             type="button"
-            className={`contracts-filter-pill ${filter === "inactive" ? "active" : ""}`}
+            className={`contracts-filter-pill ${
+              filter === "inactive" ? "active" : ""
+            }`}
             onClick={() => setFilter("inactive")}
           >
             Closed
@@ -547,11 +562,13 @@ export default function ContractsPage() {
         <section className="contracts-summary-strip">
           <div className="contracts-summary-item">
             <span>Deposits Held</span>
-            <strong>{formatCompactCurrency(activeSummary.totalDepositsHeld || 0)}</strong>
+            <strong>{formatCurrency(activeSummary.totalDepositsHeld || 0)}</strong>
           </div>
           <div className="contracts-summary-item">
             <span>Invoice Exposure</span>
-            <strong>{formatCompactCurrency(activeSummary.totalInvoiceExposure || 0)}</strong>
+            <strong>
+              {formatCurrency(activeSummary.totalInvoiceExposure || 0)}
+            </strong>
           </div>
           <div className="contracts-summary-item">
             <span>Near Renewal</span>
@@ -564,7 +581,9 @@ export default function ContractsPage() {
         </section>
       )}
 
-      {error ? <div className="contracts-empty contracts-empty-large">{error}</div> : null}
+      {error ? (
+        <div className="contracts-empty contracts-empty-large">{error}</div>
+      ) : null}
 
       <section className="contracts-workspace">
         <aside className="contracts-registry-panel">
@@ -581,9 +600,7 @@ export default function ContractsPage() {
           </div>
 
           {loading ? (
-            <div className="contracts-empty">
-              Loading contracts...
-            </div>
+            <div className="contracts-empty">Loading contracts...</div>
           ) : filteredContracts.length === 0 ? (
             <div className="contracts-empty">
               No contracts found.
@@ -601,7 +618,9 @@ export default function ContractsPage() {
                   <button
                     key={item.id}
                     type="button"
-                    className={`contracts-registry-item ${selected ? "selected" : ""}`}
+                    className={`contracts-registry-item ${
+                      selected ? "selected" : ""
+                    }`}
                     onClick={() => setSelectedId(item.id)}
                   >
                     <div className="contracts-registry-top">
@@ -631,13 +650,53 @@ export default function ContractsPage() {
                       <span className={`contracts-standing ${standing.tone}`}>
                         {standing.label}
                       </span>
-                      <span>{latestInvoice ? latestInvoice.period : "No invoice"}</span>
+                      <span>
+                        {latestInvoice ? latestInvoice.period : "No invoice"}
+                      </span>
                     </div>
                   </button>
                 );
               })}
             </div>
           )}
+
+          <div className="contracts-left-summary">
+            <div className="contracts-panel-head compact">
+              <div>
+                <h2 className="contracts-panel-title">Lease Snapshot</h2>
+                <p className="contracts-panel-subtitle">
+                  Quick operating view for this contract register
+                </p>
+              </div>
+              <span className="contracts-chip">Live</span>
+            </div>
+
+            <div className="contracts-left-summary-grid">
+              <div className="contracts-doc-card">
+                <span>Active Contracts</span>
+                <strong>{activeSummary.activeContracts}</strong>
+                <small>Currently running leases</small>
+              </div>
+
+              <div className="contracts-doc-card">
+                <span>Monthly Rent</span>
+                <strong>{formatCurrency(activeSummary.totalRentRoll)}</strong>
+                <small>Expected monthly lease obligation</small>
+              </div>
+
+              <div className="contracts-doc-card">
+                <span>Overdue Contracts</span>
+                <strong>{activeSummary.contractsWithOverdueInvoices || 0}</strong>
+                <small>Contracts needing payment follow-up</small>
+              </div>
+
+              <div className="contracts-doc-card">
+                <span>Next Billing Due</span>
+                <strong>{formatDate(nextBillingDue)}</strong>
+                <small>Earliest upcoming billing date</small>
+              </div>
+            </div>
+          </div>
         </aside>
 
         <section className="contracts-detail-panel">
@@ -700,12 +759,16 @@ export default function ContractsPage() {
                     <div className="contracts-doc-card">
                       <span>Resident</span>
                       <strong>{getResidentName(selectedContract)}</strong>
-                      <small>{selectedContract.resident?.user?.email || "No email"}</small>
+                      <small>
+                        {selectedContract.resident?.user?.email || "No email"}
+                      </small>
                     </div>
 
                     <div className="contracts-doc-card">
                       <span>Phone</span>
-                      <strong>{selectedContract.resident?.user?.phone || "—"}</strong>
+                      <strong>
+                        {selectedContract.resident?.user?.phone || "—"}
+                      </strong>
                       <small>Primary contact</small>
                     </div>
 
@@ -715,7 +778,8 @@ export default function ContractsPage() {
                         {selectedContract.unit?.property?.title || "No property"}
                       </strong>
                       <small>
-                        {selectedContract.unit?.property?.location || "No location"}
+                        {selectedContract.unit?.property?.location ||
+                          "No location"}
                       </small>
                     </div>
 
@@ -738,10 +802,12 @@ export default function ContractsPage() {
                       <div className="contracts-doc-card">
                         <span>Property Owner</span>
                         <strong>
-                          {selectedContract.unit?.property?.owner?.name || "No owner"}
+                          {selectedContract.unit?.property?.owner?.name ||
+                            "No owner"}
                         </strong>
                         <small>
-                          {selectedContract.unit?.property?.owner?.email || "No email"}
+                          {selectedContract.unit?.property?.owner?.email ||
+                            "No email"}
                         </small>
                       </div>
 
@@ -774,17 +840,23 @@ export default function ContractsPage() {
 
                     <div className="contracts-doc-card">
                       <span>Deposit</span>
-                      <strong>{formatCurrency(selectedContract.depositAmount)}</strong>
+                      <strong>
+                        {formatCurrency(selectedContract.depositAmount)}
+                      </strong>
                     </div>
 
                     <div className="contracts-doc-card">
                       <span>Service Charge</span>
-                      <strong>{formatCurrency(selectedContract.serviceCharge)}</strong>
+                      <strong>
+                        {formatCurrency(selectedContract.serviceCharge)}
+                      </strong>
                     </div>
 
                     <div className="contracts-doc-card">
                       <span>Garbage Fee</span>
-                      <strong>{formatCurrency(selectedContract.garbageFee)}</strong>
+                      <strong>
+                        {formatCurrency(selectedContract.garbageFee)}
+                      </strong>
                     </div>
                   </div>
                 </section>
@@ -813,7 +885,9 @@ export default function ContractsPage() {
 
                     <div className="contracts-doc-card">
                       <span>Next Billing</span>
-                      <strong>{formatDate(selectedContract.nextBillingDate)}</strong>
+                      <strong>
+                        {formatDate(selectedContract.nextBillingDate)}
+                      </strong>
                     </div>
                   </div>
                 </section>
@@ -838,12 +912,16 @@ export default function ContractsPage() {
                       </div>
                       <div className="contracts-doc-card">
                         <span>Estimated End</span>
-                        <strong>{formatDate(selectedContract.estimatedEndDate)}</strong>
+                        <strong>
+                          {formatDate(selectedContract.estimatedEndDate)}
+                        </strong>
                       </div>
                       <div className="contracts-doc-card">
                         <span>Renewal Alert</span>
                         <strong>
-                          {selectedContract.isNearRenewal ? "Near renewal" : "Stable"}
+                          {selectedContract.isNearRenewal
+                            ? "Near renewal"
+                            : "Stable"}
                         </strong>
                       </div>
                     </div>
@@ -859,9 +937,9 @@ export default function ContractsPage() {
                   <div className="contracts-standing-panel">
                     <div className="contracts-standing-summary">
                       <span
-                        className={`contracts-standing-badge ${getPaymentStanding(
-                          selectedContract,
-                        ).tone}`}
+                        className={`contracts-standing-badge ${
+                          getPaymentStanding(selectedContract).tone
+                        }`}
                       >
                         {getPaymentStanding(selectedContract).label}
                       </span>
@@ -873,24 +951,31 @@ export default function ContractsPage() {
                         <>
                           <div className="contracts-invoice-line">
                             <span>Invoice Period</span>
-                            <strong>{getLatestInvoice(selectedContract)?.period}</strong>
+                            <strong>
+                              {getLatestInvoice(selectedContract)?.period}
+                            </strong>
                           </div>
                           <div className="contracts-invoice-line">
                             <span>Status</span>
-                            <strong>{getLatestInvoice(selectedContract)?.status}</strong>
+                            <strong>
+                              {getLatestInvoice(selectedContract)?.status}
+                            </strong>
                           </div>
                           <div className="contracts-invoice-line">
                             <span>Amount</span>
                             <strong>
                               {formatCurrency(
-                                getLatestInvoice(selectedContract)?.totalAmount || 0,
+                                getLatestInvoice(selectedContract)?.totalAmount ||
+                                  0,
                               )}
                             </strong>
                           </div>
                           <div className="contracts-invoice-line">
                             <span>Due Date</span>
                             <strong>
-                              {formatDate(getLatestInvoice(selectedContract)?.dueDate)}
+                              {formatDate(
+                                getLatestInvoice(selectedContract)?.dueDate,
+                              )}
                             </strong>
                           </div>
                         </>

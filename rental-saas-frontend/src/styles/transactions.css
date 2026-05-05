@@ -343,6 +343,14 @@ body {
   background: #2456db;
 }
 
+.transactions-donut-dot.service {
+  background: #0ea5e9;
+}
+
+.transactions-donut-dot.garbage {
+  background: #64748b;
+}
+
 .transactions-donut-dot.maintenance {
   background: #7c3aed;
 }
@@ -877,19 +885,27 @@ body {
 /* RESIDENT TAILORING */
 
 .transactions-shell-resident {
+  gap: 14px;
   background:
     radial-gradient(circle at top left, rgba(37, 99, 235, 0.045), transparent 22%),
     linear-gradient(180deg, #f5f8fc 0%, #edf4fb 100%);
 }
 
 .transactions-hero-resident {
+  padding: 18px 24px;
   background:
     radial-gradient(circle at top left, rgba(37, 99, 235, 0.07), transparent 30%),
     linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
 }
 
 .transactions-summary-card-resident {
+  min-height: 86px;
   background: linear-gradient(135deg, #08112b 0%, #12308f 55%, #2563eb 100%);
+}
+
+.transactions-overview-bar-resident {
+  padding: 12px 14px;
+  gap: 10px;
 }
 
 .transactions-overview-bar-resident .transactions-overview-item,
@@ -897,6 +913,103 @@ body {
 .transactions-insight-mini,
 .transactions-section-resident .transactions-toolbar {
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.transactions-shell-resident .transactions-insights {
+  grid-template-columns: minmax(0, 1.28fr) minmax(300px, 0.72fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.transactions-shell-resident .transactions-insights-main {
+  gap: 12px;
+}
+
+.transactions-shell-resident .transactions-insights-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-self: start;
+}
+
+.transactions-shell-resident .transactions-insights-card {
+  padding: 16px 18px;
+  border-radius: 22px;
+}
+
+.transactions-shell-resident .transactions-insights-card-donut {
+  gap: 12px;
+}
+
+.transactions-shell-resident .transactions-insights-card-trend {
+  gap: 12px;
+}
+
+.transactions-shell-resident .transactions-donut-wrap {
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+}
+
+.transactions-shell-resident .transactions-donut {
+  width: 158px;
+  height: 158px;
+}
+
+.transactions-shell-resident .transactions-donut::after {
+  width: 88px;
+  height: 88px;
+}
+
+.transactions-shell-resident .transactions-donut-center {
+  width: 82px;
+}
+
+.transactions-shell-resident .transactions-donut-center strong {
+  font-size: 14px;
+}
+
+.transactions-shell-resident .transactions-donut-legend {
+  gap: 9px;
+}
+
+.transactions-shell-resident .transactions-mini-bars {
+  height: 150px;
+  gap: 12px;
+}
+
+.transactions-shell-resident .transactions-mini-bar-stack {
+  height: 112px;
+}
+
+.transactions-shell-resident .transactions-insight-mini {
+  min-height: 0;
+  padding: 16px 18px;
+  border-radius: 22px;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.transactions-shell-resident .transactions-insight-mini strong {
+  margin-top: 0;
+  font-size: 22px;
+}
+
+.transactions-shell-resident .transactions-section-resident {
+  padding: 18px 20px;
+}
+
+.transactions-shell-resident .transactions-journal-card {
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.transactions-shell-resident .transactions-journal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.07);
+  border-color: #c7dcf7;
 }
 
 @media (max-width: 1200px) {
@@ -925,6 +1038,15 @@ body {
 
   .transactions-property-board {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .transactions-shell-resident .transactions-insights {
+    grid-template-columns: 1fr;
+  }
+
+  .transactions-shell-resident .transactions-insights-side {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 }
 
@@ -991,6 +1113,10 @@ body {
 
   .transactions-mini-bars {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .transactions-shell-resident .transactions-donut-wrap {
+    grid-template-columns: 1fr;
   }
 }
 

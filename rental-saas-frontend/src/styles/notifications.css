@@ -137,12 +137,14 @@ body {
   box-shadow: 0 16px 34px rgba(15, 37, 102, 0.22);
 }
 
+.notifications-stat-card p,
 .notifications-stat-label {
   margin: 0;
   font-size: 13px;
   color: #607795;
 }
 
+.notifications-stat-card h3,
 .notifications-stat-value {
   margin: 10px 0 0;
   font-size: 28px;
@@ -157,6 +159,8 @@ body {
   line-height: 1.15;
 }
 
+.notifications-stat-card.dark p,
+.notifications-stat-card.dark h3,
 .notifications-stat-card.dark .notifications-stat-label,
 .notifications-stat-card.dark .notifications-stat-value {
   color: #ffffff;
@@ -216,6 +220,69 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+.notifications-feed-panel > div:not(.notifications-empty) {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.notifications-feed-panel h4 {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 28px;
+  margin: 0 0 12px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #f1f6ff;
+  border: 1px solid #dbe7ff;
+  color: #2456db;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.notifications-feed-panel h4 + div {
+  border: 1px solid #dbe7f5;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  padding: 18px;
+  margin-bottom: 12px;
+}
+
+.notifications-feed-panel h4 + div p:first-child,
+.notifications-feed-panel h4 + div + div p:first-child {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.2;
+  color: #081a3a;
+  font-weight: 800;
+}
+
+.notifications-feed-panel h4 + div p:nth-child(2),
+.notifications-feed-panel h4 + div + div p:nth-child(2) {
+  margin: 8px 0 14px;
+  color: #526b8f;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.notifications-feed-panel button {
+  border: 1px solid #d9e6ff;
+  background: #eff5ff;
+  color: #2456db;
+  border-radius: 999px;
+  min-height: 36px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.notifications-feed-panel button:hover {
+  background: #e3edff;
 }
 
 .notifications-panel-head {

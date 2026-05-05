@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import axios from "@/lib/axios";
+import { api } from "@/services/api";
 import "@/styles/reports.css";
 
 type ReportType =
@@ -75,7 +75,7 @@ export default function ReportsPage() {
     async function loadProperties() {
       try {
         setLoadingProperties(true);
-        const res = await axios.get("/properties");
+        const res = await api.get("/properties");
         const rows = Array.isArray(res.data)
           ? res.data
           : Array.isArray(res.data?.items)
@@ -106,7 +106,7 @@ export default function ReportsPage() {
 
       if (reportType === "PROPERTY_INCOME") {
         if (!selectedPropertyId) return;
-        const res = await axios.get(
+        const res = await api.get(
           `/reports/property-income/${selectedPropertyId}`,
         );
         setPropertyIncome(res.data);
@@ -115,12 +115,12 @@ export default function ReportsPage() {
 
       if (reportType === "OCCUPANCY") {
         if (!selectedPropertyId) return;
-        const res = await axios.get(`/reports/occupancy/${selectedPropertyId}`);
+        const res = await api.get(`/reports/occupancy/${selectedPropertyId}`);
         setOccupancyReport(res.data);
         return;
       }
 
-      const res = await axios.get(`/reports/${reportType}`);
+      const res = await api.get(`/reports/${reportType}`);
       setGenericOutput(res.data);
     } catch (error) {
       console.error("Failed to run report", error);

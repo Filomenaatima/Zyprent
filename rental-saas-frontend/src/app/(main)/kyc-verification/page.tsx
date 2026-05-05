@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import axios from "@/lib/axios";
+import { api } from "@/services/api";
 import "@/styles/kyc-verification.css";
 
 type KycStatus = "PENDING" | "APPROVED" | "REJECTED" | string;
@@ -67,7 +67,7 @@ export default function KycVerificationPage() {
   async function loadKyc() {
     try {
       setLoading(true);
-      const res = await axios.get("/kyc/admin/all");
+      const res = await api.get("/kyc/admin/all");
       const rows: KycRecord[] = res.data ?? [];
 
       setRecords(rows);
@@ -139,7 +139,7 @@ export default function KycVerificationPage() {
   async function reviewKyc(kycId: string, status: "APPROVED" | "REJECTED") {
     try {
       setBusyId(kycId);
-      await axios.post(`/kyc/review/${kycId}`, { status });
+      await api.post(`/kyc/review/${kycId}`, { status });
       await loadKyc();
     } catch (error) {
       console.error("Failed to review KYC", error);

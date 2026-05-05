@@ -74,6 +74,7 @@ type AdminResidentsResponse = {
 
 function formatDate(value?: string | null) {
   if (!value) return "-";
+
   return new Date(value).toLocaleDateString("en-UG", {
     day: "numeric",
     month: "short",
@@ -96,6 +97,12 @@ function formatStatus(status: ResidentItem["status"]) {
   }
 }
 
+function getAssignmentLabel(resident: ResidentItem) {
+  if (resident.status === "MOVED_OUT") return "Moved out";
+  if (!resident.unitId || !resident.unit) return "Not assigned";
+  return `${resident.unit.property.title} • Unit ${resident.unit.number}`;
+}
+
 export default function ResidentsPage() {
   const { user } = useAuthStore();
   const role = user?.role as AppRole | undefined;
@@ -109,7 +116,8 @@ export default function ResidentsPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const [adminSummary, setAdminSummary] = useState<AdminResidentsResponse["summary"] | null>(null);
+  const [adminSummary, setAdminSummary] =
+    useState<AdminResidentsResponse["summary"] | null>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -146,7 +154,7 @@ export default function ResidentsPage() {
         setResidents([]);
         setAdminSummary(null);
         setError("This residents view is not available for your account.");
-      } catch (err: any) {
+      } catch (err) {
         console.error("Failed to load residents", err);
         if (!mounted) return;
         setError("Failed to load residents.");
@@ -206,6 +214,7 @@ export default function ResidentsPage() {
     } catch (err: any) {
       console.error("Failed to create resident", err);
       const apiMessage = err?.response?.data?.message;
+
       setError(
         Array.isArray(apiMessage)
           ? apiMessage.join(", ")
@@ -231,6 +240,7 @@ export default function ResidentsPage() {
     } catch (err: any) {
       console.error("Failed to move out resident", err);
       const apiMessage = err?.response?.data?.message;
+
       setError(
         Array.isArray(apiMessage)
           ? apiMessage.join(", ")
@@ -260,7 +270,9 @@ export default function ResidentsPage() {
     const movedOut = residents.filter((r) => r.status === "MOVED_OUT").length;
     const assigned = residents.filter((r) => !!r.unitId).length;
     const inactive = residents.filter((r) => r.status === "INACTIVE").length;
-    const transferred = residents.filter((r) => r.status === "TRANSFERRED").length;
+    const transferred = residents.filter(
+      (r) => r.status === "TRANSFERRED",
+    ).length;
 
     return {
       total,
@@ -280,11 +292,13 @@ export default function ResidentsPage() {
           <p className="residents-eyebrow">
             {isAdmin ? "Admin Residents" : "Manager Residents"}
           </p>
+
           <h1 className="residents-title">
             {isAdmin
               ? "Oversee residents, occupancy allocation, and movement across the platform"
-              : "Create residents, monitor occupancy assignments, and manage tenant movement"}
+              : "Create residents, monitor occupancy assignments, and manage resident movement"}
           </h1>
+
           <p className="residents-text">
             {isAdmin
               ? "Maintain a platform-wide view of resident records, unit linkage, and status changes across properties, while keeping visibility into assigned and unassigned occupancy."
@@ -308,14 +322,17 @@ export default function ResidentsPage() {
             <span>Total Residents</span>
             <strong>{stats.total}</strong>
           </div>
+
           <div className="residents-stat-card">
             <span>Active</span>
             <strong>{stats.active}</strong>
           </div>
+
           <div className="residents-stat-card">
             <span>Unassigned</span>
             <strong>{stats.unassigned}</strong>
           </div>
+
           <div className="residents-stat-card">
             <span>Moved Out</span>
             <strong>{stats.movedOut}</strong>
@@ -336,6 +353,7 @@ export default function ResidentsPage() {
                   : "Add a new resident profile under your management"}
               </p>
             </div>
+
             <span className="residents-chip">
               {isAdmin ? "Admin View" : "Manager Action"}
             </span>
@@ -358,7 +376,9 @@ export default function ResidentsPage() {
               <div className="residents-metric-card">
                 <span>Transferred / Inactive</span>
                 <strong>{stats.transferred + stats.inactive}</strong>
-                <small>Residents no longer in standard active occupancy flow</small>
+                <small>
+                  Residents no longer in the standard active occupancy flow
+                </small>
               </div>
             </div>
           ) : (
@@ -404,7 +424,10 @@ export default function ResidentsPage() {
                     type="password"
                     value={form.password}
                     onChange={(e) =>
-                      setForm((prev) => ({ ...prev, password: e.target.value }))
+                      setForm((prev) => ({
+                        ...prev,
+                        password: e.target.value,
+                      }))
                     }
                     placeholder="Set temporary password"
                   />
@@ -414,7 +437,10 @@ export default function ResidentsPage() {
               {message ? (
                 <div className="residents-message success">{message}</div>
               ) : null}
-              {error ? <div className="residents-message error">{error}</div> : null}
+
+              {error ? (
+                <div className="residents-message error">{error}</div>
+              ) : null}
 
               <div className="residents-actions">
                 <button
@@ -441,6 +467,7 @@ export default function ResidentsPage() {
                   : "High-level resident movement and assignment snapshot"}
               </p>
             </div>
+
             <span className="residents-chip">Live</span>
           </div>
 
@@ -476,6 +503,7 @@ export default function ResidentsPage() {
                 : "All residents created or managed within your properties"}
             </p>
           </div>
+
           <span className="residents-chip">
             {loading ? "Loading..." : `${residents.length} Residents`}
           </span>
@@ -484,6 +512,7 @@ export default function ResidentsPage() {
         {!isAdmin && message ? (
           <div className="residents-message success">{message}</div>
         ) : null}
+
         {!isAdmin && error ? (
           <div className="residents-message error">{error}</div>
         ) : null}
@@ -505,7 +534,7 @@ export default function ResidentsPage() {
             <div className="residents-table-head">
               <span>Resident</span>
               <span>Status</span>
-              <span>Property</span>
+              <span>Assignment</span>
               <span>Unit</span>
               <span>Created</span>
               <span>Action</span>
@@ -528,7 +557,7 @@ export default function ResidentsPage() {
                   </span>
 
                   <div>
-                    <strong>{resident.unit?.property?.title || "Unassigned"}</strong>
+                    <strong>{getAssignmentLabel(resident)}</strong>
                     <p>{resident.unit?.property?.location || "-"}</p>
                   </div>
 
@@ -544,14 +573,18 @@ export default function ResidentsPage() {
                           onClick={() => handleMoveOut(resident.id)}
                           disabled={movingId === resident.id}
                         >
-                          {movingId === resident.id ? "Processing..." : "Move Out"}
+                          {movingId === resident.id
+                            ? "Processing..."
+                            : "Move Out"}
                         </button>
                       ) : (
-                        <span className="residents-muted-text">Unassigned</span>
+                        <span className="residents-muted-text">
+                          Not assigned
+                        </span>
                       )
                     ) : (
                       <span className="residents-muted-text">
-                        {resident.unitId ? "Assigned" : "Unassigned"}
+                        {resident.unitId ? "Assigned" : "Not assigned"}
                       </span>
                     )}
                   </div>

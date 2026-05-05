@@ -14,6 +14,8 @@ type ProfitCenterResponse = {
     profitThisMonth: number;
     monthlyGrowth: number;
     withdrawableEstimate: number;
+    walletBalance: number;
+    totalWithdrawn: number;
   };
   intelligence: {
     bestProperty: {
@@ -89,18 +91,14 @@ type ProfitCenterResponse = {
   } | null;
 };
 
-function formatCurrency(value: number) {
-  return `UGX ${Number(value || 0).toLocaleString()}`;
-}
+function formatCurrency(value: number | string | null | undefined) {
+  const amount = Number(value ?? 0);
 
-function formatCompactCurrency(value: number) {
-  const num = Number(value || 0);
+  if (!Number.isFinite(amount)) {
+    return "UGX 0";
+  }
 
-  if (num >= 1_000_000_000) return `UGX ${(num / 1_000_000_000).toFixed(1)}B`;
-  if (num >= 1_000_000) return `UGX ${(num / 1_000_000).toFixed(1)}M`;
-  if (num >= 1_000) return `UGX ${(num / 1_000).toFixed(0)}K`;
-
-  return `UGX ${num.toLocaleString()}`;
+  return `UGX ${Math.round(amount).toLocaleString("en-UG")}`;
 }
 
 function formatPercent(value: number) {
@@ -273,14 +271,14 @@ export default function ProfitCenterPage() {
           <div className="profit-summary-card dark">
             <p className="profit-summary-label">Total Profit Earned</p>
             <h3 className="profit-summary-value">
-              {data ? formatCompactCurrency(data.hero.totalProfitEarned) : "—"}
+              {data ? formatCurrency(data.hero.totalProfitEarned) : "—"}
             </h3>
           </div>
 
           <div className="profit-summary-card">
             <p className="profit-summary-label">Net Return</p>
             <h3 className="profit-summary-value">
-              {data ? formatCompactCurrency(data.hero.netReturn) : "—"}
+              {data ? formatCurrency(data.hero.netReturn) : "—"}
             </h3>
           </div>
 
@@ -292,9 +290,9 @@ export default function ProfitCenterPage() {
           </div>
 
           <div className="profit-summary-card">
-            <p className="profit-summary-label">Withdrawable</p>
+            <p className="profit-summary-label">Withdrawable Profit</p>
             <h3 className="profit-summary-value">
-              {data ? formatCompactCurrency(data.hero.withdrawableEstimate) : "—"}
+              {data ? formatCurrency(data.hero.withdrawableEstimate) : "—"}
             </h3>
           </div>
         </div>
@@ -334,9 +332,7 @@ export default function ProfitCenterPage() {
       <section className="profit-overview-bar">
         <div className="profit-overview-item">
           <span>Current Value</span>
-          <strong>
-            {data ? formatCompactCurrency(data.hero.totalCurrentValue) : "—"}
-          </strong>
+          <strong>{data ? formatCurrency(data.hero.totalCurrentValue) : "—"}</strong>
         </div>
 
         <div className="profit-overview-item">
@@ -347,7 +343,7 @@ export default function ProfitCenterPage() {
         <div className="profit-overview-item">
           <span>Profit This Month</span>
           <strong className="positive">
-            {data ? formatCompactCurrency(data.hero.profitThisMonth) : "—"}
+            {data ? formatCurrency(data.hero.profitThisMonth) : "—"}
           </strong>
         </div>
 
@@ -362,34 +358,24 @@ export default function ProfitCenterPage() {
       <section className="profit-overview-bar secondary">
         <div className="profit-overview-item">
           <span>Gross Return</span>
-          <strong>
-            {data ? formatCompactCurrency(data.intelligence.grossReturn) : "—"}
-          </strong>
+          <strong>{data ? formatCurrency(data.intelligence.grossReturn) : "—"}</strong>
         </div>
 
         <div className="profit-overview-item">
           <span>Allocated Expenses</span>
           <strong>
-            {data
-              ? formatCompactCurrency(data.intelligence.totalAllocatedExpenses)
-              : "—"}
+            {data ? formatCurrency(data.intelligence.totalAllocatedExpenses) : "—"}
           </strong>
         </div>
 
         <div className="profit-overview-item">
-          <span>Unrealized Return</span>
-          <strong>
-            {data
-              ? formatCompactCurrency(data.intelligence.totalUnrealizedReturn)
-              : "—"}
-          </strong>
+          <span>Wallet Balance</span>
+          <strong>{data ? formatCurrency(data.hero.walletBalance) : "—"}</strong>
         </div>
 
         <div className="profit-overview-item">
-          <span>Net Return</span>
-          <strong className={getGrowthTone(data?.intelligence.netReturn ?? 0)}>
-            {data ? formatCompactCurrency(data.intelligence.netReturn) : "—"}
-          </strong>
+          <span>Total Withdrawn</span>
+          <strong>{data ? formatCurrency(data.hero.totalWithdrawn) : "—"}</strong>
         </div>
       </section>
 
@@ -451,7 +437,7 @@ export default function ProfitCenterPage() {
                         </div>
 
                         <strong>{row.month}</strong>
-                        <span>{formatCompactCurrency(row.netProfit)}</span>
+                        <span>{formatCurrency(row.netProfit)}</span>
                       </div>
                     ))}
                   </div>
@@ -501,7 +487,7 @@ export default function ProfitCenterPage() {
                 }}
               >
                 <div className="profit-donut-center">
-                  <strong>{formatCompactCurrency(totalExpenseBreakdown)}</strong>
+                  <strong>{formatCurrency(totalExpenseBreakdown)}</strong>
                   <span>Total Expenses</span>
                 </div>
               </div>
@@ -544,7 +530,7 @@ export default function ProfitCenterPage() {
               <p>{bestProperty ? formatPercent(bestProperty.roi) : "—"}</p>
               <small>
                 Net return{" "}
-                {bestProperty ? formatCompactCurrency(bestProperty.netReturn) : "—"}
+                {bestProperty ? formatCurrency(bestProperty.netReturn) : "—"}
               </small>
             </div>
 
@@ -554,9 +540,7 @@ export default function ProfitCenterPage() {
               <p>{weakestProperty ? formatPercent(weakestProperty.roi) : "—"}</p>
               <small>
                 Net return{" "}
-                {weakestProperty
-                  ? formatCompactCurrency(weakestProperty.netReturn)
-                  : "—"}
+                {weakestProperty ? formatCurrency(weakestProperty.netReturn) : "—"}
               </small>
             </div>
           </div>
@@ -624,8 +608,8 @@ export default function ProfitCenterPage() {
                         {item.roi >= 15
                           ? "Outperforming"
                           : item.roi >= 0
-                          ? "Stable"
-                          : "Under pressure"}
+                            ? "Stable"
+                            : "Under pressure"}
                       </span>
                     </div>
 
@@ -635,26 +619,26 @@ export default function ProfitCenterPage() {
 
                   <div className="profit-property-price-box">
                     <span>Net Return</span>
-                    <strong>{formatCompactCurrency(item.netReturn)}</strong>
+                    <strong>{formatCurrency(item.netReturn)}</strong>
                   </div>
                 </div>
 
                 <div className="profit-property-metrics">
                   <div className="profit-metric-card">
                     <span>Invested</span>
-                    <strong>{formatCompactCurrency(item.investedCapital)}</strong>
+                    <strong>{formatCurrency(item.investedCapital)}</strong>
                   </div>
                   <div className="profit-metric-card">
                     <span>Current Value</span>
-                    <strong>{formatCompactCurrency(item.currentValue)}</strong>
+                    <strong>{formatCurrency(item.currentValue)}</strong>
                   </div>
                   <div className="profit-metric-card">
                     <span>Profit Earned</span>
-                    <strong>{formatCompactCurrency(item.totalProfitEarned)}</strong>
+                    <strong>{formatCurrency(item.totalProfitEarned)}</strong>
                   </div>
                   <div className="profit-metric-card">
                     <span>Allocated Expenses</span>
-                    <strong>{formatCompactCurrency(item.allocatedExpenses)}</strong>
+                    <strong>{formatCurrency(item.allocatedExpenses)}</strong>
                   </div>
                   <div className="profit-metric-card">
                     <span>ROI</span>
@@ -681,11 +665,11 @@ export default function ProfitCenterPage() {
                   </div>
                   <div className="profit-mini-data">
                     <span>Current Share Price</span>
-                    <strong>{formatCompactCurrency(item.currentSharePrice)}</strong>
+                    <strong>{formatCurrency(item.currentSharePrice)}</strong>
                   </div>
                   <div className="profit-mini-data">
                     <span>Entry Share Price</span>
-                    <strong>{formatCompactCurrency(item.entrySharePrice)}</strong>
+                    <strong>{formatCurrency(item.entrySharePrice)}</strong>
                   </div>
                   <div className="profit-mini-data">
                     <span>Expense Impact</span>

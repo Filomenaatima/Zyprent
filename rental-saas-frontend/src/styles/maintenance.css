@@ -2176,3 +2176,707 @@ body {
     justify-content: center;
   }
 }
+
+/* ===== FINAL MAINTENANCE COMPLETION PATCH ===== */
+/* Preserves existing styling and supports the full preserved maintenance/page.tsx. */
+
+.maintenance-info-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.maintenance-info-card small {
+  display: block;
+  margin-top: 6px;
+  color: #7b94b3;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.maintenance-photo-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.maintenance-photo-card {
+  display: block;
+  min-height: 118px;
+  border: 1px solid #dbe7f5;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  padding: 14px;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.maintenance-photo-card:hover {
+  transform: translateY(-2px);
+  border-color: #b9d0f0;
+  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.08);
+}
+
+.maintenance-photo-card span {
+  display: block;
+  color: #64809f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.maintenance-photo-card strong {
+  display: block;
+  margin-top: 8px;
+  color: #081a3a;
+  font-size: 15px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.maintenance-photo-card small {
+  display: block;
+  margin-top: 8px;
+  color: #7b94b3;
+  font-size: 12px;
+}
+
+.maintenance-timeline-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.maintenance-timeline-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid #dbe7f5;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 14px 16px;
+}
+
+.maintenance-timeline-dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #2456db 0%, #60a5fa 100%);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.18);
+}
+
+.maintenance-timeline-row h4 {
+  margin: 0;
+  color: #081a3a;
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+.maintenance-timeline-row p {
+  margin: 6px 0 0;
+  color: #64809f;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.maintenance-timeline-row .maintenance-badge {
+  align-self: start;
+}
+
+.maintenance-quote-items-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.maintenance-quote-item-card {
+  border: 1px solid #dbe7f5;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.maintenance-quote-item-card span {
+  display: block;
+  color: #64809f;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.maintenance-quote-item-card strong {
+  display: block;
+  margin-top: 6px;
+  color: #081a3a;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.maintenance-quote-item-card small {
+  display: block;
+  margin-top: 5px;
+  color: #7b94b3;
+  font-size: 11px;
+}
+
+.maintenance-payout-card,
+.maintenance-review-card,
+.maintenance-expense-card {
+  margin-top: 12px;
+  border: 1px solid #dbe7f5;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.06), transparent 28%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  padding: 16px;
+}
+
+.maintenance-payout-card.completed,
+.maintenance-review-card.completed {
+  border-color: #ccefd8;
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+}
+
+.maintenance-payout-card.failed {
+  border-color: #fecdd3;
+  background: linear-gradient(180deg, #fff1f2 0%, #ffffff 100%);
+}
+
+.maintenance-payout-card.pending {
+  border-color: #fde7bf;
+  background: linear-gradient(180deg, #fffaf0 0%, #ffffff 100%);
+}
+
+.maintenance-payout-head,
+.maintenance-review-head,
+.maintenance-expense-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.maintenance-payout-head h4,
+.maintenance-review-head h4,
+.maintenance-expense-head h4 {
+  margin: 0;
+  color: #081a3a;
+  font-size: 17px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.maintenance-payout-head p,
+.maintenance-review-head p,
+.maintenance-expense-head p {
+  margin: 6px 0 0;
+  color: #64809f;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.maintenance-review-stars {
+  display: inline-flex;
+  gap: 3px;
+  color: #b45309;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.maintenance-review-comment {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid #dbe7f5;
+  background: #ffffff;
+  color: #425b7a;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.maintenance-warning-card {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 13px;
+  line-height: 1.65;
+  font-weight: 700;
+}
+
+.maintenance-success-card {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 13px;
+  line-height: 1.65;
+  font-weight: 700;
+}
+
+.maintenance-danger-card {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid #fecdd3;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 13px;
+  line-height: 1.65;
+  font-weight: 700;
+}
+
+.maintenance-metric-mini-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.maintenance-metric-mini {
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid #dbe7f5;
+  background: #ffffff;
+  min-width: 0;
+}
+
+.maintenance-metric-mini span {
+  display: block;
+  color: #64809f;
+  font-size: 11px;
+}
+
+.maintenance-metric-mini strong {
+  display: block;
+  margin-top: 6px;
+  color: #081a3a;
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+/* Supports anchor quote/photo cards without browser link styling. */
+a.maintenance-quote-card,
+a.maintenance-photo-card {
+  text-decoration: none;
+}
+
+/* Better spacing when multiple new detail sections appear together. */
+.maintenance-detail-section .maintenance-empty.mini + .maintenance-empty.mini,
+.maintenance-detail-section .maintenance-quote-list + .maintenance-quote-list,
+.maintenance-detail-section .maintenance-info-grid + .maintenance-quote-list,
+.maintenance-detail-section .maintenance-info-grid + .maintenance-timeline-list,
+.maintenance-detail-section .maintenance-info-grid + .maintenance-photo-grid {
+  margin-top: 12px;
+}
+
+/* Provider side polish */
+.maintenance-provider-card .maintenance-info-grid,
+.maintenance-provider-card .maintenance-action-grid,
+.maintenance-provider-card .maintenance-quote-list {
+  margin-top: 14px;
+}
+
+.maintenance-provider-card .maintenance-description-card {
+  margin-top: 14px;
+}
+
+.maintenance-provider-card .maintenance-inline-actions {
+  margin-top: 14px;
+}
+
+/* Admin analytics polish */
+.maintenance-property-card .maintenance-info-grid {
+  margin-top: 12px;
+}
+
+.maintenance-linked-card .maintenance-badge,
+.maintenance-property-card .maintenance-badge,
+.maintenance-provider-score-card .maintenance-badge {
+  flex-shrink: 0;
+}
+
+/* Resident page support for photos, reviews, and provider details if rendered later */
+.resident-maintenance-photo-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.resident-maintenance-photo-card {
+  text-decoration: none;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid #dbe7f5;
+  background: #ffffff;
+  color: inherit;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.resident-maintenance-photo-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(37, 99, 235, 0.08);
+}
+
+.resident-maintenance-photo-card span {
+  display: block;
+  color: #64809f;
+  font-size: 12px;
+}
+
+.resident-maintenance-photo-card strong {
+  display: block;
+  margin-top: 7px;
+  color: #081a3a;
+  font-size: 14px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+/* Final responsive protection for newly added blocks */
+@media (max-width: 1100px) {
+  .maintenance-info-grid.two,
+  .maintenance-photo-grid,
+  .maintenance-quote-items-grid,
+  .maintenance-metric-mini-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .maintenance-timeline-row,
+  .maintenance-payout-head,
+  .maintenance-review-head,
+  .maintenance-expense-head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .maintenance-info-grid.two,
+  .maintenance-photo-grid,
+  .maintenance-quote-items-grid,
+  .maintenance-metric-mini-grid,
+  .resident-maintenance-photo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .maintenance-photo-card,
+  .maintenance-payout-card,
+  .maintenance-review-card,
+  .maintenance-expense-card,
+  .maintenance-warning-card,
+  .maintenance-success-card,
+  .maintenance-danger-card {
+    border-radius: 18px;
+    padding: 14px;
+  }
+}
+/* =========================================================
+   FINAL RESIDENT MAINTENANCE PRODUCTION POLISH
+   Non-destructive: resident-scoped overrides only.
+   Manager / provider / admin / investor maintenance styles remain preserved above.
+   ========================================================= */
+
+.maintenance-shell-resident {
+  gap: 14px;
+}
+
+.resident-maintenance-hero {
+  padding: 24px 28px;
+  min-height: 360px;
+  align-items: center;
+}
+
+.resident-maintenance-title {
+  max-width: 680px;
+  font-size: 34px;
+  line-height: 1.08;
+}
+
+.resident-maintenance-text {
+  max-width: 680px;
+  font-size: 14px;
+  line-height: 1.62;
+}
+
+.resident-maintenance-glass-card {
+  min-height: 92px;
+  padding: 16px 18px;
+}
+
+.resident-maintenance-glass-card.main {
+  min-height: 112px;
+}
+
+.resident-maintenance-glass-card strong {
+  font-size: 28px;
+  line-height: 1.05;
+}
+
+.resident-maintenance-overview {
+  gap: 12px;
+  padding: 14px;
+}
+
+.resident-maintenance-overview-card {
+  padding: 16px 18px;
+}
+
+.resident-maintenance-overview-card strong {
+  font-size: 22px;
+  line-height: 1.12;
+}
+
+.resident-maintenance-overview-card small {
+  line-height: 1.5;
+}
+
+.resident-maintenance-toolbar {
+  padding: 13px 16px;
+}
+
+.resident-maintenance-filter-row {
+  gap: 8px;
+}
+
+.resident-maintenance-filter-pill {
+  min-height: 38px;
+  padding: 8px 14px;
+  font-size: 12px;
+}
+
+.resident-maintenance-search-input {
+  min-height: 42px;
+  font-size: 13px;
+}
+
+.resident-maintenance-board {
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.resident-maintenance-list-panel,
+.resident-maintenance-focus-panel {
+  padding: 20px;
+}
+
+.resident-maintenance-request-list {
+  gap: 10px;
+}
+
+.resident-maintenance-request-card {
+  padding: 15px 16px;
+}
+
+.resident-maintenance-request-badges {
+  gap: 6px;
+}
+
+.resident-maintenance-request-date {
+  font-size: 11px;
+}
+
+.resident-maintenance-request-card h3 {
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.resident-maintenance-request-card p {
+  font-size: 12px;
+}
+
+.resident-maintenance-request-bottom span,
+.resident-maintenance-request-bottom strong {
+  font-size: 12px;
+}
+
+.resident-maintenance-focus-panel {
+  gap: 14px;
+}
+
+.resident-maintenance-focus-hero {
+  padding: 18px;
+}
+
+.resident-maintenance-focus-head h2 {
+  font-size: 26px;
+  line-height: 1.08;
+}
+
+.resident-maintenance-focus-head p {
+  font-size: 13px;
+}
+
+.resident-maintenance-summary-grid {
+  margin-top: 16px;
+  gap: 10px;
+}
+
+.resident-maintenance-summary-card {
+  padding: 13px 14px;
+}
+
+.resident-maintenance-summary-card strong {
+  font-size: 14px;
+}
+
+.resident-maintenance-progress-strip.compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.resident-progress-step {
+  position: relative;
+  min-height: 58px;
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.resident-progress-step.done {
+  background: linear-gradient(180deg, #eef5ff 0%, #f8fbff 100%);
+  border-color: #bdd6ff;
+}
+
+.resident-progress-step-number {
+  width: 32px;
+  height: 32px;
+  font-size: 11px;
+}
+
+.resident-progress-step-copy strong {
+  font-size: 13px;
+}
+
+.resident-progress-step-copy span {
+  font-size: 11px;
+}
+
+.resident-maintenance-clean-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.9fr);
+  gap: 14px;
+}
+
+.resident-maintenance-detail-mini,
+.resident-maintenance-payment-panel {
+  padding: 18px;
+  border-radius: 22px;
+}
+
+.resident-maintenance-mini-head h3 {
+  font-size: 21px;
+}
+
+.resident-maintenance-mini-head p {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.resident-maintenance-description-card {
+  padding: 15px 17px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.resident-maintenance-info-row,
+.resident-maintenance-charge-row {
+  padding: 11px 0;
+}
+
+.resident-maintenance-info-row span,
+.resident-maintenance-charge-row span {
+  font-size: 12px;
+}
+
+.resident-maintenance-info-row strong,
+.resident-maintenance-charge-row strong {
+  font-size: 13px;
+}
+
+.resident-maintenance-payment-amount {
+  padding: 15px 18px;
+}
+
+.resident-maintenance-payment-amount strong {
+  font-size: 27px;
+  line-height: 1.08;
+}
+
+.resident-maintenance-channel-card {
+  padding: 13px 15px;
+}
+
+.resident-maintenance-channel-card span {
+  font-size: 11px;
+}
+
+.resident-maintenance-empty,
+.resident-maintenance-detail-empty {
+  padding: 28px 16px;
+  font-size: 13px;
+}
+
+.resident-maintenance-primary-btn,
+.resident-maintenance-secondary-btn {
+  min-height: 38px;
+  font-size: 12px;
+}
+
+.resident-maintenance-modal-head h3 {
+  font-size: 22px;
+}
+
+.resident-maintenance-form input,
+.resident-maintenance-form textarea,
+.resident-maintenance-form select,
+.resident-payment-channel-panel input {
+  font-size: 13px;
+}
+
+@media (max-width: 1240px) {
+  .resident-maintenance-board,
+  .resident-maintenance-clean-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resident-maintenance-list-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 860px) {
+  .resident-maintenance-hero {
+    min-height: auto;
+    padding: 22px;
+  }
+
+  .resident-maintenance-title {
+    font-size: 28px;
+  }
+
+  .resident-maintenance-focus-head h2 {
+    font-size: 22px;
+  }
+
+  .resident-maintenance-progress-strip.compact,
+  .resident-maintenance-summary-grid.cleaner {
+    grid-template-columns: 1fr;
+  }
+}

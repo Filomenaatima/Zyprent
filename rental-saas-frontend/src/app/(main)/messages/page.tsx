@@ -63,6 +63,8 @@ type ContactItem = {
 
 function formatRole(role?: string) {
   if (!role) return "User";
+  if (role === "SERVICE_PROVIDER") return "Provider";
+
   return role
     .split("_")
     .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
@@ -117,9 +119,128 @@ function getInitials(name?: string | null, email?: string | null) {
     .join("");
 }
 
+function getOtherParticipant(
+  conversation: ConversationItem,
+  currentUserId: string,
+) {
+  return conversation.participants.find(
+    (participant) => participant.userId !== currentUserId,
+  );
+}
+
+function getLatestMessage(conversation: ConversationItem) {
+  return conversation.messages?.[0] ?? null;
+}
+
+function uniqueConversations(items: ConversationItem[]) {
+  const map = new Map<string, ConversationItem>();
+
+  for (const item of items) {
+    if (item?.id) map.set(item.id, item);
+  }
+
+  return Array.from(map.values()).sort((a, b) => {
+    const aTime = new Date(a.updatedAt || a.createdAt).getTime();
+    const bTime = new Date(b.updatedAt || b.createdAt).getTime();
+    return bTime - aTime;
+  });
+}
+
+function uniqueMessages(items: FullMessage[]) {
+  const map = new Map<string, FullMessage>();
+
+  for (const item of items) {
+    if (item?.id) map.set(item.id, item);
+  }
+
+  return Array.from(map.values()).sort((a, b) => {
+    const aTime = new Date(a.createdAt).getTime();
+    const bTime = new Date(b.createdAt).getTime();
+
+    if (aTime === bTime) return a.id.localeCompare(b.id);
+    return aTime - bTime;
+  });
+}
+
+function getHeroContent(role?: UserRole) {
+  switch (role) {
+    case "ADMIN":
+      return {
+        eyebrow: "Admin Messages",
+        title: "Platform communication in one secure inbox",
+        text:
+          "Keep track of conversations with managers, investors, residents, and providers. Use this space for operations follow-up, approvals, support, and platform records.",
+        tags: [
+          "Platform oversight",
+          "Role-based access",
+          "Operations records",
+          "Secure communication",
+        ],
+      };
+
+    case "MANAGER":
+      return {
+        eyebrow: "Manager Messages",
+        title: "Manage conversations across your property network",
+        text:
+          "Communicate with investors, residents, providers, and admin from one secure workspace. Keep property updates, maintenance follow-ups, and finance conversations organized.",
+        tags: [
+          "Resident support",
+          "Investor updates",
+          "Provider coordination",
+          "Stored records",
+        ],
+      };
+
+    case "RESIDENT":
+      return {
+        eyebrow: "Resident Messages",
+        title: "Stay connected with your property manager",
+        text:
+          "Use this space for rent questions, maintenance updates, receipts, contract follow-ups, and property communication with your verified manager.",
+        tags: [
+          "Manager support",
+          "Maintenance updates",
+          "Rent questions",
+          "Secure history",
+        ],
+      };
+
+    case "SERVICE_PROVIDER":
+      return {
+        eyebrow: "Provider Messages",
+        title: "Coordinate jobs directly with property managers",
+        text:
+          "Discuss assigned work, inspections, quotes, scheduling, and completion updates with verified managers connected to your service jobs.",
+        tags: [
+          "Job coordination",
+          "Manager communication",
+          "Quote follow-up",
+          "Stored records",
+        ],
+      };
+
+    case "INVESTOR":
+    default:
+      return {
+        eyebrow: "Investor Messages",
+        title: "Secure conversations with your relationship team",
+        text:
+          "Keep a permanent record of your investment communication with verified Zyprent-connected contacts. Use this space for portfolio questions, distribution follow-up, property updates, and manager support.",
+        tags: [
+          "Stored conversation history",
+          "Role-based access",
+          "Manager communication",
+          "Audit-friendly records",
+        ],
+      };
+  }
+}
+
 export default function MessagesPage() {
   const { user } = useAuthStore();
   const currentUserId = user?.id ?? "";
+  const currentUserRole = user?.role as UserRole | undefined;
 
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [contacts, setContacts] = useState<ContactItem[]>([]);
@@ -135,6 +256,11 @@ export default function MessagesPage() {
   const [showNewConversation, setShowNewConversation] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const heroContent = useMemo(
+    () => getHeroContent(currentUserRole),
+    [currentUserRole],
+  );
 
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow;
@@ -153,7 +279,8 @@ export default function MessagesPage() {
     try {
       setLoadingList(true);
       const res = await api.get<ConversationItem[]>("/messages/me");
-      const items = res.data ?? [];
+      const items = uniqueConversations(res.data ?? []);
+
       setConversations(items);
 
       if (!activeConversationId && items.length > 0) {
@@ -175,7 +302,19 @@ export default function MessagesPage() {
     try {
       setLoadingContacts(true);
       const res = await api.get<ContactItem[]>("/messages/contacts");
-      setContacts(res.data ?? []);
+
+      const map = new Map<string, ContactItem>();
+      for (const contact of res.data ?? []) {
+        if (contact?.id && contact.id !== currentUserId) {
+          map.set(contact.id, contact);
+        }
+      }
+
+      setContacts(
+        Array.from(map.values()).sort((a, b) =>
+          (a.name || a.email || "").localeCompare(b.name || b.email || ""),
+        ),
+      );
     } catch (error) {
       console.error("Failed to load contacts", error);
     } finally {
@@ -191,7 +330,8 @@ export default function MessagesPage() {
       const res = await api.get<FullMessage[]>(
         `/messages/conversation/${conversationId}`,
       );
-      const rows = res.data ?? [];
+
+      const rows = uniqueMessages(res.data ?? []);
       setMessages(rows);
 
       for (const row of rows) {
@@ -241,16 +381,14 @@ export default function MessagesPage() {
     if (!term) return conversations;
 
     return conversations.filter((conversation) => {
-      const otherParticipant = conversation.participants.find(
-        (participant) => participant.userId !== currentUserId,
-      );
+      const otherParticipant = getOtherParticipant(conversation, currentUserId);
 
       const participantText = `${otherParticipant?.user.name ?? ""} ${
         otherParticipant?.user.email ?? ""
       } ${otherParticipant?.user.role ?? ""}`.toLowerCase();
 
       const lastMessageText =
-        conversation.messages?.[0]?.content?.toLowerCase?.() ?? "";
+        getLatestMessage(conversation)?.content?.toLowerCase?.() ?? "";
 
       return participantText.includes(term) || lastMessageText.includes(term);
     });
@@ -261,27 +399,33 @@ export default function MessagesPage() {
     if (!term) return contacts;
 
     return contacts.filter((contact) => {
-      const text = `${contact.name ?? ""} ${contact.email ?? ""} ${contact.role ?? ""}`.toLowerCase();
+      const text = `${contact.name ?? ""} ${contact.email ?? ""} ${
+        contact.role ?? ""
+      }`.toLowerCase();
+
       return text.includes(term);
     });
   }, [contacts, contactSearch]);
 
   const activeConversation = useMemo(() => {
-    return conversations.find((conversation) => conversation.id === activeConversationId);
+    return conversations.find(
+      (conversation) => conversation.id === activeConversationId,
+    );
   }, [conversations, activeConversationId]);
 
   const activeParticipant = useMemo(() => {
-    return activeConversation?.participants.find(
-      (participant) => participant.userId !== currentUserId,
-    );
+    if (!activeConversation) return undefined;
+    return getOtherParticipant(activeConversation, currentUserId);
   }, [activeConversation, currentUserId]);
 
   const unreadCount = useMemo(() => {
     return conversations.reduce((count, conversation) => {
-      const latest = conversation.messages?.[0];
+      const latest = getLatestMessage(conversation);
+
       if (latest && latest.senderId !== currentUserId && !latest.readAt) {
         return count + 1;
       }
+
       return count;
     }, 0);
   }, [conversations, currentUserId]);
@@ -289,13 +433,22 @@ export default function MessagesPage() {
   const latestActivity = useMemo(() => {
     const timestamps = conversations
       .flatMap((conversation) =>
-        conversation.messages.map((message) => new Date(message.createdAt).getTime()),
+        conversation.messages.map((message) =>
+          new Date(message.createdAt).getTime(),
+        ),
       )
-      .filter(Boolean);
+      .filter((value) => Number.isFinite(value));
 
     if (!timestamps.length) return null;
     return new Date(Math.max(...timestamps));
   }, [conversations]);
+
+  const primaryContact = useMemo(() => {
+    const mostRecentConversation = conversations[0];
+    if (!mostRecentConversation) return null;
+
+    return getOtherParticipant(mostRecentConversation, currentUserId)?.user ?? null;
+  }, [conversations, currentUserId]);
 
   const availableContactsWithoutConversation = useMemo(() => {
     const existingParticipantIds = new Set(
@@ -306,7 +459,9 @@ export default function MessagesPage() {
       ),
     );
 
-    return filteredContacts.filter((contact) => !existingParticipantIds.has(contact.id));
+    return filteredContacts.filter(
+      (contact) => !existingParticipantIds.has(contact.id),
+    );
   }, [filteredContacts, conversations, currentUserId]);
 
   async function handleSendMessage() {
@@ -322,7 +477,6 @@ export default function MessagesPage() {
 
       setDraft("");
       await loadConversationMessages(activeConversationId);
-      await loadConversations();
     } catch (error) {
       console.error("Failed to send message", error);
     } finally {
@@ -337,6 +491,7 @@ export default function MessagesPage() {
       });
 
       const conversationId = res.data?.id;
+
       await loadConversations();
       await loadContacts();
 
@@ -362,21 +517,18 @@ export default function MessagesPage() {
     <div className="messages-shell">
       <section className="messages-hero">
         <div className="messages-hero-copy">
-          <p className="messages-eyebrow">Investor Messages</p>
-          <h1 className="messages-title">
-            Secure conversations with your relationship team
-          </h1>
-          <p className="messages-text">
-            Keep a permanent record of your investment communication with verified
-            Zyprent-connected contacts. Use this space for portfolio questions,
-            distribution follow-up, property updates, and manager support.
-          </p>
+          <p className="messages-eyebrow">{heroContent.eyebrow}</p>
+
+          <h1 className="messages-title">{heroContent.title}</h1>
+
+          <p className="messages-text">{heroContent.text}</p>
 
           <div className="messages-hero-tags">
-            <span className="messages-hero-tag">Stored conversation history</span>
-            <span className="messages-hero-tag">Role-based access</span>
-            <span className="messages-hero-tag">Manager communication</span>
-            <span className="messages-hero-tag">Audit-friendly records</span>
+            {heroContent.tags.map((tag) => (
+              <span key={tag} className="messages-hero-tag">
+                {tag}
+              </span>
+            ))}
           </div>
         </div>
 
@@ -393,7 +545,7 @@ export default function MessagesPage() {
 
           <div className="messages-stat-card">
             <span>Primary Contact</span>
-            <strong>{activeParticipant?.user.name ?? "—"}</strong>
+            <strong>{primaryContact?.name ?? primaryContact?.email ?? "—"}</strong>
           </div>
 
           <div className="messages-stat-card">
@@ -448,7 +600,8 @@ export default function MessagesPage() {
                     No available contacts.
                     <br />
                     <span>
-                      Allowed contacts will appear here when a verified relationship exists.
+                      Allowed contacts will appear here when a verified relationship
+                      exists.
                     </span>
                   </div>
                 ) : (
@@ -482,16 +635,18 @@ export default function MessagesPage() {
                 No conversations yet.
                 <br />
                 <span>
-                  Start a secure conversation with an allowed contact using the New button.
+                  Start a secure conversation with a verified contact using the New
+                  button.
                 </span>
               </div>
             ) : (
               filteredConversations.map((conversation) => {
-                const otherParticipant = conversation.participants.find(
-                  (participant) => participant.userId !== currentUserId,
+                const otherParticipant = getOtherParticipant(
+                  conversation,
+                  currentUserId,
                 );
 
-                const lastMessage = conversation.messages?.[0];
+                const lastMessage = getLatestMessage(conversation);
                 const isActive = conversation.id === activeConversationId;
                 const isUnread =
                   !!lastMessage &&
@@ -502,7 +657,9 @@ export default function MessagesPage() {
                   <button
                     key={conversation.id}
                     type="button"
-                    className={`messages-conversation-card ${isActive ? "active" : ""}`}
+                    className={`messages-conversation-card ${
+                      isActive ? "active" : ""
+                    }`}
                     onClick={() => setActiveConversationId(conversation.id)}
                   >
                     <div className="messages-avatar">
@@ -550,8 +707,8 @@ export default function MessagesPage() {
             <div className="messages-thread-empty">
               <h3>No active conversation</h3>
               <p>
-                Open a secure thread from the left panel. Only verified Zyprent-connected
-                contacts can be messaged here.
+                Select a thread from the left panel or start a new conversation
+                with a verified Zyprent-connected contact.
               </p>
             </div>
           ) : (
@@ -639,6 +796,7 @@ export default function MessagesPage() {
                     );
                   })
                 )}
+
                 <div ref={messagesEndRef} />
               </div>
 
