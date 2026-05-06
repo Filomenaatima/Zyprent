@@ -3,31 +3,32 @@
 import { useState } from "react";
 import "@/styles/landing.css";
 
-const DEMO_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSec8xBGT1T70S0YZJCp-7h6lAt1XrcfKYHmTdbtzl5WgrujGw/viewform";
+const DEMO_FORM_LINK =
+  "https://docs.google.com/forms/d/e/1FAIpQLSec8xBGT1T70S0YZJCp-7h6lAt1XrcfKYHmTdbtzl5WgrujGw/viewform";
 
 const roles = {
   Managers: {
     title: "Property Managers",
     label: "Portfolio control",
-    text: "Manage properties, units, contracts, invoices, rent, expenses, residents, providers, and maintenance from one workspace.",
+    text: "Control rent, units, residents, contracts, expenses, maintenance and reporting from one connected workspace.",
     items: ["Rent collection", "Unit occupancy", "Expense tracking"],
   },
   Investors: {
     title: "Investors",
     label: "Returns visibility",
-    text: "Track property performance, profit movement, expenses, payouts, wallet activity, and returns clearly.",
+    text: "See property performance, expenses, returns, payouts, wallet activity and investment movement clearly.",
     items: ["Profit movement", "Expense share", "Portfolio returns"],
   },
   Residents: {
     title: "Residents",
     label: "Resident self-service",
-    text: "Pay rent, view receipts, manage wallet activity, and submit maintenance requests from a clean portal.",
+    text: "Pay rent, view receipts, track wallet activity, raise maintenance requests and stay updated without confusion.",
     items: ["Rent receipts", "Wallet history", "Maintenance requests"],
   },
   Providers: {
     title: "Service Providers",
     label: "Job workflow",
-    text: "Receive jobs, submit quotes, update work progress, manage completion, and track payouts.",
+    text: "Receive jobs, submit quotes, update work progress, manage completion and track payouts with clarity.",
     items: ["Assigned jobs", "Quote approvals", "Payout tracking"],
   },
 };
@@ -36,17 +37,17 @@ const faqs = [
   {
     question: "What is Zyprent?",
     answer:
-      "Zyprent is a real estate operating platform for managing property operations, finance, maintenance, residents, providers, and investor visibility.",
+      "Zyprent is a real estate operating system that connects property operations, finance, maintenance, residents, providers and investor visibility in one secure workspace.",
   },
   {
     question: "Who is Zyprent built for?",
     answer:
-      "Zyprent is built for property managers, investors, residents, and service providers who need one connected real estate workspace.",
+      "Zyprent is built for property managers, investors, residents and service providers who need one connected real estate workspace.",
   },
   {
     question: "Can I request a demo?",
     answer:
-      "Yes. You can request a demo and review how Zyprent fits your workflow before rollout.",
+      "Yes. You can request a demo and review how Zyprent fits your property workflow before rollout.",
   },
 ];
 
@@ -64,7 +65,8 @@ export default function HomePage() {
 
         <nav className="landing-nav-links" aria-label="Landing navigation">
           <a href="#solution">Solution</a>
-          <a href="#roles">Who it&apos;s for</a>
+          <a href="#platform">Platform</a>
+          <a href="#why">Why Zyprent</a>
           <a href="#faq">FAQ</a>
         </nav>
 
@@ -87,11 +89,11 @@ export default function HomePage() {
         <div className="hero-copy">
           <p className="hero-eyebrow">Modern real estate operating system</p>
 
-          <h1>Real estate operations made simple.</h1>
+          <h1>Property operations, finally connected.</h1>
 
           <p className="hero-subtext">
-            A premium workspace for property operations, finance, maintenance,
-            residents, providers, and investor visibility.
+            Payments, maintenance, residents, providers, reporting and
+            investments connected in one secure workspace.
           </p>
 
           <div className="hero-actions">
@@ -104,7 +106,7 @@ export default function HomePage() {
               Request Demo
             </a>
             <a href="/login" className="landing-btn secondary large">
-              Open Platform
+              Explore Platform
             </a>
           </div>
         </div>
@@ -122,7 +124,9 @@ export default function HomePage() {
                 <span />
               </div>
 
-              <div className="dashboard-search">Search properties, payments, requests</div>
+              <div className="dashboard-search">
+                Search properties, payments, requests
+              </div>
 
               <div className="dashboard-user-dot" />
             </div>
@@ -240,6 +244,67 @@ export default function HomePage() {
         </p>
       </section>
 
+      <section id="platform" className="section inside-section">
+        <div className="section-heading center">
+          <span>Platform</span>
+          <h2>Built to replace scattered property operations.</h2>
+        </div>
+
+        <div className="inside-grid">
+          <article className="inside-card large finance-card">
+            <div className="finance-visual" aria-hidden="true">
+              <div className="finance-orbit orbit-a" />
+              <div className="finance-orbit orbit-b" />
+
+              <div className="finance-tower tower-one" />
+              <div className="finance-tower tower-two" />
+              <div className="finance-tower tower-three" />
+              <div className="finance-tower tower-four" />
+
+              <div className="finance-coin coin-one">UGX</div>
+              <div className="finance-coin coin-two">%</div>
+
+              <div className="finance-mini-card finance-mini-card-one">
+                <span>Collected</span>
+                <strong>UGX 2.8M</strong>
+              </div>
+
+              <div className="finance-mini-card finance-mini-card-two">
+                <span>Returns</span>
+                <strong>18.4%</strong>
+              </div>
+            </div>
+
+            <div className="inside-card-content">
+              <span>Financial clarity</span>
+              <h3>Follow every shilling clearly.</h3>
+              <p>
+                Rent, expenses, payouts, wallet movement and investor deductions
+                stay tied to the right property, unit and user.
+              </p>
+            </div>
+          </article>
+
+          <article className="inside-card">
+            <span>Maintenance</span>
+            <h3>Requests move with structure.</h3>
+            <p>
+              From request to quote, approval, assignment, progress and
+              completion.
+            </p>
+          </article>
+
+          <article className="inside-card">
+            <span>Visibility</span>
+            <h3>No guessing.</h3>
+            <p>
+              Every user sees the information that matters to them, without
+              chasing updates.
+            </p>
+          </article>
+        </div>
+      </section>
+
       <section id="roles" className="section roles-section">
         <div className="section-heading">
           <span>Built for</span>
@@ -285,57 +350,39 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="section inside-section">
+      <section id="why" className="section inside-section">
         <div className="section-heading center">
-          <span>Inside Zyprent</span>
-          <h2>A command center for your property business.</h2>
+          <span>Why Zyprent</span>
+          <h2>Property operations should not feel chaotic.</h2>
         </div>
 
         <div className="inside-grid">
-          <article className="inside-card large finance-card">
-            <div className="finance-visual" aria-hidden="true">
-              <div className="finance-orbit orbit-a" />
-              <div className="finance-orbit orbit-b" />
-
-              <div className="finance-tower tower-one" />
-              <div className="finance-tower tower-two" />
-              <div className="finance-tower tower-three" />
-              <div className="finance-tower tower-four" />
-
-              <div className="finance-coin coin-one">UGX</div>
-              <div className="finance-coin coin-two">%</div>
-
-              <div className="finance-mini-card finance-mini-card-one">
-                <span>Collected</span>
-                <strong>UGX 2.8M</strong>
-              </div>
-
-              <div className="finance-mini-card finance-mini-card-two">
-                <span>Returns</span>
-                <strong>18.4%</strong>
-              </div>
-            </div>
-
-            <div className="inside-card-content">
-              <span>Finance</span>
-              <h3>Follow every shilling clearly.</h3>
-              <p>
-                Rent, expenses, payouts, wallet movement, and investor deductions
-                stay tied to the right property, unit, and user.
-              </p>
-            </div>
+          <article className="inside-card">
+            <span>Problem</span>
+            <h3>Too much is still scattered.</h3>
+            <p>
+              Payments sit in one place, maintenance conversations happen
+              elsewhere, reports are delayed and investors wait for updates.
+            </p>
           </article>
 
           <article className="inside-card">
-            <span>Maintenance</span>
-            <h3>Requests move with structure.</h3>
-            <p>From request to quote, approval, assignment, progress, and completion.</p>
+            <span>Control</span>
+            <h3>Everything becomes traceable.</h3>
+            <p>
+              Workflows, records, payments, requests and activity are connected
+              to the right property and user.
+            </p>
           </article>
 
-          <article className="inside-card">
-            <span>Visibility</span>
-            <h3>No guessing.</h3>
-            <p>Every user sees the information that matters to them.</p>
+          <article className="inside-card large">
+            <span>Built for Africa</span>
+            <h3>Designed around how modern property teams actually work.</h3>
+            <p>
+              Zyprent is built for real operating environments where property
+              teams need clarity across payments, maintenance, communication,
+              residents, providers and investors.
+            </p>
           </article>
         </div>
       </section>
@@ -358,7 +405,7 @@ export default function HomePage() {
 
       <section className="final-cta">
         <span>Ready when you are</span>
-        <h2>Run your entire property operation from one system.</h2>
+        <h2>A more connected way to run property operations.</h2>
         <p>
           From rent collection to maintenance and investor reporting, everything
           stays connected.
@@ -374,7 +421,7 @@ export default function HomePage() {
             Request Demo
           </a>
           <a href="/login" className="landing-btn secondary large">
-            Open Platform
+            Explore Platform
           </a>
         </div>
       </section>
