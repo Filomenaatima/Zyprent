@@ -1,0 +1,1 @@
+export const RENT_REMINDER_QUEUE = 'rent-reminder';

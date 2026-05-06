@@ -1,0 +1,1 @@
+export const PROFIT_QUEUE = 'profit-distribution';

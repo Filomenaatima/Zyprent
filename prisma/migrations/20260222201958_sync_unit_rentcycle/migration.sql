@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Unit" ALTER COLUMN "rentCycle" SET DEFAULT 'MONTHLY';
