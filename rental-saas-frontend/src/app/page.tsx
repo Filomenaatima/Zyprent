@@ -66,6 +66,7 @@ export default function HomePage() {
         <nav className="landing-nav-links" aria-label="Landing navigation">
           <a href="#solution">Solution</a>
           <a href="#platform">Platform</a>
+          <a href="/experiences">Experiences</a>
           <a href="#why">Why Zyprent</a>
           <a href="#faq">FAQ</a>
         </nav>
@@ -350,13 +351,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="why" className="section inside-section">
+      <section id="why" className="section why-section">
         <div className="section-heading center">
           <span>Why Zyprent</span>
           <h2>Property operations should not feel chaotic.</h2>
         </div>
 
-        <div className="inside-grid">
+        <div className="why-grid">
           <article className="inside-card">
             <span>Problem</span>
             <h3>Too much is still scattered.</h3>
@@ -375,7 +376,7 @@ export default function HomePage() {
             </p>
           </article>
 
-          <article className="inside-card large">
+          <article className="inside-card">
             <span>Built for Africa</span>
             <h3>Designed around how modern property teams actually work.</h3>
             <p>
@@ -425,6 +426,65 @@ export default function HomePage() {
           </a>
         </div>
       </section>
+
+      <footer className="landing-footer">
+        <div className="footer-top">
+          <a href="/" className="landing-brand" aria-label="Zyprent home">
+            <span className="landing-brand-mark">Z</span>
+            <strong>Zyprent</strong>
+          </a>
+
+          <p>The connected workspace for modern property operations.</p>
+        </div>
+
+        <div className="footer-grid">
+          <div>
+            <h4>Platform</h4>
+            <a href="#solution">Solution</a>
+            <a href="#platform">Finance</a>
+            <a href="#platform">Maintenance</a>
+            <a href="#roles">User experiences</a>
+          </div>
+
+          <div>
+            <h4>Built for</h4>
+            <a href="/experiences">Property Managers</a>
+            <a href="/experiences">Investors</a>
+            <a href="/experiences">Residents</a>
+            <a href="/experiences">Service Providers</a>
+          </div>
+
+          <div>
+            <h4>Company</h4>
+            <a href="#why">Why Zyprent</a>
+            <a href="#faq">FAQ</a>
+            <a
+              href={DEMO_FORM_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Request Demo
+            </a>
+          </div>
+
+          <div>
+            <h4>Access</h4>
+            <a href="/login">Sign In</a>
+            <a
+              href={DEMO_FORM_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Book Demo
+            </a>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <span>© 2026 Zyprent. All rights reserved.</span>
+          <span>Built for clarity, control, and connected property operations.</span>
+        </div>
+      </footer>
     </main>
   );
 }

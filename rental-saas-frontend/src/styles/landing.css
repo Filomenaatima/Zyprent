@@ -86,7 +86,7 @@
 }
 
 .landing-nav-links {
-  gap: 30px;
+  gap: 24px;
 }
 
 .landing-nav-links a,
@@ -644,11 +644,17 @@
 
 .section-heading h2,
 .final-cta h2 {
+  max-width: 960px;
   margin: 12px 0 0;
-  font-size: clamp(34px, 4vw, 52px);
-  line-height: 1;
-  letter-spacing: -0.055em;
+  font-size: clamp(34px, 3.45vw, 46px);
+  line-height: 1.04;
+  letter-spacing: -0.052em;
   font-weight: 950;
+}
+
+.section-heading.center h2 {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .solution-section {
@@ -901,9 +907,9 @@
 
 .inside-card h3 {
   margin: 14px 0 0;
-  font-size: clamp(25px, 2.8vw, 38px);
-  line-height: 1;
-  letter-spacing: -0.055em;
+  font-size: clamp(24px, 2.35vw, 34px);
+  line-height: 1.06;
+  letter-spacing: -0.052em;
 }
 
 .inside-card p {
@@ -913,6 +919,24 @@
   font-size: 16px;
   line-height: 1.65;
 }
+
+/* WHY SECTION */
+
+.why-section {
+  margin-top: 100px;
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.why-grid .inside-card {
+  min-height: 250px;
+}
+
+/* FAQ */
 
 .faq-section {
   max-width: 900px;
@@ -955,8 +979,10 @@
   line-height: 1.65;
 }
 
+/* CTA */
+
 .final-cta {
-  margin-bottom: 70px;
+  margin-bottom: 0;
   padding: 56px;
   border-radius: 32px;
   text-align: center;
@@ -968,7 +994,7 @@
 }
 
 .final-cta h2 {
-  max-width: 780px;
+  max-width: 760px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -984,6 +1010,72 @@
 .final-actions {
   justify-content: center;
   margin-top: 28px;
+}
+
+/* FOOTER */
+
+.landing-footer {
+  width: min(1120px, calc(100% - 80px));
+  margin: 90px auto 0;
+  padding: 52px 0 34px;
+  border-top: 1px solid rgba(255, 255, 255, 0.13);
+}
+
+.footer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding-bottom: 34px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.11);
+}
+
+.footer-top p {
+  margin: 0;
+  max-width: 420px;
+  color: var(--zy-muted);
+  font-size: 18px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.footer-grid {
+  padding: 36px 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 34px;
+}
+
+.footer-grid h4 {
+  margin: 0 0 18px;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.footer-grid a {
+  display: block;
+  margin-top: 13px;
+  color: rgba(255, 255, 255, 0.68);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.footer-grid a:hover {
+  color: #ffffff;
+}
+
+.footer-bottom {
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.11);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 /* FINANCE GRAPHIC */
@@ -1195,7 +1287,8 @@
   .landing-nav,
   .hero-section,
   .section,
-  .final-cta {
+  .final-cta,
+  .landing-footer {
     width: calc(100% - 36px);
   }
 
@@ -1237,7 +1330,8 @@
 
   .system-flow,
   .role-content,
-  .inside-grid {
+  .inside-grid,
+  .why-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1287,6 +1381,20 @@
 
   .tower-four {
     left: 66%;
+  }
+
+  .footer-top,
+  .footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .footer-top p {
+    text-align: left;
+  }
+
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -1347,7 +1455,7 @@
 
   .section-heading h2,
   .final-cta h2 {
-    font-size: clamp(32px, 11vw, 44px);
+    font-size: clamp(30px, 10vw, 40px);
   }
 
   .system-flow,
@@ -1382,5 +1490,14 @@
   .finance-coin {
     width: 46px;
     height: 46px;
+  }
+
+  .landing-footer {
+    width: calc(100% - 36px);
+    margin-top: 72px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
   }
 }
