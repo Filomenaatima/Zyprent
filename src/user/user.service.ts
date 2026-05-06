@@ -14,6 +14,7 @@ import {
   ResidentStatus,
   AccountType,
   SubscriptionStatus,
+  UserStatus,
 } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
@@ -21,26 +22,12 @@ import * as bcrypt from 'bcrypt';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * =========================================
-   * ADMIN: LIST ALL USERS
-   * =========================================
-   */
   async findAllUsers() {
     const users = await this.prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
-        wallet: {
-          select: {
-            balance: true,
-          },
-        },
-        account: {
-          select: {
-            balance: true,
-            type: true,
-          },
-        },
+        wallet: { select: { balance: true } },
+        account: { select: { balance: true, type: true } },
         residentProfile: {
           select: {
             id: true,
@@ -51,11 +38,7 @@ export class UserService {
                 id: true,
                 number: true,
                 property: {
-                  select: {
-                    id: true,
-                    title: true,
-                    location: true,
-                  },
+                  select: { id: true, title: true, location: true },
                 },
               },
             },
@@ -92,11 +75,7 @@ export class UserService {
             sharesOwned: true,
             amountPaid: true,
             property: {
-              select: {
-                id: true,
-                title: true,
-                location: true,
-              },
+              select: { id: true, title: true, location: true },
             },
           },
         },
@@ -141,12 +120,14 @@ export class UserService {
 
     const summary = {
       totalUsers: users.length,
+      pendingUsers: users.filter((user) => user.status === UserStatus.PENDING).length,
+      approvedUsers: users.filter((user) => user.status === UserStatus.APPROVED).length,
+      suspendedUsers: users.filter((user) => user.status === UserStatus.SUSPENDED).length,
       admins: users.filter((user) => user.role === Role.ADMIN).length,
       managers: users.filter((user) => user.role === Role.MANAGER).length,
       investors: users.filter((user) => user.role === Role.INVESTOR).length,
       residents: users.filter((user) => user.role === Role.RESIDENT).length,
-      providers: users.filter((user) => user.role === Role.SERVICE_PROVIDER)
-        .length,
+      providers: users.filter((user) => user.role === Role.SERVICE_PROVIDER).length,
       verifiedProviders: users.filter(
         (user) =>
           user.role === Role.SERVICE_PROVIDER &&
@@ -184,6 +165,7 @@ export class UserService {
           email: user.email,
           phone: user.phone,
           role: user.role,
+          status: user.status,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
 
@@ -198,8 +180,7 @@ export class UserService {
                 unitId: user.residentProfile.unit?.id ?? null,
                 unitNumber: user.residentProfile.unit?.number ?? null,
                 propertyId: user.residentProfile.unit?.property?.id ?? null,
-                propertyTitle:
-                  user.residentProfile.unit?.property?.title ?? null,
+                propertyTitle: user.residentProfile.unit?.property?.title ?? null,
                 propertyLocation:
                   user.residentProfile.unit?.property?.location ?? null,
               }
@@ -267,11 +248,112 @@ export class UserService {
     };
   }
 
-  /**
-   * =========================================
-   * GET MY PROFILE
-   * =========================================
-   */
+  async findPendingUsers() {
+    const users = await this.prisma.user.findMany({
+      where: { status: UserStatus.PENDING },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      total: users.length,
+      users,
+    };
+  }
+
+  async approveUser(userId: string, adminId: string) {
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+    });
+
+    if (!admin || admin.role !== Role.ADMIN) {
+      throw new ForbiddenException('Only admins can approve users');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role === Role.ADMIN) {
+      throw new ForbiddenException('Admin accounts cannot be approved here');
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { status: UserStatus.APPROVED },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      message: 'User approved successfully',
+      user: updated,
+    };
+  }
+
+  async rejectUser(userId: string, adminId: string) {
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+    });
+
+    if (!admin || admin.role !== Role.ADMIN) {
+      throw new ForbiddenException('Only admins can reject users');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role === Role.ADMIN) {
+      throw new ForbiddenException('Admin accounts cannot be rejected here');
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { status: UserStatus.SUSPENDED },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      message: 'User rejected successfully',
+      user: updated,
+    };
+  }
+
   async getMyProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -282,20 +364,14 @@ export class UserService {
         sharesOwned: {
           include: {
             property: {
-              select: {
-                id: true,
-                title: true,
-                location: true,
-              },
+              select: { id: true, title: true, location: true },
             },
           },
         },
         residentProfile: {
           include: {
             unit: {
-              include: {
-                property: true,
-              },
+              include: { property: true },
             },
           },
         },
@@ -318,6 +394,7 @@ export class UserService {
       email: user.email,
       phone: user.phone,
       role: user.role,
+      status: user.status,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
 
@@ -372,11 +449,6 @@ export class UserService {
     };
   }
 
-  /**
-   * =========================================
-   * UPDATE MY PROFILE
-   * =========================================
-   */
   async updateMyProfile(userId: string, dto: UpdateProfileDto) {
     const existingUser = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -423,16 +495,12 @@ export class UserService {
         email: updated.email,
         phone: updated.phone,
         role: updated.role,
+        status: updated.status,
         updatedAt: updated.updatedAt,
       },
     };
   }
 
-  /**
-   * =========================================
-   * CHANGE MY PASSWORD
-   * =========================================
-   */
   async changeMyPassword(userId: string, dto: ChangePasswordDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -461,9 +529,7 @@ export class UserService {
 
     await this.prisma.user.update({
       where: { id: userId },
-      data: {
-        password: hashedPassword,
-      },
+      data: { password: hashedPassword },
     });
 
     return {
@@ -471,11 +537,6 @@ export class UserService {
     };
   }
 
-  /**
-   * =========================================
-   * CREATE RESIDENT (FULLY WIRED)
-   * =========================================
-   */
   async createResident(dto: CreateResidentDto, creatorId: string) {
     const creator = await this.prisma.user.findUnique({
       where: { id: creatorId },
@@ -503,6 +564,7 @@ export class UserService {
           phone: dto.phone,
           password: hashedPassword,
           role: Role.RESIDENT,
+          status: UserStatus.APPROVED,
         },
       });
 
@@ -537,6 +599,7 @@ export class UserService {
           email: user.email,
           phone: user.phone,
           role: user.role,
+          status: user.status,
           createdAt: user.createdAt,
         },
         resident,
@@ -544,11 +607,6 @@ export class UserService {
     });
   }
 
-  /**
-   * =========================================
-   * ASSIGN TO UNIT
-   * =========================================
-   */
   async assignToUnit(residentId: string, unitId: string) {
     const occupied = await this.prisma.resident.findFirst({
       where: { unitId, status: ResidentStatus.ACTIVE },
@@ -567,11 +625,6 @@ export class UserService {
     });
   }
 
-  /**
-   * =========================================
-   * MOVE OUT
-   * =========================================
-   */
   async moveOut(residentId: string) {
     return this.prisma.resident.update({
       where: { id: residentId },
@@ -582,11 +635,6 @@ export class UserService {
     });
   }
 
-  /**
-   * =========================================
-   * TRANSFER
-   * =========================================
-   */
   async transfer(residentId: string, newUnitId: string) {
     const occupied = await this.prisma.resident.findFirst({
       where: { unitId: newUnitId, status: ResidentStatus.ACTIVE },

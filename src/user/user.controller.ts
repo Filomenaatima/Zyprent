@@ -1,16 +1,17 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
+  Param,
   Patch,
   Post,
   Req,
   UseGuards,
-  ForbiddenException,
-  Param,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -28,11 +29,38 @@ interface JwtUser {
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Get()
   async findAllUsers() {
     return this.userService.findAllUsers();
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('admin/pending')
+  async findPendingUsers() {
+    return this.userService.findPendingUsers();
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch('admin/:userId/approve')
+  async approveUser(
+    @Param('userId') userId: string,
+    @Req() req: Request & { user: JwtUser },
+  ) {
+    return this.userService.approveUser(userId, req.user.id);
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch('admin/:userId/reject')
+  async rejectUser(
+    @Param('userId') userId: string,
+    @Req() req: Request & { user: JwtUser },
+  ) {
+    return this.userService.rejectUser(userId, req.user.id);
   }
 
   @UseGuards(JwtGuard)
@@ -71,7 +99,7 @@ export class UserController {
     return this.userService.changeMyPassword(req.user.id, dto);
   }
 
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.MANAGER)
   @Post('resident')
   async createResident(
@@ -85,7 +113,7 @@ export class UserController {
     return this.userService.createResident(dto, req.user.id);
   }
 
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.MANAGER, Role.ADMIN)
   @Patch('resident/:residentId/assign/:unitId')
   async assignResidentToUnit(
@@ -95,14 +123,14 @@ export class UserController {
     return this.userService.assignToUnit(residentId, unitId);
   }
 
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.MANAGER, Role.ADMIN)
   @Patch('resident/:residentId/move-out')
   async moveOutResident(@Param('residentId') residentId: string) {
     return this.userService.moveOut(residentId);
   }
 
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.MANAGER, Role.ADMIN)
   @Patch('resident/:residentId/transfer/:unitId')
   async transferResident(
