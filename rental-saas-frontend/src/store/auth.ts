@@ -5,6 +5,7 @@ type User = {
   email: string;
   role: string;
   name?: string | null;
+  status?: "PENDING" | "APPROVED" | "SUSPENDED" | string | null;
 };
 
 type AuthState = {
@@ -20,8 +21,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
 
   setAuth: (token, user) => {
-    console.log("setAuth token:", token);
-    console.log("setAuth user:", user);
     localStorage.setItem("token", token);
 
     if (user) {
@@ -35,6 +34,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("refresh_token");
     localStorage.removeItem("user");
     set({ token: null, user: null });
   },

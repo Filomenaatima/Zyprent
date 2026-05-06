@@ -2,20 +2,16 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { api } from "@/services/api";
+import { useAuthStore } from "@/store/auth";
 
 type Mode = "login" | "signup";
 
-type Role =
-  | "MANAGER"
-  | "INVESTOR"
-  | "RESIDENT"
-  | "SERVICE_PROVIDER";
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+type Role = "MANAGER" | "INVESTOR" | "RESIDENT" | "SERVICE_PROVIDER";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setAuth } = useAuthStore();
 
   const [mode, setMode] = useState<Mode>("login");
   const [name, setName] = useState("");
@@ -39,31 +35,54 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const endpoint = isSignup ? "/auth/register" : "/auth/login";
+      if (isSignup) {
+        const res = await api.post("/auth/register", {
+          name,
+          email,
+          role,
+          password,
+        });
 
-      const body = isSignup
-        ? { name, email, phone, role, password }
-        : { email, password };
+        const status = res.data?.status || res.data?.user?.status;
 
-      const res = await fetch(`${API_BASE}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+        if (status === "PENDING") {
+          router.push(`/pending-approval?email=${encodeURIComponent(email)}`);
+          return;
+        }
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.message || "Something went wrong");
+        router.push("/pending-approval");
+        return;
       }
 
-      localStorage.setItem("token", data.access_token);
-      localStorage.setItem("refresh_token", data.refresh_token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      const res = await api.post("/auth/login", {
+        email,
+        password,
+      });
 
-      router.push("/dashboard");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Request failed");
+      const { access_token, refresh_token, user } = res.data;
+
+      if (user?.status === "PENDING") {
+        router.push(`/pending-approval?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
+      if (access_token && user) {
+        localStorage.setItem("refresh_token", refresh_token || "");
+        setAuth(access_token, user);
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Request failed";
+
+      if (String(message).toLowerCase().includes("pending approval")) {
+        router.push(`/pending-approval?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -90,7 +109,7 @@ export default function LoginPage() {
           <div className="auth-points">
             <div>
               <strong>Secure access</strong>
-              <span>Role-based dashboards for every user.</span>
+              <span>New accounts are reviewed before platform access.</span>
             </div>
             <div>
               <strong>Clear visibility</strong>
@@ -109,7 +128,7 @@ export default function LoginPage() {
             <h2>{title}</h2>
             <p>
               {isSignup
-                ? "Start with a secure account built around your role."
+                ? "Create your account. Our team will review it before dashboard access is enabled."
                 : "Sign in to continue managing your workspace."}
             </p>
           </div>

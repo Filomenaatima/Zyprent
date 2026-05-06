@@ -32,6 +32,16 @@ type ApprovalSummary = {
   pendingWithdrawals?: number;
 };
 
+type PendingUser = {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  role: string;
+  status: string;
+  createdAt: string;
+};
+
 function formatDate(value?: string) {
   if (!value) return "—";
   return new Date(value).toLocaleDateString("en-UG", {
@@ -52,7 +62,7 @@ function getStatusTone(status: string) {
     return "approved";
   }
 
-  if (["REJECTED", "DECLINED", "FAILED"].includes(normalized)) {
+  if (["REJECTED", "DECLINED", "FAILED", "SUSPENDED"].includes(normalized)) {
     return "rejected";
   }
 
@@ -83,11 +93,49 @@ export default function ApprovalsPage() {
   const [summary, setSummary] = useState<ApprovalSummary | null>(null);
   const [queue, setQueue] = useState<ApprovalQueueItem[]>([]);
   const [selected, setSelected] = useState<ApprovalQueueItem | null>(null);
+  const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [userBusyId, setUserBusyId] = useState<string | null>(null);
 
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [search, setSearch] = useState("");
+
+  const loadPendingUsers = async () => {
+    try {
+      const res = await api.get("/users/admin/pending");
+      setPendingUsers(res.data?.users || []);
+    } catch (error) {
+      console.error("Failed to load pending users", error);
+    }
+  };
+
+  const approveUser = async (userId: string) => {
+    try {
+      setUserBusyId(userId);
+      await api.patch(`/users/admin/${userId}/approve`);
+      await loadPendingUsers();
+    } catch (error: any) {
+      console.error("Failed to approve user", error);
+      window.alert(error?.response?.data?.message || "Failed to approve user.");
+    } finally {
+      setUserBusyId(null);
+    }
+  };
+
+  const rejectUser = async (userId: string) => {
+    try {
+      setUserBusyId(userId);
+      await api.patch(`/users/admin/${userId}/reject`);
+      await loadPendingUsers();
+    } catch (error: any) {
+      console.error("Failed to reject user", error);
+      window.alert(error?.response?.data?.message || "Failed to reject user.");
+    } finally {
+      setUserBusyId(null);
+    }
+  };
 
   const loadApprovals = async () => {
     try {
@@ -186,6 +234,7 @@ export default function ApprovalsPage() {
 
   useEffect(() => {
     loadApprovals();
+    loadPendingUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typeFilter]);
 
@@ -323,8 +372,8 @@ export default function ApprovalsPage() {
         <div className="approvals-hero-copy">
           <p className="approvals-label">ADMIN APPROVALS</p>
           <h1>
-            Review platform approvals across KYC, providers, expenses, profit
-            requests, and withdrawals
+            Review platform approvals across access, KYC, providers, expenses,
+            profit requests, and withdrawals
           </h1>
           <p className="approvals-sub">
             A centralized workspace for processing sensitive approval queues and
@@ -332,6 +381,7 @@ export default function ApprovalsPage() {
           </p>
 
           <div className="approvals-tags">
+            <span>User access</span>
             <span>KYC review</span>
             <span>Provider verification</span>
             <span>Expense approval</span>
@@ -342,21 +392,97 @@ export default function ApprovalsPage() {
 
         <div className="approvals-hero-metrics">
           <div className="approvals-metric-card main">
+            <span>User Access</span>
+            <h2>{pendingUsers.length}</h2>
+          </div>
+          <div className="approvals-metric-card">
             <span>Total Pending</span>
-            <h2>{summary?.totalPending ?? 0}</h2>
+            <h3>{summary?.totalPending ?? 0}</h3>
           </div>
           <div className="approvals-metric-card">
             <span>KYC</span>
             <h3>{summary?.pendingKyc ?? 0}</h3>
           </div>
           <div className="approvals-metric-card">
-            <span>Providers</span>
-            <h3>{summary?.pendingProviders ?? 0}</h3>
-          </div>
-          <div className="approvals-metric-card">
             <span>Withdrawals</span>
             <h3>{summary?.pendingWithdrawals ?? 0}</h3>
           </div>
+        </div>
+      </section>
+
+      <section className="approvals-panel">
+        <div className="approvals-panel-head">
+          <div>
+            <h2>User Access Requests</h2>
+            <p>Approve or reject new platform accounts</p>
+          </div>
+
+          <span className="approvals-count-chip">
+            {pendingUsers.length} pending
+          </span>
+        </div>
+
+        <div style={{ display: "grid", gap: "14px", marginTop: "22px" }}>
+          {pendingUsers.length === 0 ? (
+            <div className="approvals-empty">
+              No pending user access requests.
+            </div>
+          ) : (
+            pendingUsers.map((user) => (
+              <div
+                key={user.id}
+                className="approvals-record-card"
+                style={{ cursor: "default" }}
+              >
+                <div className="approvals-record-top">
+                  <div>
+                    <h4>{user.name || "Unnamed User"}</h4>
+                    <p>{user.email || "No email"}</p>
+                  </div>
+
+                  <span
+                    className={`approvals-badge ${getStatusTone(user.status)}`}
+                  >
+                    {user.status}
+                  </span>
+                </div>
+
+                <div className="approvals-record-meta">
+                  <span>{user.role.replace("_", " ")}</span>
+                  <span>{user.phone || "No phone number"}</span>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "18px",
+                    display: "flex",
+                    gap: "12px",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <button
+                    className="approvals-btn approve"
+                    disabled={userBusyId === user.id}
+                    onClick={() => approveUser(user.id)}
+                  >
+                    {userBusyId === user.id ? "Processing..." : "Approve"}
+                  </button>
+
+                  <button
+                    className="approvals-btn reject"
+                    disabled={userBusyId === user.id}
+                    onClick={() => rejectUser(user.id)}
+                  >
+                    {userBusyId === user.id ? "Processing..." : "Reject"}
+                  </button>
+                </div>
+
+                <div className="approvals-record-bottom">
+                  <span>Requested {formatDate(user.createdAt)}</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
 
@@ -632,7 +758,9 @@ export default function ApprovalsPage() {
                         disabled={busyId === selectedItem.id}
                         onClick={() => review("APPROVE")}
                       >
-                        {busyId === selectedItem.id ? "Processing..." : "Approve"}
+                        {busyId === selectedItem.id
+                          ? "Processing..."
+                          : "Approve"}
                       </button>
 
                       <button
@@ -640,7 +768,9 @@ export default function ApprovalsPage() {
                         disabled={busyId === selectedItem.id}
                         onClick={() => review("REJECT")}
                       >
-                        {busyId === selectedItem.id ? "Processing..." : "Reject"}
+                        {busyId === selectedItem.id
+                          ? "Processing..."
+                          : "Reject"}
                       </button>
                     </>
                   )}
