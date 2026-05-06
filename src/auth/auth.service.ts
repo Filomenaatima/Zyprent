@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
-import { Role } from '@prisma/client';
+import { Role, UserStatus } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +17,7 @@ export class AuthService {
   ) {}
 
   async register(data: {
-    name: string;
+    name?: string;
     email: string;
     password: string;
     role: Role;
@@ -34,14 +34,25 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        name: data.name,
+        name: data.name ?? null,
         email: data.email,
         password: hashedPassword,
         role: data.role,
+        status: UserStatus.PENDING,
       },
     });
 
-    return this.buildAuthResponse(user);
+    return {
+      message: 'Account created successfully. Your account is pending approval.',
+      status: user.status,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name ?? null,
+        status: user.status,
+      },
+    };
   }
 
   async login(email: string, password: string) {
@@ -59,6 +70,18 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (user.status === UserStatus.PENDING) {
+      throw new UnauthorizedException(
+        'Your account is pending approval. You will be notified once approved.',
+      );
+    }
+
+    if (user.status === UserStatus.SUSPENDED) {
+      throw new UnauthorizedException(
+        'Your account has been suspended. Please contact support.',
+      );
+    }
+
     return this.buildAuthResponse(user);
   }
 
@@ -70,6 +93,7 @@ export class AuthService {
         email: true,
         role: true,
         name: true,
+        status: true,
         createdAt: true,
       },
     });
@@ -80,11 +104,13 @@ export class AuthService {
     email: string | null;
     role: Role;
     name?: string | null;
+    status: UserStatus;
   }) {
     const payload = {
       sub: user.id,
       email: user.email ?? '',
       role: user.role,
+      status: user.status,
     };
 
     const access_token = this.jwtService.sign(payload, {
@@ -105,6 +131,7 @@ export class AuthService {
         email: user.email,
         role: user.role,
         name: user.name ?? null,
+        status: user.status,
       },
     };
   }

@@ -1,6 +1,10 @@
-import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class RegisterDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
   @IsEmail()
   email!: string;
 
@@ -8,6 +12,6 @@ export class RegisterDto {
   @MinLength(6)
   password!: string;
 
-  @IsEnum(['ADMIN', 'MANAGER', 'INVESTOR', 'RESIDENT'])
-  role!: 'ADMIN' | 'MANAGER' | 'INVESTOR' | 'RESIDENT';
+  @IsEnum(['MANAGER', 'INVESTOR', 'RESIDENT', 'SERVICE_PROVIDER'])
+  role!: 'MANAGER' | 'INVESTOR' | 'RESIDENT' | 'SERVICE_PROVIDER';
 }
