@@ -7,8 +7,8 @@ const DEMO_FORM_LINK =
 
 export default function ExperiencesPage() {
   return (
-    <main className="experiences-page">
-      <header className="landing-nav experiences-nav">
+    <main className="experiencePage">
+      <header className="landing-nav xpNav">
         <a href="/" className="landing-brand">
           <span className="landing-brand-mark">Z</span>
           <strong>Zyprent</strong>
@@ -37,16 +37,16 @@ export default function ExperiencesPage() {
         </div>
       </header>
 
-      <section className="xp-hero">
-        <div className="xp-hero-copy">
-          <span>Zyprent experiences</span>
-          <h1>Property operations, shown clearly.</h1>
-          <p>
-            A cleaner view of how residents, managers, service providers and
-            investors move through one connected property workspace.
-          </p>
+      <section className="xpHero">
+        <div className="xpHeroText">
+          <p>ZYPreNT EXPERIENCES</p>
+          <h1>Every property user gets a clearer workspace.</h1>
+          <span>
+            A visual look at how Zyprent keeps managers, residents, service
+            providers and investors moving through one connected system.
+          </span>
 
-          <div className="xp-actions">
+          <div className="xpHeroActions">
             <a
               href={DEMO_FORM_LINK}
               target="_blank"
@@ -61,128 +61,177 @@ export default function ExperiencesPage() {
           </div>
         </div>
 
-        <div className="xp-product-shot">
-          <div className="mock-topbar">
-            <i />
-            <i />
-            <i />
-            <strong>Live property workspace</strong>
-          </div>
+        <div className="xpHeroVisual">
+          <div className="productWindow">
+            <div className="windowTop">
+              <i />
+              <i />
+              <i />
+              <strong>Zyprent Workspace</strong>
+            </div>
 
-          <div className="mock-layout">
-            <aside>
-              <span />
-              <span />
-              <span />
-              <span />
-            </aside>
+            <div className="windowBody">
+              <aside className="sideRail">
+                <span className="active" />
+                <span />
+                <span />
+                <span />
+                <span />
+              </aside>
 
-            <section>
-              <div className="mock-hero-card">
-                <div>
-                  <small>Portfolio status</small>
+              <div className="mainPanel">
+                <div className="bluePanel">
+                  <small>Live portfolio</small>
                   <strong>UGX 48.2M</strong>
-                  <p>Collected this month</p>
+                  <em>Collected this month</em>
                 </div>
-                <button>Live</button>
-              </div>
 
-              <div className="mock-grid">
-                <div>
-                  <small>Residents</small>
-                  <strong>128</strong>
+                <div className="miniStats">
+                  <div>
+                    <small>Units</small>
+                    <strong>42</strong>
+                  </div>
+                  <div>
+                    <small>Open jobs</small>
+                    <strong>06</strong>
+                  </div>
+                  <div>
+                    <small>Returns</small>
+                    <strong>18.4%</strong>
+                  </div>
                 </div>
-                <div>
-                  <small>Open jobs</small>
-                  <strong>06</strong>
-                </div>
-                <div>
-                  <small>Expenses</small>
-                  <strong>UGX 3.4M</strong>
-                </div>
-              </div>
 
-              <div className="mock-table">
-                <p>
-                  <span>Rent payment received</span>
-                  <strong>Receipt saved</strong>
-                </p>
-                <p>
-                  <span>Bathroom leak request</span>
-                  <strong>Provider assigned</strong>
-                </p>
-                <p>
-                  <span>Investor return update</span>
-                  <strong>Report ready</strong>
-                </p>
+                <div className="activityList">
+                  <div>
+                    <span>Rent payment</span>
+                    <b>Receipt saved</b>
+                  </div>
+                  <div>
+                    <span>Maintenance</span>
+                    <b>Provider assigned</b>
+                  </div>
+                  <div>
+                    <span>Investor report</span>
+                    <b>Ready</b>
+                  </div>
+                </div>
               </div>
-            </section>
+            </div>
+          </div>
+
+          <div className="floatingCard one">
+            <small>Resident</small>
+            <strong>Paid</strong>
+          </div>
+
+          <div className="floatingCard two">
+            <small>Provider</small>
+            <strong>Assigned</strong>
           </div>
         </div>
       </section>
 
-      <section className="xp-section">
-        <div className="xp-heading">
-          <span>Built around real users</span>
-          <h2>Every role gets the view they need.</h2>
+      <section className="xpRoles">
+        <div className="xpSectionHead">
+          <p>ROLE-BASED VIEWS</p>
+          <h2>Four experiences. One operating system.</h2>
         </div>
 
-        <div className="xp-role-grid">
-          {[
-            ["Residents", "Pay rent, view receipts, submit requests."],
-            ["Managers", "Track units, residents, payments and work orders."],
-            ["Service Providers", "Receive jobs, quote, update and complete work."],
-            ["Investors", "Follow returns, expenses, wallets and performance."],
-          ].map(([title, text]) => (
-            <article key={title} className="xp-role-card">
-              <div className="xp-card-preview">
-                <div className="preview-line large" />
-                <div className="preview-line" />
-                <div className="preview-line short" />
-                <div className="preview-chip">Live</div>
+        <div className="roleGrid">
+          <article>
+            <div className="rolePreview residentPreview">
+              <div className="phoneMock">
+                <span />
+                <strong>Rent paid</strong>
+                <small>Receipt generated</small>
               </div>
-              <span>{title}</span>
-              <h3>{text}</h3>
-            </article>
-          ))}
+            </div>
+            <p>Resident</p>
+            <h3>Payments and requests feel simple.</h3>
+          </article>
+
+          <article>
+            <div className="rolePreview managerPreview">
+              <div className="dashMock">
+                <i />
+                <i />
+                <i />
+                <i />
+              </div>
+            </div>
+            <p>Manager</p>
+            <h3>Property operations stay visible.</h3>
+          </article>
+
+          <article>
+            <div className="rolePreview providerPreview">
+              <div className="jobMock">
+                <span>Job request</span>
+                <strong>Quote approved</strong>
+                <small>Provider on site</small>
+              </div>
+            </div>
+            <p>Service provider</p>
+            <h3>Work orders become trackable.</h3>
+          </article>
+
+          <article>
+            <div className="rolePreview investorPreview">
+              <div className="chartMock">
+                <strong>18.4%</strong>
+                <div>
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                </div>
+              </div>
+            </div>
+            <p>Investor</p>
+            <h3>Returns and expenses become clear.</h3>
+          </article>
         </div>
       </section>
 
-      <section className="xp-workflow">
+      <section className="xpShowcase">
         <div>
-          <span>Connected workflow</span>
-          <h2>From one action to a complete record.</h2>
-          <p>
-            Payments, maintenance updates, approvals and reports stay tied to
-            the right property and user.
-          </p>
+          <p>CONNECTED WORKFLOW</p>
+          <h2>One action updates the whole record.</h2>
+          <span>
+            Payments, maintenance, approvals and reports are tied to the right
+            property, user and timeline.
+          </span>
         </div>
 
-        <div className="xp-flow-list">
-          <p>
-            <strong>01</strong> Resident pays rent
-          </p>
-          <p>
-            <strong>02</strong> Manager sees payment status
-          </p>
-          <p>
-            <strong>03</strong> Provider completes assigned work
-          </p>
-          <p>
-            <strong>04</strong> Investor reviews performance
-          </p>
+        <div className="workflowList">
+          <section>
+            <b>01</b>
+            <strong>Resident pays rent</strong>
+          </section>
+          <section>
+            <b>02</b>
+            <strong>Manager sees the record</strong>
+          </section>
+          <section>
+            <b>03</b>
+            <strong>Provider completes work</strong>
+          </section>
+          <section>
+            <b>04</b>
+            <strong>Investor reviews performance</strong>
+          </section>
         </div>
       </section>
 
-      <section className="final-cta experiences-final">
-        <span>One workspace for property operations</span>
+      <section className="xpFinal">
+        <p>BUILT FOR CONNECTED PROPERTY WORK</p>
         <h2>Give every user a clearer way to work.</h2>
-        <p>
-          Zyprent connects the people, payments, maintenance and financial
-          records behind every property.
-        </p>
+        <span>
+          Zyprent brings people, payments, maintenance and property financials
+          into one clean workspace.
+        </span>
 
-        <div className="final-actions">
+        <div>
           <a
             href={DEMO_FORM_LINK}
             target="_blank"
@@ -198,398 +247,495 @@ export default function ExperiencesPage() {
       </section>
 
       <style jsx>{`
-        .experiences-page {
+        .experiencePage {
           min-height: 100vh;
-          background:
-            radial-gradient(circle at 80% 8%, rgba(102, 164, 255, 0.2), transparent 30%),
-            linear-gradient(135deg, #04040c 0%, #080a1d 48%, #0b1026 100%);
-          color: #fff;
+          background: #050612;
+          color: #ffffff;
           overflow-x: hidden;
         }
 
-        .experiences-nav {
+        .xpNav {
           position: relative;
-          z-index: 20;
+          z-index: 10;
         }
 
-        .xp-hero {
+        .xpHero {
           width: min(1120px, calc(100% - 40px));
           height: calc(100vh - 92px);
-          max-height: 650px;
-          min-height: 560px;
+          max-height: 610px;
+          min-height: 520px;
           margin: 0 auto;
           display: grid;
-          grid-template-columns: 0.78fr 1.22fr;
-          align-items: center;
+          grid-template-columns: 0.82fr 1.18fr;
           gap: 42px;
-          padding: 22px 0 34px;
+          align-items: center;
+          padding: 16px 0 28px;
         }
 
-        .xp-hero-copy span,
-        .xp-heading span,
-        .xp-workflow span,
-        .final-cta span {
+        .xpHeroText p,
+        .xpSectionHead p,
+        .xpShowcase p,
+        .xpFinal p {
+          margin: 0;
           color: #8fd0ff;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 950;
           letter-spacing: 0.16em;
           text-transform: uppercase;
         }
 
-        .xp-hero-copy h1 {
+        .xpHeroText h1 {
           margin: 14px 0 0;
-          max-width: 520px;
-          font-size: clamp(44px, 5vw, 68px);
-          line-height: 0.95;
-          letter-spacing: -0.075em;
+          font-size: clamp(38px, 4.9vw, 62px);
+          line-height: 0.96;
+          letter-spacing: -0.07em;
+          max-width: 560px;
         }
 
-        .xp-hero-copy p {
-          margin: 20px 0 0;
-          max-width: 460px;
-          color: rgba(255, 255, 255, 0.7);
-          font-size: 17px;
-          line-height: 1.6;
+        .xpHeroText span {
+          display: block;
+          margin-top: 18px;
+          max-width: 500px;
+          color: rgba(255, 255, 255, 0.68);
+          font-size: 16px;
+          line-height: 1.55;
         }
 
-        .xp-actions {
-          margin-top: 26px;
+        .xpHeroActions {
+          margin-top: 24px;
           display: flex;
-          gap: 14px;
+          gap: 12px;
           flex-wrap: wrap;
         }
 
-        .xp-product-shot {
+        .xpHeroVisual {
+          position: relative;
+          min-height: 455px;
           border-radius: 34px;
+          background:
+            radial-gradient(circle at 70% 12%, rgba(143, 208, 255, 0.22), transparent 32%),
+            linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035));
+          border: 1px solid rgba(205, 225, 255, 0.16);
+          box-shadow: 0 34px 90px rgba(0, 0, 0, 0.34);
           overflow: hidden;
-          border: 1px solid rgba(185, 214, 255, 0.18);
-          background: rgba(255, 255, 255, 0.07);
-          box-shadow: 0 35px 100px rgba(0, 0, 0, 0.38);
-          backdrop-filter: blur(18px);
+          padding: 26px;
         }
 
-        .mock-topbar {
-          height: 54px;
+        .productWindow {
+          height: 100%;
+          border-radius: 26px;
+          overflow: hidden;
+          background: rgba(6, 10, 30, 0.72);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          box-shadow: 0 28px 70px rgba(0, 0, 0, 0.36);
+        }
+
+        .windowTop {
+          height: 48px;
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 9px;
           padding: 0 18px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           background: rgba(255, 255, 255, 0.06);
         }
 
-        .mock-topbar i {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.35);
+        .windowTop i {
+          width: 9px;
+          height: 9px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.34);
         }
 
-        .mock-topbar strong {
+        .windowTop strong {
           margin-left: auto;
-          font-size: 13px;
-          color: rgba(255, 255, 255, 0.72);
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.58);
         }
 
-        .mock-layout {
+        .windowBody {
           display: grid;
-          grid-template-columns: 150px 1fr;
-          min-height: 430px;
+          grid-template-columns: 120px 1fr;
+          min-height: 381px;
         }
 
-        .mock-layout aside {
-          padding: 22px;
-          border-right: 1px solid rgba(255, 255, 255, 0.1);
-          background: rgba(2, 4, 18, 0.34);
+        .sideRail {
+          padding: 22px 18px;
+          background: rgba(255, 255, 255, 0.035);
+          border-right: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .mock-layout aside span {
+        .sideRail span {
           display: block;
           height: 12px;
           border-radius: 999px;
-          margin-bottom: 18px;
-          background: rgba(255, 255, 255, 0.22);
+          margin-bottom: 17px;
+          background: rgba(255, 255, 255, 0.18);
         }
 
-        .mock-layout aside span:nth-child(1) {
-          width: 76px;
+        .sideRail span.active {
+          width: 78px;
+          background: #6aa9ff;
         }
 
-        .mock-layout aside span:nth-child(2) {
-          width: 96px;
-          background: rgba(96, 130, 255, 0.8);
+        .mainPanel {
+          padding: 22px;
         }
 
-        .mock-layout aside span:nth-child(3) {
-          width: 70px;
+        .bluePanel {
+          min-height: 126px;
+          border-radius: 24px;
+          padding: 22px;
+          background: linear-gradient(135deg, #0f1e5a, #315bea);
         }
 
-        .mock-layout aside span:nth-child(4) {
-          width: 86px;
-        }
-
-        .mock-layout section {
-          padding: 24px;
-        }
-
-        .mock-hero-card {
-          min-height: 145px;
-          border-radius: 26px;
-          padding: 24px;
-          display: flex;
-          justify-content: space-between;
-          background: linear-gradient(135deg, #101d55, #315bea);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
-        }
-
-        .mock-hero-card small,
-        .mock-grid small {
-          color: rgba(255, 255, 255, 0.68);
+        .bluePanel small,
+        .miniStats small {
+          color: rgba(255, 255, 255, 0.66);
           font-weight: 800;
         }
 
-        .mock-hero-card strong {
+        .bluePanel strong {
           display: block;
-          margin-top: 10px;
-          font-size: 38px;
+          margin-top: 7px;
+          font-size: 34px;
           letter-spacing: -0.06em;
         }
 
-        .mock-hero-card p {
-          margin: 8px 0 0;
+        .bluePanel em {
+          display: block;
+          margin-top: 5px;
           color: rgba(255, 255, 255, 0.68);
+          font-style: normal;
         }
 
-        .mock-hero-card button {
-          align-self: flex-start;
-          border: 0;
-          border-radius: 999px;
-          padding: 9px 14px;
-          color: #0b1026;
-          font-weight: 950;
-          background: #fff;
-        }
-
-        .mock-grid {
-          margin-top: 16px;
+        .miniStats {
+          margin-top: 13px;
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 12px;
+          gap: 10px;
         }
 
-        .mock-grid div {
-          padding: 18px;
-          border-radius: 20px;
+        .miniStats div {
+          padding: 15px;
+          border-radius: 18px;
           background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-        }
-
-        .mock-grid strong {
-          display: block;
-          margin-top: 8px;
-          font-size: 24px;
-        }
-
-        .mock-table {
-          margin-top: 16px;
-          padding: 8px;
-          border-radius: 22px;
-          background: rgba(255, 255, 255, 0.06);
           border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .mock-table p {
-          margin: 0;
-          padding: 14px;
-          display: flex;
-          justify-content: space-between;
-          gap: 20px;
-          color: rgba(255, 255, 255, 0.72);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        .miniStats strong {
+          display: block;
+          margin-top: 5px;
+          font-size: 22px;
         }
 
-        .mock-table p:last-child {
+        .activityList {
+          margin-top: 13px;
+          padding: 6px;
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.09);
+        }
+
+        .activityList div {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
+          padding: 12px;
+          font-size: 13px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .activityList div:last-child {
           border-bottom: 0;
         }
 
-        .mock-table strong {
-          color: #fff;
+        .activityList span {
+          color: rgba(255, 255, 255, 0.62);
         }
 
-        .xp-section,
-        .xp-workflow,
-        .experiences-final {
+        .floatingCard {
+          position: absolute;
+          padding: 12px 16px;
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          backdrop-filter: blur(16px);
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.24);
+        }
+
+        .floatingCard small {
+          display: block;
+          color: #8fd0ff;
+          font-weight: 950;
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+        }
+
+        .floatingCard strong {
+          display: block;
+          margin-top: 4px;
+        }
+
+        .floatingCard.one {
+          left: 10px;
+          bottom: 42px;
+        }
+
+        .floatingCard.two {
+          right: 14px;
+          top: 76px;
+        }
+
+        .xpRoles,
+        .xpShowcase,
+        .xpFinal {
           width: min(1120px, calc(100% - 40px));
           margin: 0 auto;
         }
 
-        .xp-section {
-          padding: 70px 0;
+        .xpRoles {
+          padding: 58px 0 72px;
         }
 
-        .xp-heading {
-          max-width: 720px;
-          margin: 0 auto;
+        .xpSectionHead {
           text-align: center;
+          max-width: 660px;
+          margin: 0 auto;
         }
 
-        .xp-heading h2,
-        .xp-workflow h2 {
-          margin: 12px 0 0;
-          font-size: clamp(34px, 4vw, 56px);
-          line-height: 0.98;
-          letter-spacing: -0.07em;
+        .xpSectionHead h2,
+        .xpShowcase h2,
+        .xpFinal h2 {
+          margin: 10px 0 0;
+          font-size: clamp(32px, 4vw, 52px);
+          line-height: 1;
+          letter-spacing: -0.065em;
         }
 
-        .xp-role-grid {
-          margin-top: 32px;
+        .roleGrid {
+          margin-top: 28px;
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 16px;
         }
 
-        .xp-role-card {
-          padding: 18px;
-          min-height: 320px;
+        .roleGrid article {
+          min-height: 290px;
+          padding: 16px;
           border-radius: 28px;
-          background: rgba(255, 255, 255, 0.06);
-          border: 1px solid rgba(185, 214, 255, 0.16);
-          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+          background: rgba(255, 255, 255, 0.055);
+          border: 1px solid rgba(205, 225, 255, 0.14);
         }
 
-        .xp-card-preview {
-          height: 150px;
-          position: relative;
+        .rolePreview {
+          height: 142px;
           border-radius: 22px;
-          padding: 18px;
+          margin-bottom: 16px;
+          position: relative;
+          overflow: hidden;
           background:
-            radial-gradient(circle at 70% 28%, rgba(143, 208, 255, 0.2), transparent 34%),
-            rgba(255, 255, 255, 0.07);
-          margin-bottom: 18px;
+            radial-gradient(circle at 60% 22%, rgba(143, 208, 255, 0.22), transparent 36%),
+            rgba(255, 255, 255, 0.065);
         }
 
-        .preview-line {
-          width: 72%;
-          height: 10px;
-          border-radius: 999px;
-          margin-top: 14px;
-          background: rgba(255, 255, 255, 0.26);
-        }
-
-        .preview-line.large {
-          width: 48%;
-          height: 18px;
-          background: #8fd0ff;
-        }
-
-        .preview-line.short {
-          width: 54%;
-        }
-
-        .preview-chip {
+        .phoneMock,
+        .jobMock,
+        .chartMock,
+        .dashMock {
           position: absolute;
-          right: 16px;
-          bottom: 16px;
-          padding: 8px 12px;
+          inset: 18px;
+          border-radius: 18px;
+          padding: 16px;
+          background: rgba(5, 8, 28, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .phoneMock span {
+          display: block;
+          width: 38px;
+          height: 5px;
+          margin: 0 auto 18px;
           border-radius: 999px;
-          background: rgba(86, 119, 255, 0.4);
-          font-size: 12px;
-          font-weight: 950;
+          background: rgba(255, 255, 255, 0.28);
         }
 
-        .xp-role-card span {
-          color: #8fd0ff;
-          font-size: 12px;
-          font-weight: 950;
-        }
-
-        .xp-role-card h3 {
-          margin: 10px 0 0;
-          font-size: 23px;
+        .phoneMock strong,
+        .jobMock strong,
+        .chartMock strong {
+          display: block;
+          color: #fff;
+          font-size: 18px;
           line-height: 1.05;
+        }
+
+        .phoneMock small,
+        .jobMock small {
+          display: block;
+          margin-top: 9px;
+          color: #8fd0ff;
+        }
+
+        .dashMock {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+        }
+
+        .dashMock i {
+          border-radius: 12px;
+          background: rgba(106, 169, 255, 0.28);
+        }
+
+        .jobMock span,
+        .chartMock > span {
+          color: #8fd0ff;
+        }
+
+        .chartMock div {
+          height: 64px;
+          display: flex;
+          align-items: end;
+          gap: 7px;
+          margin-top: 14px;
+        }
+
+        .chartMock i {
+          flex: 1;
+          border-radius: 9px 9px 0 0;
+          background: linear-gradient(180deg, #8fd0ff, #4057f2);
+        }
+
+        .chartMock i:nth-child(1) { height: 34%; }
+        .chartMock i:nth-child(2) { height: 55%; }
+        .chartMock i:nth-child(3) { height: 76%; }
+        .chartMock i:nth-child(4) { height: 100%; }
+
+        .roleGrid article p {
+          margin: 0;
+          color: #8fd0ff;
+          font-size: 11px;
+          font-weight: 950;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .roleGrid article h3 {
+          margin: 10px 0 0;
+          font-size: 21px;
+          line-height: 1.08;
           letter-spacing: -0.05em;
         }
 
-        .xp-workflow {
-          padding: 38px;
+        .xpShowcase {
+          padding: 34px;
           border-radius: 32px;
           display: grid;
-          grid-template-columns: 0.85fr 1.15fr;
+          grid-template-columns: 0.86fr 1.14fr;
           gap: 28px;
           align-items: center;
-          background: rgba(255, 255, 255, 0.06);
-          border: 1px solid rgba(185, 214, 255, 0.16);
+          background: rgba(255, 255, 255, 0.055);
+          border: 1px solid rgba(205, 225, 255, 0.14);
         }
 
-        .xp-workflow p {
+        .xpShowcase span,
+        .xpFinal span {
+          display: block;
+          margin-top: 14px;
           color: rgba(255, 255, 255, 0.66);
-          line-height: 1.65;
+          line-height: 1.6;
         }
 
-        .xp-flow-list {
+        .workflowList {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 12px;
         }
 
-        .xp-flow-list p {
-          margin: 0;
-          padding: 20px;
-          border-radius: 22px;
-          color: #fff;
+        .workflowList section {
+          padding: 18px;
+          border-radius: 20px;
           background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(255, 255, 255, 0.11);
         }
 
-        .xp-flow-list strong {
+        .workflowList b {
           display: block;
           color: #8fd0ff;
+          font-size: 13px;
           margin-bottom: 8px;
         }
 
-        .experiences-final {
-          margin: 70px auto 60px;
+        .workflowList strong {
+          font-size: 17px;
+        }
+
+        .xpFinal {
+          margin: 64px auto 56px;
+          padding: 54px 28px;
+          text-align: center;
+          border-radius: 32px;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(89, 112, 255, 0.18), transparent 40%),
+            rgba(255, 255, 255, 0.055);
+          border: 1px solid rgba(205, 225, 255, 0.14);
+        }
+
+        .xpFinal span {
+          max-width: 620px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .xpFinal div {
+          margin-top: 24px;
+          display: flex;
+          justify-content: center;
+          gap: 12px;
+          flex-wrap: wrap;
         }
 
         @media (max-width: 980px) {
-          .xp-hero,
-          .xp-workflow {
-            grid-template-columns: 1fr;
+          .xpHero,
+          .xpShowcase {
             height: auto;
             max-height: none;
+            grid-template-columns: 1fr;
           }
 
-          .xp-role-grid {
+          .roleGrid {
             grid-template-columns: repeat(2, 1fr);
           }
         }
 
         @media (max-width: 640px) {
-          .xp-hero {
+          .xpHero {
             width: min(100% - 28px, 1120px);
             min-height: auto;
           }
 
-          .xp-hero-copy h1 {
-            font-size: 44px;
+          .xpHeroText h1 {
+            font-size: 42px;
           }
 
-          .mock-layout {
+          .xpHeroVisual {
+            min-height: auto;
+            padding: 16px;
+          }
+
+          .windowBody {
             grid-template-columns: 1fr;
           }
 
-          .mock-layout aside {
+          .sideRail {
             display: none;
           }
 
-          .mock-grid,
-          .xp-role-grid,
-          .xp-flow-list {
+          .miniStats,
+          .roleGrid,
+          .workflowList {
             grid-template-columns: 1fr;
-          }
-
-          .xp-product-shot {
-            border-radius: 26px;
           }
         }
       `}</style>
