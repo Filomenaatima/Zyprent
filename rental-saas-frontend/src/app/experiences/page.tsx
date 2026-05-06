@@ -9,12 +9,12 @@ export default function ExperiencesPage() {
   return (
     <main className="experiences-page">
       <header className="landing-nav experiences-nav">
-        <a href="/" className="landing-brand" aria-label="Zyprent home">
+        <a href="/" className="landing-brand">
           <span className="landing-brand-mark">Z</span>
           <strong>Zyprent</strong>
         </a>
 
-        <nav className="landing-nav-links" aria-label="Experiences navigation">
+        <nav className="landing-nav-links">
           <a href="/">Home</a>
           <a href="/#solution">Solution</a>
           <a href="/#platform">Platform</a>
@@ -37,18 +37,16 @@ export default function ExperiencesPage() {
         </div>
       </header>
 
-      <section className="experience-hero">
-        <div className="experience-hero-copy">
-          <p className="hero-eyebrow">Zyprent experiences</p>
-
-          <h1>Property work that feels connected.</h1>
-
+      <section className="xp-hero">
+        <div className="xp-hero-copy">
+          <span>Zyprent experiences</span>
+          <h1>Property operations, shown clearly.</h1>
           <p>
-            See how residents, managers, service providers and investors move
-            through one clean property workflow.
+            A cleaner view of how residents, managers, service providers and
+            investors move through one connected property workspace.
           </p>
 
-          <div className="experience-hero-actions">
+          <div className="xp-actions">
             <a
               href={DEMO_FORM_LINK}
               target="_blank"
@@ -57,254 +55,131 @@ export default function ExperiencesPage() {
             >
               Request Demo
             </a>
-
             <a href="/" className="landing-btn secondary large">
               Back Home
             </a>
           </div>
         </div>
 
-        <div className="hero-scene-panel" aria-hidden="true">
-          <div className="scene-orb orb-one" />
-          <div className="scene-orb orb-two" />
-
-          <div className="premium-stage">
-            <div className="stage-plate plate-back" />
-            <div className="stage-plate plate-front" />
-
-            <div className="dashboard-tower">
-              <div className="dash-top">
-                <span />
-                <span />
-                <span />
-              </div>
-
-              <div className="dash-card rent">
-                <small>Rent paid</small>
-                <strong>UGX</strong>
-              </div>
-
-              <div className="dash-card repair">
-                <small>Repair</small>
-                <strong>Assigned</strong>
-              </div>
-
-              <div className="dash-card returns">
-                <small>Returns</small>
-                <strong>Visible</strong>
-              </div>
-
-              <div className="dash-bars">
-                <i />
-                <i />
-                <i />
-                <i />
-              </div>
-            </div>
-
-            <div className="human-card resident">
-              <div className="avatar-face">
-                <span className="hair" />
-                <span className="eye left" />
-                <span className="eye right" />
-                <span className="smile" />
-              </div>
-              <div className="avatar-body blue" />
-              <div className="mini-bubble">Receipt saved</div>
-            </div>
-
-            <div className="human-card manager">
-              <div className="avatar-face manager-face">
-                <span className="hair neat" />
-                <span className="eye left" />
-                <span className="eye right" />
-                <span className="smile" />
-              </div>
-              <div className="avatar-body suit" />
-              <div className="mini-bubble">Live dashboard</div>
-            </div>
-
-            <div className="human-card provider">
-              <div className="avatar-face provider-face">
-                <span className="helmet" />
-                <span className="eye left" />
-                <span className="eye right" />
-                <span className="smile" />
-              </div>
-              <div className="avatar-body overall" />
-              <div className="tool tool-one" />
-              <div className="tool tool-two" />
-              <div className="mini-bubble">On site</div>
-            </div>
+        <div className="xp-product-shot">
+          <div className="mock-topbar">
+            <i />
+            <i />
+            <i />
+            <strong>Live property workspace</strong>
           </div>
-        </div>
-      </section>
 
-      <section className="moment-section">
-        <div className="section-heading center">
-          <span>Real moments</span>
-          <h2>Less explaining. More showing.</h2>
-          <p>
-            Zyprent turns everyday property actions into clear records everyone
-            can follow.
-          </p>
-        </div>
+          <div className="mock-layout">
+            <aside>
+              <span />
+              <span />
+              <span />
+              <span />
+            </aside>
 
-        <div className="moment-grid">
-          <article className="moment-card">
-            <div className="moment-visual">
-              <div className="phone-visual">
-                <span />
-                <h4>Rent payment</h4>
-                <strong>UGX 1,250,000</strong>
-                <p>Receipt generated</p>
+            <section>
+              <div className="mock-hero-card">
+                <div>
+                  <small>Portfolio status</small>
+                  <strong>UGX 48.2M</strong>
+                  <p>Collected this month</p>
+                </div>
+                <button>Live</button>
               </div>
 
-              <div className="person-visual resident-mini">
-                <div className="mini-head" />
-                <div className="mini-body" />
-              </div>
-            </div>
-
-            <div className="moment-copy">
-              <span>Resident</span>
-              <h3>Rent paid without screenshots.</h3>
-              <p>
-                The resident sees the record immediately, and the manager sees
-                it too.
-              </p>
-            </div>
-          </article>
-
-          <article className="moment-card">
-            <div className="moment-visual">
-              <div className="operations-panel">
+              <div className="mock-grid">
                 <div>
-                  <span>Units</span>
-                  <strong>42</strong>
+                  <small>Residents</small>
+                  <strong>128</strong>
                 </div>
                 <div>
-                  <span>Paid</span>
-                  <strong>31</strong>
-                </div>
-                <div>
-                  <span>Open jobs</span>
+                  <small>Open jobs</small>
                   <strong>06</strong>
                 </div>
-              </div>
-
-              <div className="person-visual manager-mini">
-                <div className="mini-head" />
-                <div className="mini-body suit-mini" />
-              </div>
-            </div>
-
-            <div className="moment-copy">
-              <span>Manager</span>
-              <h3>Operations stay visible.</h3>
-              <p>
-                Rent, units, residents, expenses and maintenance are not sitting
-                in different places.
-              </p>
-            </div>
-          </article>
-
-          <article className="moment-card">
-            <div className="moment-visual provider-scene">
-              <div className="provider-worker">
-                <div className="worker-head">
-                  <i />
-                </div>
-                <div className="worker-overall" />
-                <div className="worker-arm left-arm" />
-                <div className="worker-arm right-arm" />
-                <div className="wrench-tool" />
-              </div>
-
-              <div className="repair-ticket">
-                <span>Bathroom leak</span>
-                <strong>Quote approved</strong>
-                <p>Provider assigned</p>
-              </div>
-            </div>
-
-            <div className="moment-copy">
-              <span>Service provider</span>
-              <h3>Work becomes trackable.</h3>
-              <p>
-                Jobs move from request, to quote, to progress, to completion
-                with a clean trail.
-              </p>
-            </div>
-          </article>
-
-          <article className="moment-card">
-            <div className="moment-visual">
-              <div className="return-panel">
-                <span>Property return</span>
-                <strong>18.4%</strong>
-                <div className="return-bars">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
+                <div>
+                  <small>Expenses</small>
+                  <strong>UGX 3.4M</strong>
                 </div>
               </div>
 
-              <div className="person-visual investor-mini">
-                <div className="mini-head" />
-                <div className="mini-body investor-mini-body" />
+              <div className="mock-table">
+                <p>
+                  <span>Rent payment received</span>
+                  <strong>Receipt saved</strong>
+                </p>
+                <p>
+                  <span>Bathroom leak request</span>
+                  <strong>Provider assigned</strong>
+                </p>
+                <p>
+                  <span>Investor return update</span>
+                  <strong>Report ready</strong>
+                </p>
               </div>
-            </div>
-
-            <div className="moment-copy">
-              <span>Investor</span>
-              <h3>Money becomes easier to follow.</h3>
-              <p>
-                Returns, expenses, wallets and property performance become part
-                of one picture.
-              </p>
-            </div>
-          </article>
+            </section>
+          </div>
         </div>
       </section>
 
-      <section className="storyboard-section">
-        <div className="storyboard-copy">
+      <section className="xp-section">
+        <div className="xp-heading">
+          <span>Built around real users</span>
+          <h2>Every role gets the view they need.</h2>
+        </div>
+
+        <div className="xp-role-grid">
+          {[
+            ["Residents", "Pay rent, view receipts, submit requests."],
+            ["Managers", "Track units, residents, payments and work orders."],
+            ["Service Providers", "Receive jobs, quote, update and complete work."],
+            ["Investors", "Follow returns, expenses, wallets and performance."],
+          ].map(([title, text]) => (
+            <article key={title} className="xp-role-card">
+              <div className="xp-card-preview">
+                <div className="preview-line large" />
+                <div className="preview-line" />
+                <div className="preview-line short" />
+                <div className="preview-chip">Live</div>
+              </div>
+              <span>{title}</span>
+              <h3>{text}</h3>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="xp-workflow">
+        <div>
           <span>Connected workflow</span>
-          <h2>One action creates clarity for everyone else.</h2>
+          <h2>From one action to a complete record.</h2>
           <p>
-            A payment, request, quote or payout is tied to the right property,
-            user and record.
+            Payments, maintenance updates, approvals and reports stay tied to
+            the right property and user.
           </p>
         </div>
 
-        <div className="storyboard-flow">
-          <div>
-            <strong>01</strong>
-            <span>Resident pays</span>
-          </div>
-          <div>
-            <strong>02</strong>
-            <span>Manager sees it</span>
-          </div>
-          <div>
-            <strong>03</strong>
-            <span>Provider updates work</span>
-          </div>
-          <div>
-            <strong>04</strong>
-            <span>Investor views returns</span>
-          </div>
+        <div className="xp-flow-list">
+          <p>
+            <strong>01</strong> Resident pays rent
+          </p>
+          <p>
+            <strong>02</strong> Manager sees payment status
+          </p>
+          <p>
+            <strong>03</strong> Provider completes assigned work
+          </p>
+          <p>
+            <strong>04</strong> Investor reviews performance
+          </p>
         </div>
       </section>
 
       <section className="final-cta experiences-final">
-        <span>Built for connected property work</span>
-        <h2>Give every user a better way to work.</h2>
+        <span>One workspace for property operations</span>
+        <h2>Give every user a clearer way to work.</h2>
         <p>
-          Managers, investors, residents and service providers all operate from
-          one connected property system.
+          Zyprent connects the people, payments, maintenance and financial
+          records behind every property.
         </p>
 
         <div className="final-actions">
@@ -326,747 +201,395 @@ export default function ExperiencesPage() {
         .experiences-page {
           min-height: 100vh;
           background:
-            radial-gradient(circle at 78% 12%, rgba(134, 198, 255, 0.2), transparent 30%),
-            radial-gradient(circle at 12% 78%, rgba(51, 83, 221, 0.18), transparent 34%),
-            linear-gradient(135deg, #030107 0%, #07051a 45%, #0b1026 100%);
-          color: #ffffff;
+            radial-gradient(circle at 80% 8%, rgba(102, 164, 255, 0.2), transparent 30%),
+            linear-gradient(135deg, #04040c 0%, #080a1d 48%, #0b1026 100%);
+          color: #fff;
           overflow-x: hidden;
         }
 
         .experiences-nav {
           position: relative;
-          z-index: 10;
+          z-index: 20;
         }
 
-        .experience-hero {
+        .xp-hero {
           width: min(1120px, calc(100% - 40px));
+          height: calc(100vh - 92px);
+          max-height: 650px;
+          min-height: 560px;
           margin: 0 auto;
-          min-height: calc(100vh - 92px);
-          max-height: 760px;
           display: grid;
-          grid-template-columns: 0.84fr 1.16fr;
+          grid-template-columns: 0.78fr 1.22fr;
           align-items: center;
           gap: 42px;
-          padding: 26px 0 42px;
+          padding: 22px 0 34px;
         }
 
-        .experience-hero-copy h1 {
-          margin: 0;
-          max-width: 560px;
-          font-size: clamp(54px, 6.4vw, 86px);
-          line-height: 0.91;
-          letter-spacing: -0.08em;
+        .xp-hero-copy span,
+        .xp-heading span,
+        .xp-workflow span,
+        .final-cta span {
+          color: #8fd0ff;
+          font-size: 12px;
+          font-weight: 950;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
         }
 
-        .experience-hero-copy p:not(.hero-eyebrow) {
+        .xp-hero-copy h1 {
+          margin: 14px 0 0;
+          max-width: 520px;
+          font-size: clamp(44px, 5vw, 68px);
+          line-height: 0.95;
+          letter-spacing: -0.075em;
+        }
+
+        .xp-hero-copy p {
           margin: 20px 0 0;
-          max-width: 470px;
-          color: rgba(255, 255, 255, 0.72);
+          max-width: 460px;
+          color: rgba(255, 255, 255, 0.7);
           font-size: 17px;
-          line-height: 1.55;
+          line-height: 1.6;
         }
 
-        .experience-hero-actions {
+        .xp-actions {
           margin-top: 26px;
           display: flex;
           gap: 14px;
           flex-wrap: wrap;
         }
 
-        .hero-scene-panel {
-          position: relative;
-          height: 560px;
-          border-radius: 42px;
-          background:
-            radial-gradient(circle at 50% 35%, rgba(132, 197, 255, 0.24), transparent 42%),
-            linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-          border: 1px solid rgba(180, 210, 255, 0.18);
-          box-shadow: 0 34px 95px rgba(0, 0, 0, 0.34);
-          overflow: hidden;
-        }
-
-        .scene-orb {
-          position: absolute;
-          border-radius: 999px;
-          filter: blur(8px);
-        }
-
-        .orb-one {
-          width: 360px;
-          height: 360px;
-          right: 50px;
-          top: 42px;
-          background: rgba(116, 172, 255, 0.18);
-        }
-
-        .orb-two {
-          width: 250px;
-          height: 250px;
-          left: 52px;
-          bottom: 58px;
-          background: rgba(61, 88, 235, 0.2);
-        }
-
-        .premium-stage {
-          position: absolute;
-          inset: 30px;
-        }
-
-        .stage-plate {
-          position: absolute;
-          left: 50%;
-          border-radius: 50%;
-          transform: translateX(-50%) rotateX(62deg);
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(70, 104, 255, 0.12));
-        }
-
-        .plate-back {
-          bottom: 68px;
-          width: 420px;
-          height: 170px;
-          opacity: 0.62;
-        }
-
-        .plate-front {
-          bottom: 48px;
-          width: 520px;
-          height: 190px;
-          box-shadow: 0 30px 75px rgba(0, 0, 0, 0.28);
-        }
-
-        .dashboard-tower {
-          position: absolute;
-          left: 50%;
-          top: 78px;
-          width: 245px;
-          height: 315px;
-          transform: translateX(-50%);
+        .xp-product-shot {
           border-radius: 34px;
-          background:
-            linear-gradient(145deg, rgba(143, 208, 255, 0.18), rgba(58, 80, 230, 0.24)),
-            rgba(255, 255, 255, 0.07);
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          backdrop-filter: blur(18px);
-          box-shadow: 0 26px 70px rgba(0, 0, 0, 0.34);
-          padding: 18px;
-          animation: softFloat 7s ease-in-out infinite;
-        }
-
-        @keyframes softFloat {
-          0%, 100% {
-            transform: translateX(-50%) translateY(0);
-          }
-          50% {
-            transform: translateX(-50%) translateY(-10px);
-          }
-        }
-
-        .dash-top {
-          display: flex;
-          gap: 8px;
-          margin-bottom: 14px;
-        }
-
-        .dash-top span {
-          width: 34px;
-          height: 8px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.32);
-        }
-
-        .dash-card {
-          padding: 12px;
-          border-radius: 18px;
-          margin-bottom: 10px;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.14);
-        }
-
-        .dash-card small {
-          display: block;
-          color: #8fd0ff;
-          font-size: 10px;
-          font-weight: 950;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-        }
-
-        .dash-card strong {
-          display: block;
-          margin-top: 4px;
-          font-size: 15px;
-        }
-
-        .dash-bars {
-          height: 82px;
-          display: flex;
-          align-items: flex-end;
-          gap: 10px;
-          margin-top: 8px;
-        }
-
-        .dash-bars i {
-          flex: 1;
-          border-radius: 12px 12px 0 0;
-          background: linear-gradient(180deg, #8fd0ff, #4057f2);
-        }
-
-        .dash-bars i:nth-child(1) { height: 32%; }
-        .dash-bars i:nth-child(2) { height: 56%; }
-        .dash-bars i:nth-child(3) { height: 76%; }
-        .dash-bars i:nth-child(4) { height: 100%; }
-
-        .human-card {
-          position: absolute;
-          width: 130px;
-          height: 172px;
-          padding: 14px;
-          border-radius: 30px;
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.16);
-          backdrop-filter: blur(16px);
-          box-shadow: 0 24px 64px rgba(0, 0, 0, 0.26);
-          animation: floatHuman 6s ease-in-out infinite;
-        }
-
-        @keyframes floatHuman {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
-        }
-
-        .resident {
-          left: 30px;
-          bottom: 70px;
-        }
-
-        .manager {
-          right: 34px;
-          top: 56px;
-          animation-delay: -1.5s;
-        }
-
-        .provider {
-          right: 44px;
-          bottom: 64px;
-          animation-delay: -3s;
-        }
-
-        .avatar-face {
-          position: relative;
-          width: 58px;
-          height: 58px;
-          margin: 0 auto;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #f3c69a, #b97748);
           overflow: hidden;
+          border: 1px solid rgba(185, 214, 255, 0.18);
+          background: rgba(255, 255, 255, 0.07);
+          box-shadow: 0 35px 100px rgba(0, 0, 0, 0.38);
+          backdrop-filter: blur(18px);
         }
 
-        .hair {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-          height: 20px;
-          border-radius: 50% 50% 40% 40%;
-          background: #2a1b18;
+        .mock-topbar {
+          height: 54px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 0 18px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+          background: rgba(255, 255, 255, 0.06);
         }
 
-        .hair.neat {
-          height: 16px;
-          background: #1b2136;
-        }
-
-        .helmet {
-          position: absolute;
-          left: 4px;
-          top: 0;
-          width: 50px;
-          height: 24px;
-          border-radius: 24px 24px 8px 8px;
-          background: linear-gradient(135deg, #ffd96a, #f2a900);
-        }
-
-        .eye {
-          position: absolute;
-          top: 31px;
-          width: 5px;
-          height: 5px;
+        .mock-topbar i {
+          width: 10px;
+          height: 10px;
           border-radius: 50%;
-          background: #171717;
+          background: rgba(255, 255, 255, 0.35);
         }
 
-        .eye.left { left: 20px; }
-        .eye.right { right: 20px; }
-
-        .smile {
-          position: absolute;
-          left: 23px;
-          bottom: 13px;
-          width: 14px;
-          height: 7px;
-          border-bottom: 2px solid rgba(0, 0, 0, 0.5);
-          border-radius: 0 0 999px 999px;
+        .mock-topbar strong {
+          margin-left: auto;
+          font-size: 13px;
+          color: rgba(255, 255, 255, 0.72);
         }
 
-        .avatar-body {
-          width: 82px;
-          height: 75px;
-          margin: -4px auto 0;
-          border-radius: 30px 30px 18px 18px;
-          box-shadow: inset 10px 0 20px rgba(255, 255, 255, 0.14);
+        .mock-layout {
+          display: grid;
+          grid-template-columns: 150px 1fr;
+          min-height: 430px;
         }
 
-        .blue {
-          background: linear-gradient(135deg, #8fd0ff, #4057f2);
+        .mock-layout aside {
+          padding: 22px;
+          border-right: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(2, 4, 18, 0.34);
         }
 
-        .suit {
-          background: linear-gradient(135deg, #ffffff, #6f7faa);
-        }
-
-        .overall {
-          background:
-            linear-gradient(90deg, transparent 42%, rgba(255, 255, 255, 0.34) 42%, rgba(255, 255, 255, 0.34) 58%, transparent 58%),
-            linear-gradient(135deg, #ffcb62, #315cff);
-        }
-
-        .mini-bubble {
-          position: absolute;
-          left: 50%;
-          bottom: 12px;
-          transform: translateX(-50%);
-          white-space: nowrap;
-          padding: 8px 10px;
+        .mock-layout aside span {
+          display: block;
+          height: 12px;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.12);
-          color: #ffffff;
-          font-size: 11px;
-          font-weight: 900;
+          margin-bottom: 18px;
+          background: rgba(255, 255, 255, 0.22);
         }
 
-        .tool {
-          position: absolute;
-          background: #d8eaff;
+        .mock-layout aside span:nth-child(1) {
+          width: 76px;
+        }
+
+        .mock-layout aside span:nth-child(2) {
+          width: 96px;
+          background: rgba(96, 130, 255, 0.8);
+        }
+
+        .mock-layout aside span:nth-child(3) {
+          width: 70px;
+        }
+
+        .mock-layout aside span:nth-child(4) {
+          width: 86px;
+        }
+
+        .mock-layout section {
+          padding: 24px;
+        }
+
+        .mock-hero-card {
+          min-height: 145px;
+          border-radius: 26px;
+          padding: 24px;
+          display: flex;
+          justify-content: space-between;
+          background: linear-gradient(135deg, #101d55, #315bea);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+        }
+
+        .mock-hero-card small,
+        .mock-grid small {
+          color: rgba(255, 255, 255, 0.68);
+          font-weight: 800;
+        }
+
+        .mock-hero-card strong {
+          display: block;
+          margin-top: 10px;
+          font-size: 38px;
+          letter-spacing: -0.06em;
+        }
+
+        .mock-hero-card p {
+          margin: 8px 0 0;
+          color: rgba(255, 255, 255, 0.68);
+        }
+
+        .mock-hero-card button {
+          align-self: flex-start;
+          border: 0;
           border-radius: 999px;
-          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.22);
+          padding: 9px 14px;
+          color: #0b1026;
+          font-weight: 950;
+          background: #fff;
         }
 
-        .tool-one {
-          right: 4px;
-          top: 74px;
-          width: 44px;
-          height: 8px;
-          transform: rotate(-34deg);
+        .mock-grid {
+          margin-top: 16px;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
         }
 
-        .tool-two {
-          right: 16px;
-          top: 88px;
-          width: 28px;
-          height: 8px;
-          transform: rotate(40deg);
+        .mock-grid div {
+          padding: 18px;
+          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
-        .moment-section,
-        .storyboard-section,
+        .mock-grid strong {
+          display: block;
+          margin-top: 8px;
+          font-size: 24px;
+        }
+
+        .mock-table {
+          margin-top: 16px;
+          padding: 8px;
+          border-radius: 22px;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mock-table p {
+          margin: 0;
+          padding: 14px;
+          display: flex;
+          justify-content: space-between;
+          gap: 20px;
+          color: rgba(255, 255, 255, 0.72);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .mock-table p:last-child {
+          border-bottom: 0;
+        }
+
+        .mock-table strong {
+          color: #fff;
+        }
+
+        .xp-section,
+        .xp-workflow,
         .experiences-final {
           width: min(1120px, calc(100% - 40px));
           margin: 0 auto;
         }
 
-        .moment-section {
-          padding: 80px 0;
+        .xp-section {
+          padding: 70px 0;
         }
 
-        .section-heading p {
-          max-width: 640px;
-          margin: 14px auto 0;
-          color: rgba(255, 255, 255, 0.64);
-          line-height: 1.6;
+        .xp-heading {
+          max-width: 720px;
+          margin: 0 auto;
+          text-align: center;
         }
 
-        .moment-grid {
+        .xp-heading h2,
+        .xp-workflow h2 {
+          margin: 12px 0 0;
+          font-size: clamp(34px, 4vw, 56px);
+          line-height: 0.98;
+          letter-spacing: -0.07em;
+        }
+
+        .xp-role-grid {
           margin-top: 32px;
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 16px;
         }
 
-        .moment-card {
-          border-radius: 30px;
-          overflow: hidden;
-          border: 1px solid rgba(180, 210, 255, 0.18);
+        .xp-role-card {
+          padding: 18px;
+          min-height: 320px;
+          border-radius: 28px;
           background: rgba(255, 255, 255, 0.06);
-          box-shadow: 0 30px 90px rgba(0, 0, 0, 0.26);
+          border: 1px solid rgba(185, 214, 255, 0.16);
+          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
         }
 
-        .moment-visual {
-          height: 210px;
+        .xp-card-preview {
+          height: 150px;
           position: relative;
-          background:
-            radial-gradient(circle at 50% 44%, rgba(143, 208, 255, 0.2), transparent 38%),
-            linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(66, 91, 232, 0.12));
-        }
-
-        .phone-visual {
-          position: absolute;
-          left: 22px;
-          top: 22px;
-          width: 125px;
-          height: 160px;
-          padding: 18px;
-          border-radius: 24px;
-          background: #071027;
-          border: 1px solid rgba(255, 255, 255, 0.16);
-        }
-
-        .phone-visual span {
-          display: block;
-          width: 40px;
-          height: 5px;
-          margin: 0 auto 18px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.32);
-        }
-
-        .phone-visual h4 {
-          margin: 0;
-          color: #8fd0ff;
-          font-size: 13px;
-        }
-
-        .phone-visual strong {
-          display: block;
-          margin-top: 12px;
-          font-size: 22px;
-        }
-
-        .phone-visual p {
-          margin: 12px 0 0;
-          padding: 8px;
-          border-radius: 10px;
-          background: rgba(74, 110, 255, 0.22);
-          font-size: 12px;
-        }
-
-        .person-visual {
-          position: absolute;
-          right: 32px;
-          bottom: 22px;
-          width: 80px;
-        }
-
-        .mini-head {
-          width: 52px;
-          height: 52px;
-          margin: 0 auto;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #f3c69a, #b97748);
-        }
-
-        .mini-body {
-          width: 80px;
-          height: 78px;
-          margin-top: -4px;
-          border-radius: 28px 28px 16px 16px;
-          background: linear-gradient(135deg, #8fd0ff, #4057f2);
-        }
-
-        .suit-mini {
-          background: linear-gradient(135deg, #ffffff, #6f7faa);
-        }
-
-        .investor-mini-body {
-          background: linear-gradient(135deg, #e4f3ff, #203bba);
-        }
-
-        .operations-panel,
-        .return-panel,
-        .repair-ticket {
-          position: absolute;
-          left: 22px;
-          right: 22px;
-          bottom: 24px;
-          padding: 18px;
           border-radius: 22px;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.14);
-          backdrop-filter: blur(12px);
-        }
-
-        .operations-panel {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 10px;
-        }
-
-        .operations-panel span,
-        .return-panel span,
-        .repair-ticket span {
-          display: block;
-          color: #8fd0ff;
-          font-size: 10px;
-          font-weight: 950;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-        }
-
-        .operations-panel strong,
-        .return-panel strong,
-        .repair-ticket strong {
-          display: block;
-          margin-top: 6px;
-          font-size: 20px;
-        }
-
-        .provider-scene {
-          display: grid;
-          place-items: center;
-        }
-
-        .provider-worker {
-          position: absolute;
-          left: 32px;
-          bottom: 26px;
-          width: 100px;
-          height: 145px;
-        }
-
-        .worker-head {
-          position: relative;
-          width: 56px;
-          height: 56px;
-          margin: 0 auto;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #f3c69a, #b97748);
-        }
-
-        .worker-head i {
-          position: absolute;
-          left: 3px;
-          top: -2px;
-          width: 50px;
-          height: 24px;
-          border-radius: 24px 24px 8px 8px;
-          background: linear-gradient(135deg, #ffd96a, #f2a900);
-        }
-
-        .worker-overall {
-          width: 86px;
-          height: 86px;
-          margin: -4px auto 0;
-          border-radius: 30px 30px 18px 18px;
+          padding: 18px;
           background:
-            linear-gradient(90deg, transparent 42%, rgba(255, 255, 255, 0.34) 42%, rgba(255, 255, 255, 0.34) 58%, transparent 58%),
-            linear-gradient(135deg, #ffcb62, #315cff);
+            radial-gradient(circle at 70% 28%, rgba(143, 208, 255, 0.2), transparent 34%),
+            rgba(255, 255, 255, 0.07);
+          margin-bottom: 18px;
         }
 
-        .worker-arm {
-          position: absolute;
-          width: 46px;
-          height: 12px;
+        .preview-line {
+          width: 72%;
+          height: 10px;
           border-radius: 999px;
-          background: #f0bd90;
-          top: 76px;
-        }
-
-        .left-arm {
-          left: 0;
-          transform: rotate(28deg);
-        }
-
-        .right-arm {
-          right: 0;
-          transform: rotate(-34deg);
-        }
-
-        .wrench-tool {
-          position: absolute;
-          right: -4px;
-          top: 58px;
-          width: 52px;
-          height: 9px;
-          border-radius: 999px;
-          background: #d8eaff;
-          transform: rotate(-36deg);
-          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.22);
-        }
-
-        .repair-ticket {
-          left: auto;
-          right: 20px;
-          width: 150px;
-          bottom: 38px;
-        }
-
-        .repair-ticket p {
-          margin: 8px 0 0;
-          color: rgba(255, 255, 255, 0.62);
-          font-size: 13px;
-        }
-
-        .return-bars {
-          display: flex;
-          align-items: end;
-          gap: 8px;
-          height: 70px;
           margin-top: 14px;
+          background: rgba(255, 255, 255, 0.26);
         }
 
-        .return-bars i {
-          flex: 1;
-          border-radius: 10px 10px 0 0;
-          background: linear-gradient(180deg, #8fd0ff, #4057f2);
+        .preview-line.large {
+          width: 48%;
+          height: 18px;
+          background: #8fd0ff;
         }
 
-        .return-bars i:nth-child(1) { height: 32%; }
-        .return-bars i:nth-child(2) { height: 55%; }
-        .return-bars i:nth-child(3) { height: 78%; }
-        .return-bars i:nth-child(4) { height: 100%; }
-
-        .moment-copy {
-          padding: 22px;
+        .preview-line.short {
+          width: 54%;
         }
 
-        .moment-copy span {
-          color: #8fd0ff;
-          font-size: 11px;
+        .preview-chip {
+          position: absolute;
+          right: 16px;
+          bottom: 16px;
+          padding: 8px 12px;
+          border-radius: 999px;
+          background: rgba(86, 119, 255, 0.4);
+          font-size: 12px;
           font-weight: 950;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
         }
 
-        .moment-copy h3 {
-          margin: 12px 0 0;
-          font-size: 24px;
-          line-height: 1.04;
-          letter-spacing: -0.06em;
+        .xp-role-card span {
+          color: #8fd0ff;
+          font-size: 12px;
+          font-weight: 950;
         }
 
-        .moment-copy p {
-          margin: 12px 0 0;
-          color: rgba(255, 255, 255, 0.62);
-          line-height: 1.55;
-          font-size: 14px;
+        .xp-role-card h3 {
+          margin: 10px 0 0;
+          font-size: 23px;
+          line-height: 1.05;
+          letter-spacing: -0.05em;
         }
 
-        .storyboard-section {
+        .xp-workflow {
           padding: 38px;
-          border-radius: 34px;
+          border-radius: 32px;
           display: grid;
           grid-template-columns: 0.85fr 1.15fr;
           gap: 28px;
           align-items: center;
           background: rgba(255, 255, 255, 0.06);
-          border: 1px solid rgba(180, 210, 255, 0.18);
-          box-shadow: 0 30px 90px rgba(0, 0, 0, 0.26);
+          border: 1px solid rgba(185, 214, 255, 0.16);
         }
 
-        .storyboard-copy span {
-          color: #8fd0ff;
-          font-size: 12px;
-          font-weight: 950;
-          text-transform: uppercase;
-          letter-spacing: 0.16em;
-        }
-
-        .storyboard-copy h2 {
-          margin: 14px 0 0;
-          font-size: clamp(34px, 4vw, 56px);
-          line-height: 0.96;
-          letter-spacing: -0.07em;
-        }
-
-        .storyboard-copy p {
-          margin: 18px 0 0;
+        .xp-workflow p {
           color: rgba(255, 255, 255, 0.66);
           line-height: 1.65;
         }
 
-        .storyboard-flow {
+        .xp-flow-list {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 14px;
+          gap: 12px;
         }
 
-        .storyboard-flow div {
+        .xp-flow-list p {
+          margin: 0;
           padding: 20px;
-          border-radius: 24px;
+          border-radius: 22px;
+          color: #fff;
           background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.14);
+          border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
-        .storyboard-flow strong {
-          color: #8fd0ff;
-          font-size: 13px;
-        }
-
-        .storyboard-flow span {
+        .xp-flow-list strong {
           display: block;
-          margin-top: 10px;
-          font-weight: 950;
-          font-size: 18px;
-          line-height: 1.1;
+          color: #8fd0ff;
+          margin-bottom: 8px;
         }
 
         .experiences-final {
-          margin: 80px auto 60px;
+          margin: 70px auto 60px;
         }
 
-        @media (max-width: 1050px) {
-          .experience-hero,
-          .storyboard-section {
+        @media (max-width: 980px) {
+          .xp-hero,
+          .xp-workflow {
             grid-template-columns: 1fr;
+            height: auto;
             max-height: none;
           }
 
-          .moment-grid {
+          .xp-role-grid {
             grid-template-columns: repeat(2, 1fr);
-          }
-
-          .hero-scene-panel {
-            height: 560px;
           }
         }
 
-        @media (max-width: 680px) {
-          .experience-hero {
+        @media (max-width: 640px) {
+          .xp-hero {
             width: min(100% - 28px, 1120px);
-            padding-top: 28px;
+            min-height: auto;
           }
 
-          .experience-hero-copy h1 {
-            font-size: 46px;
+          .xp-hero-copy h1 {
+            font-size: 44px;
           }
 
-          .hero-scene-panel {
-            height: 500px;
-          }
-
-          .dashboard-tower {
-            transform: translateX(-50%) scale(0.82);
-          }
-
-          .human-card {
-            transform: scale(0.82);
-          }
-
-          .manager {
-            right: 14px;
-          }
-
-          .resident {
-            left: 12px;
-          }
-
-          .provider {
-            right: 16px;
-          }
-
-          .moment-grid,
-          .storyboard-flow {
+          .mock-layout {
             grid-template-columns: 1fr;
+          }
+
+          .mock-layout aside {
+            display: none;
+          }
+
+          .mock-grid,
+          .xp-role-grid,
+          .xp-flow-list {
+            grid-template-columns: 1fr;
+          }
+
+          .xp-product-shot {
+            border-radius: 26px;
           }
         }
       `}</style>
