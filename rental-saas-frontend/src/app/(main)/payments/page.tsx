@@ -15,6 +15,28 @@ type AppRole =
 type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED";
 type InvoiceStatus = "ISSUED" | "PARTIALLY_PAID" | "PAID" | "OVERDUE";
 
+type FlutterwaveCheckoutPayload = {
+  public_key: string | undefined;
+  tx_ref: string;
+  amount: number;
+  currency: string;
+  payment_options: string;
+  customer: {
+    email?: string | null;
+    phone_number?: string | null;
+    name?: string | null;
+  };
+  meta?: Record<string, any>;
+  callback?: (payment: any) => void;
+  onclose?: () => void;
+};
+
+declare global {
+  interface Window {
+    FlutterwaveCheckout?: (payload: FlutterwaveCheckoutPayload) => void;
+  }
+}
+
 type ResidentPaymentItem = {
   id: string;
   createdAt: string;
@@ -365,84 +387,82 @@ export default function PaymentsPage() {
   const [invoiceKindFilter, setInvoiceKindFilter] =
     useState<InvoiceKindFilter>("ALL");
   const [error, setError] = useState("");
+  const [payingInvoiceId, setPayingInvoiceId] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
+  async function loadPayments() {
+    try {
+      setLoading(true);
+      setError("");
 
-    async function loadPayments() {
-      try {
-        setLoading(true);
-        setError("");
+      if (isResident) {
+        const [paymentsRes, summaryRes, invoiceRes] = await Promise.all([
+          api.get<ResidentPaymentsResponse>("/payments/resident/me"),
+          api.get<ResidentPaymentSummaryResponse>("/payments/resident/summary"),
+          api
+            .get<CurrentResidentInvoiceResponse>("/invoices/resident/me/current")
+            .catch(() => ({ data: null })),
+        ]);
 
-        if (isResident) {
-          const [paymentsRes, summaryRes, invoiceRes] = await Promise.all([
-            api.get<ResidentPaymentsResponse>("/payments/resident/me"),
-            api.get<ResidentPaymentSummaryResponse>("/payments/resident/summary"),
-            api
-              .get<CurrentResidentInvoiceResponse>("/invoices/resident/me/current")
-              .catch(() => ({ data: null })),
-          ]);
+        setPayments(paymentsRes.data?.items || []);
+        setSummary(summaryRes.data || null);
+        setCurrentInvoiceDetails(invoiceRes.data || null);
+        setPlatformResponse(null);
+        setSelectedPaymentId(null);
 
-          if (!mounted) return;
+        return;
+      }
 
-          setPayments(paymentsRes.data?.items || []);
-          setSummary(summaryRes.data || null);
-          setCurrentInvoiceDetails(invoiceRes.data || null);
-          setPlatformResponse(null);
-          setSelectedPaymentId(null);
+      const endpoint = getPlatformEndpoint(role);
 
-          return;
-        }
-
-        const endpoint = getPlatformEndpoint(role);
-
-        if (!endpoint) {
-          if (!mounted) return;
-
-          setError("This payments view is not available for your account.");
-          setPayments([]);
-          setSummary(null);
-          setCurrentInvoiceDetails(null);
-          setPlatformResponse(null);
-          setSelectedPaymentId(null);
-
-          return;
-        }
-
-        const res = await api.get<PlatformPaymentsResponse>(endpoint, {
-          params: {
-            page,
-            limit: 30,
-            search: search.trim() || undefined,
-          },
-        });
-
-        if (!mounted) return;
-
-        setPlatformResponse(res.data);
-        setPayments([]);
-        setSummary(null);
-        setCurrentInvoiceDetails(null);
-      } catch (err) {
-        console.error("Failed to load payments", err);
-
-        if (!mounted) return;
-
-        setError("Failed to load payments.");
+      if (!endpoint) {
+        setError("This payments view is not available for your account.");
         setPayments([]);
         setSummary(null);
         setCurrentInvoiceDetails(null);
         setPlatformResponse(null);
         setSelectedPaymentId(null);
-      } finally {
-        if (mounted) setLoading(false);
+
+        return;
       }
+
+      const res = await api.get<PlatformPaymentsResponse>(endpoint, {
+        params: {
+          page,
+          limit: 30,
+          search: search.trim() || undefined,
+        },
+      });
+
+      setPlatformResponse(res.data);
+      setPayments([]);
+      setSummary(null);
+      setCurrentInvoiceDetails(null);
+    } catch (err) {
+      console.error("Failed to load payments", err);
+
+      setError("Failed to load payments.");
+      setPayments([]);
+      setSummary(null);
+      setCurrentInvoiceDetails(null);
+      setPlatformResponse(null);
+      setSelectedPaymentId(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    let active = true;
+
+    async function run() {
+      if (!active) return;
+      await loadPayments();
     }
 
-    loadPayments();
+    run();
 
     return () => {
-      mounted = false;
+      active = false;
     };
   }, [isResident, role, page, search]);
 
@@ -499,6 +519,64 @@ export default function PaymentsPage() {
       outstandingAmount: toNumber(currentInvoiceDetails.outstandingAmount),
     };
   }, [currentInvoiceDetails, residentInvoices, summary]);
+
+  async function handleResidentFlutterwavePayment(invoice: ResidentPaymentSummaryResponse["currentInvoices"][number]) {
+    if (payingInvoiceId) return;
+
+    const amount = toNumber(invoice.outstandingAmount);
+
+    if (!amount || amount <= 0) {
+      window.alert("This invoice has no outstanding balance.");
+      return;
+    }
+
+    if (!window.FlutterwaveCheckout) {
+      window.alert("Flutterwave checkout is still loading. Please wait a moment and try again.");
+      return;
+    }
+
+    try {
+      setPayingInvoiceId(invoice.id);
+
+      const res = await api.post("/payments/initiate/mobile-money", {
+        invoiceId: invoice.id,
+        amount,
+        provider: "FLUTTERWAVE",
+      });
+
+      const data = res.data;
+
+      window.FlutterwaveCheckout({
+        public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY,
+        tx_ref: data.providerRef,
+        amount: data.amount,
+        currency: "UGX",
+        payment_options: "card,mobilemoneyuganda",
+        customer: {
+          email: user?.email || "",
+          phone_number: (user as any)?.phone || "",
+          name: user?.name || "Zyprent User",
+        },
+        meta: data.flutterwaveMeta,
+        callback: function () {
+          window.alert("Payment is processing. Your invoice will update once the provider confirms it.");
+          setTimeout(() => {
+            loadPayments();
+          }, 4000);
+        },
+        onclose: function () {
+          setTimeout(() => {
+            loadPayments();
+          }, 2500);
+        },
+      });
+    } catch (err: any) {
+      console.error("Payment initiation failed", err);
+      window.alert(err?.response?.data?.message || "Payment initiation failed.");
+    } finally {
+      setPayingInvoiceId(null);
+    }
+  }
 
   const platformRawItems = platformResponse?.items || [];
 
@@ -711,10 +789,94 @@ export default function PaymentsPage() {
                   Payments can be settled from wallet, mobile money, card, or
                   bank depending on the selected payment channel.
                 </div>
+
+                <button
+                  type="button"
+                  className="payments-secondary-btn"
+                  onClick={() => handleResidentFlutterwavePayment(residentCurrentInvoice)}
+                  disabled={
+                    payingInvoiceId === residentCurrentInvoice.id ||
+                    toNumber(residentCurrentInvoice.outstandingAmount) <= 0
+                  }
+                >
+                  {payingInvoiceId === residentCurrentInvoice.id
+                    ? "Opening checkout..."
+                    : "Pay with Flutterwave"}
+                </button>
               </div>
             </div>
           )}
         </section>
+
+        {residentInvoices.length > 1 ? (
+          <section className="payments-card">
+            <div className="payments-card-head">
+              <div>
+                <h2 className="payments-card-title">Open Bills</h2>
+                <p className="payments-card-subtitle">
+                  Pay any active bill directly through Flutterwave checkout.
+                </p>
+              </div>
+              <span className="payments-chip">{residentInvoices.length} bills</span>
+            </div>
+
+            <div className="payments-table resident-payments-table">
+              <div className="payments-head resident-payments-head">
+                <span>Property</span>
+                <span>Bill</span>
+                <span>Outstanding</span>
+                <span>Status</span>
+                <span>Due</span>
+                <span>Action</span>
+              </div>
+
+              <div className="payments-body">
+                {residentInvoices.map((invoice) => (
+                  <div key={invoice.id} className="payments-row resident-payments-row">
+                    <div className="payments-cell-main">
+                      <strong>{invoice.propertyTitle || "Property"}</strong>
+                      <p>{invoice.propertyLocation || "No location"}</p>
+                    </div>
+
+                    <div className="payments-cell-main">
+                      <strong>{invoice.kindLabel || "Bill"}</strong>
+                      <p>Unit {invoice.unitNumber || "—"} · {invoice.period}</p>
+                    </div>
+
+                    <div className="payments-cell-main">
+                      <strong>{formatMoney(invoice.outstandingAmount)}</strong>
+                      <p>Total {formatMoney(invoice.totalAmount)}</p>
+                    </div>
+
+                    <div className="payments-cell-main">
+                      <span className={`status ${getInvoiceBadgeClass(invoice.status)}`}>
+                        {formatStatusLabel(invoice.status)}
+                      </span>
+                    </div>
+
+                    <div className="payments-cell-main">
+                      <strong>{formatDate(invoice.dueDate)}</strong>
+                    </div>
+
+                    <div className="payments-cell-main">
+                      <button
+                        type="button"
+                        className="payments-secondary-btn"
+                        onClick={() => handleResidentFlutterwavePayment(invoice)}
+                        disabled={
+                          payingInvoiceId === invoice.id ||
+                          toNumber(invoice.outstandingAmount) <= 0
+                        }
+                      >
+                        {payingInvoiceId === invoice.id ? "Opening..." : "Pay"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <section className="payments-card">
           <div className="payments-card-head">

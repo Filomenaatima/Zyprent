@@ -15,6 +15,28 @@ type UserRole =
 
 type WithdrawalMethod = "MOBILE_MONEY" | "BANK" | "CARD";
 
+type FlutterwaveCheckoutPayload = {
+  public_key: string | undefined;
+  tx_ref: string;
+  amount: number;
+  currency: string;
+  payment_options: string;
+  customer: {
+    email?: string | null;
+    phone_number?: string | null;
+    name?: string | null;
+  };
+  meta?: Record<string, any>;
+  callback?: (payment: any) => void;
+  onclose?: () => void;
+};
+
+declare global {
+  interface Window {
+    FlutterwaveCheckout?: (payload: FlutterwaveCheckoutPayload) => void;
+  }
+}
+
 type WalletTransactionItem = {
   id: string;
   title: string;
@@ -76,8 +98,8 @@ type ResidentPaymentSummaryResponse = {
 };
 
 type PaymentMethod = "WALLET" | "MOBILE_MONEY" | "CARD" | "BANK";
-type MobileProvider = "MTN" | "AIRTEL";
-type CardProvider = "STRIPE";
+type MobileProvider = "MTN" | "AIRTEL" | "FLUTTERWAVE";
+type CardProvider = "STRIPE" | "FLUTTERWAVE";
 type BankProvider = "FLUTTERWAVE";
 
 type WalletQuickAction = {
@@ -170,6 +192,10 @@ function formatReference(reference?: string | null) {
   return reference?.trim() || "—";
 }
 
+function getFlutterwavePublicKey() {
+  return process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY;
+}
+
 export default function WalletPage() {
   const { user } = useAuthStore();
   const role = (user?.role as UserRole | undefined) ?? "INVESTOR";
@@ -253,6 +279,52 @@ export default function WalletPage() {
   useEffect(() => {
     loadWallet();
   }, [isResident]);
+
+  function openFlutterwaveCheckout(params: {
+    providerRef: string;
+    amount: number;
+    meta: Record<string, any>;
+    successMessage: string;
+  }) {
+    const publicKey = getFlutterwavePublicKey();
+
+    if (!window.FlutterwaveCheckout) {
+      window.alert("Flutterwave checkout is still loading. Please wait a moment and try again.");
+      return;
+    }
+
+    if (!publicKey || publicKey.includes("placeholder")) {
+      window.alert(
+        "Flutterwave public key is not configured yet. Add your public key in .env.local when your Flutterwave account is ready.",
+      );
+      return;
+    }
+
+    window.FlutterwaveCheckout({
+      public_key: publicKey,
+      tx_ref: params.providerRef,
+      amount: params.amount,
+      currency: "UGX",
+      payment_options: "card,mobilemoneyuganda",
+      customer: {
+        email: user?.email || "",
+        phone_number: userPhone,
+        name: user?.name || "Zyprent User",
+      },
+      meta: params.meta,
+      callback: function () {
+        window.alert(params.successMessage);
+        setTimeout(() => {
+          loadWallet();
+        }, 4000);
+      },
+      onclose: function () {
+        setTimeout(() => {
+          loadWallet();
+        }, 2500);
+      },
+    });
+  }
 
   function openWithdrawModal() {
     if (actionLoading) return;
@@ -352,8 +424,21 @@ export default function WalletPage() {
 
     try {
       setActionLoading("deposit");
-      await api.post("/wallet/fund", { amount });
-      await refreshAfterAction("Wallet funded successfully.");
+
+      const res = await api.post("/wallet/fund", {
+        amount,
+        provider: "FLUTTERWAVE",
+      });
+
+      const funding = res.data;
+
+      openFlutterwaveCheckout({
+        providerRef: funding.providerRef,
+        amount: funding.amount,
+        meta: funding.flutterwaveMeta,
+        successMessage:
+          "Wallet funding is processing. Your balance will update once Flutterwave confirms the payment.",
+      });
     } catch (error: any) {
       console.error(error);
       window.alert(error?.response?.data?.message || "Deposit failed.");
@@ -554,29 +639,32 @@ export default function WalletPage() {
         return;
       }
 
-      if (!selectedProvider) {
-        window.alert("Please choose a provider.");
-        return;
-      }
+      const provider =
+        selectedProvider ||
+        (selectedMethod === "MOBILE_MONEY" ? "FLUTTERWAVE" : "FLUTTERWAVE");
 
-      const methodMap = {
-        MOBILE_MONEY: "MOBILE_MONEY",
-        CARD: "CARD",
-        BANK: "BANK",
-      } as const;
+      const endpoint =
+        selectedMethod === "CARD"
+          ? "/payments/initiate/card"
+          : "/payments/initiate/mobile-money";
 
-      await api.post("/payments/resident/initiate", {
+      const res = await api.post(endpoint, {
         invoiceId: invoice.id,
         amount,
-        channel: methodMap[selectedMethod as "MOBILE_MONEY" | "CARD" | "BANK"],
-        provider: selectedProvider,
+        provider: provider === "MTN" || provider === "AIRTEL" ? "FLUTTERWAVE" : provider,
       });
 
-      await loadWallet();
+      const payment = res.data;
+
+      openFlutterwaveCheckout({
+        providerRef: payment.providerRef,
+        amount: payment.amount,
+        meta: payment.flutterwaveMeta,
+        successMessage:
+          "Payment is processing. Your invoice will update once Flutterwave confirms it.",
+      });
+
       setPaymentModalOpen(false);
-      window.alert(
-        "External payment initiated. It will settle after provider confirmation.",
-      );
     } catch (error: any) {
       console.error(error);
       window.alert(error?.response?.data?.message || "Payment request failed.");
@@ -1368,7 +1456,11 @@ export default function WalletPage() {
                     }`}
                     onClick={() => {
                       setSelectedMethod(method);
-                      setSelectedProvider("");
+                      setSelectedProvider(
+                        method === "MOBILE_MONEY" || method === "CARD" || method === "BANK"
+                          ? "FLUTTERWAVE"
+                          : "",
+                      );
                     }}
                     disabled={actionLoading === "pay"}
                   >
@@ -1382,7 +1474,7 @@ export default function WalletPage() {
               <div className="resident-payment-modal-section">
                 <label className="resident-payment-label">Provider</label>
                 <div className="resident-payment-provider-grid">
-                  {(["MTN", "AIRTEL"] as MobileProvider[]).map((provider) => (
+                  {(["FLUTTERWAVE", "MTN", "AIRTEL"] as MobileProvider[]).map((provider) => (
                     <button
                       key={provider}
                       type="button"
@@ -1403,16 +1495,19 @@ export default function WalletPage() {
               <div className="resident-payment-modal-section">
                 <label className="resident-payment-label">Provider</label>
                 <div className="resident-payment-provider-grid">
-                  <button
-                    type="button"
-                    className={`resident-payment-provider-card ${
-                      selectedProvider === "STRIPE" ? "active" : ""
-                    }`}
-                    onClick={() => setSelectedProvider("STRIPE")}
-                    disabled={actionLoading === "pay"}
-                  >
-                    STRIPE
-                  </button>
+                  {(["FLUTTERWAVE", "STRIPE"] as CardProvider[]).map((provider) => (
+                    <button
+                      key={provider}
+                      type="button"
+                      className={`resident-payment-provider-card ${
+                        selectedProvider === provider ? "active" : ""
+                      }`}
+                      onClick={() => setSelectedProvider(provider)}
+                      disabled={actionLoading === "pay"}
+                    >
+                      {provider}
+                    </button>
+                  ))}
                 </div>
               </div>
             ) : null}

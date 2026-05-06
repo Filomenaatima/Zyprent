@@ -3,6 +3,8 @@
 import { useState } from "react";
 import "@/styles/landing.css";
 
+const DEMO_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSec8xBGT1T70S0YZJCp-7h6lAt1XrcfKYHmTdbtzl5WgrujGw/viewform";
+
 const roles = {
   Managers: {
     title: "Property Managers",
@@ -70,8 +72,13 @@ export default function HomePage() {
           <a href="/login" className="landing-link">
             Sign In
           </a>
-          <a href="mailto:info@zyprent.com" className="landing-btn primary">
-            Book Demo
+          <a
+            href={DEMO_FORM_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="landing-btn primary"
+          >
+            Request Demo
           </a>
         </div>
       </header>
@@ -88,7 +95,12 @@ export default function HomePage() {
           </p>
 
           <div className="hero-actions">
-            <a href="mailto:info@zyprent.com" className="landing-btn primary large">
+            <a
+              href={DEMO_FORM_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="landing-btn primary large"
+            >
               Request Demo
             </a>
             <a href="/login" className="landing-btn secondary large">
@@ -353,8 +365,13 @@ export default function HomePage() {
         </p>
 
         <div className="final-actions">
-          <a href="mailto:info@zyprent.com" className="landing-btn primary large">
-            Book Demo
+          <a
+            href={DEMO_FORM_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="landing-btn primary large"
+          >
+            Request Demo
           </a>
           <a href="/login" className="landing-btn secondary large">
             Open Platform
