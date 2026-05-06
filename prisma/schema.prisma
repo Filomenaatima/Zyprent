@@ -12,6 +12,7 @@ enum Role {
   MANAGER
   INVESTOR
   RESIDENT
+  SERVICE_PROVIDER
 }
 
 enum ResidentStatus {
@@ -26,24 +27,41 @@ enum UnitStatus {
   OCCUPIED
 }
 
+enum RentCycle {
+  MONTHLY
+  YEARLY
+}
+
 enum InvoiceStatus {
   ISSUED
-  PAID
   PARTIALLY_PAID
+  PAID
   OVERDUE
 }
 
+enum InvoiceKind {
+  RENT
+  GARBAGE
+  SERVICE_CHARGE
+}
+
 enum PaymentChannel {
+  WALLET
   MOBILE_MONEY
   CARD
   BANK
+  CASH
 }
 
 enum PaymentProvider {
+  WALLET
   MTN
   AIRTEL
+  STRIPE
   FLUTTERWAVE
   ONAFRIQ
+  BANK
+  CASH
 }
 
 enum PaymentStatus {
@@ -52,13 +70,293 @@ enum PaymentStatus {
   FAILED
 }
 
-enum LedgerType {
-  DEBIT
-  CREDIT
+enum LedgerSource {
+  RENT_INVOICE
+  RENT_PAYMENT
+  SERVICE_CHARGE_PAYMENT
+  GARBAGE_PAYMENT
+  MAINTENANCE_PAYMENT
+  OTHER_FEE_PAYMENT
+
+  INVESTMENT
+  PROFIT_DISTRIBUTION
+
+  PROVIDER_PAYOUT
+
+  WITHDRAWAL
+  EXTERNAL_FUNDING
+
+  PLATFORM_FEE
+  REFUND
+
+  EXPENSE_PAYMENT
 }
 
-enum RentCycle {
+enum ReportType {
+  PROPERTY_INCOME
+  MANAGER_SUMMARY
+  INVESTOR_INCOME
+  INVOICE_AGING
+}
+
+enum ReportRunStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+  CANCELED
+}
+
+enum BillingInterval {
   MONTHLY
+  YEARLY
+}
+
+enum PlatformInvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  OVERDUE
+  VOID
+}
+
+enum UsageMetricType {
+  UNITS
+  USERS
+  INVOICES
+  PROPERTIES
+}
+
+enum WalletTransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  RENT_PAYMENT
+  EXPENSE_PAYMENT
+  MAINTENANCE_PAYMENT
+  PROFIT
+  REFUND
+}
+
+enum WalletTransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  FAILED
+  REJECTED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum NotificationType {
+  RENT_PAYMENT
+  PROFIT_DISTRIBUTION
+  WITHDRAWAL_REQUEST
+  WITHDRAWAL_APPROVED
+  SYSTEM
+  MAINTENANCE
+  MANAGER_INVITE
+  MANAGER_ASSIGNED
+}
+
+enum ShareTransactionType {
+  BUY
+  SELL
+  TRANSFER
+}
+
+enum MaintenanceStatus {
+  PENDING
+  ASSIGNED
+  INSPECTION_REQUIRED
+  QUOTED
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ServiceProviderType {
+  PLUMBER
+  ELECTRICIAN
+  HVAC_TECHNICIAN
+  APPLIANCE_REPAIR
+  CARPENTER
+  LOCKSMITH
+  ROOFER
+  PAINTER
+  FLOORING_SPECIALIST
+  TILER
+
+  CLEANER
+  HOUSEKEEPER
+  LAUNDRY_SERVICE
+  HOME_ORGANIZER
+
+  LANDSCAPER
+  GARDENER
+  TREE_SURGEON
+  POOL_TECHNICIAN
+
+  PEST_CONTROL
+  SECURITY_INSTALLER
+  CCTV_TECHNICIAN
+  INTERNET_TECHNICIAN
+
+  INTERIOR_DESIGNER
+  FURNITURE_SPECIALIST
+  CURTAIN_INSTALLER
+
+  MOVING_SERVICE
+  DELIVERY_SERVICE
+
+  CHEF
+  CATERING_SERVICE
+
+  GENERAL_CONTRACTOR
+}
+
+enum MaintenanceCategory {
+  PLUMBING
+  ELECTRICAL
+  HVAC
+  APPLIANCE
+  CARPENTRY
+  LOCKS
+  ROOFING
+  FLOORING
+  PAINTING
+
+  CLEANING
+  HOUSEKEEPING
+  LAUNDRY
+
+  LANDSCAPING
+  POOL
+
+  PEST_CONTROL
+  SECURITY
+  INTERNET
+
+  INTERIOR
+  FURNITURE
+
+  GENERAL
+}
+
+enum MaintenancePaymentResponsibility {
+  PROPERTY
+  RESIDENT
+  SHARED
+}
+
+enum ProviderVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum QuoteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum DispatchStatus {
+  SENT
+  VIEWED
+  QUOTED
+  DECLINED
+}
+
+enum MaintenancePriority {
+  LOW
+  MEDIUM
+  HIGH
+  EMERGENCY
+}
+
+enum DamageSeverity {
+  MINOR
+  MODERATE
+  MAJOR
+  CRITICAL
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum InvestmentSource {
+  ADMIN
+  PLATFORM
+}
+
+enum AccountType {
+  USER
+  PROPERTY
+  PLATFORM
+}
+
+enum ProviderSource {
+  PLATFORM
+  MANAGER
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum ExpenseStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  PAID
+  REJECTED
+}
+
+enum ExpenseCategory {
+  MAINTENANCE
+  UTILITIES
+  SECURITY
+  CLEANING
+  STAFF
+  REPAIRS
+  TAX
+  INSURANCE
+  MARKETING
+  LEGAL
+  SUPPLIES
+  OTHER
+}
+
+enum WithdrawalMethod {
+  MOBILE_MONEY
+  BANK
+  CARD
 }
 
 model User {
@@ -69,10 +367,47 @@ model User {
   password String
   role     Role    @default(RESIDENT)
 
-  residentProfile  Resident?    @relation("ResidentUser")
-  createdResidents Resident[]   @relation("ResidentCreator")
-  investments      Investment[]
-  properties       Property[]
+  account Account?
+  wallet  Wallet?
+
+  withdrawalRequests WithdrawalRequest[]
+
+  residentProfile  Resident?  @relation("ResidentUser")
+  createdResidents Resident[] @relation("ResidentCreator")
+
+  ownedProperties   Property[] @relation("InvestorOwnedProperties")
+  managedProperties Property[] @relation("ManagerAssignedProperties")
+
+  createdExpenses  Expense[] @relation("ExpenseCreator")
+  reviewedExpenses Expense[] @relation("ExpenseReviewer")
+  paidExpenses      Expense[] @relation("ExpensePaidBy")
+
+  investments         Investment[]
+  profitDistributions ProfitDistribution[]
+  ProfitRequests      ProfitRequest[]
+  ProfitVotes         ProfitVote[]
+  payouts             Payout[]
+  notifications       Notification[]
+  shareListings       ShareListing[]
+
+  scheduledReports ScheduledReport[] @relation("ReportCreator")
+  reportRuns       ReportRun[]       @relation("ReportExecutor")
+
+  providers       ServiceProvider[] @relation("ProviderManager")
+  providerProfile ServiceProvider?  @relation("ProviderUser")
+
+  managerInvitesSent     ManagerInvite[] @relation("ManagerInviteSender")
+  acceptedManagerInvites ManagerInvite[] @relation("ManagerInviteAcceptedBy")
+
+  subscriptions Subscription[]
+
+  kycVerification KycVerification?
+
+  sharesOwned       InvestorShare[]
+  shareTransactions ShareTransaction[]
+
+  conversationParticipants ConversationParticipant[]
+  sentMessages             Message[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -81,15 +416,87 @@ model User {
 model Property {
   id        String  @id @default(uuid())
   title     String
+  slug      String? @unique
   location  String?
+  phase     Int     @default(1)
+  version   Int     @default(1)
+  isActive  Boolean @default(true)
+
+  // Total physical units in the building.
+  // This is the source of truth for capacity.
+  totalUnits Int @default(0)
+
+  ownerId   String?
   managerId String?
 
-  manager     User?        @relation(fields: [managerId], references: [id])
-  units       Unit[]
-  investments Investment[]
+  serviceChargeAmount Int?
+  garbageFeeAmount    Int?
+
+  marketValue         Float?
+  marketPricePerShare Float?
+  valuationCapRate    Float?   @default(0.1)
+  valuationUpdatedAt  DateTime?
+  valuationUpdatedBy  String?
+
+  expenseApprovalThreshold Float   @default(200000)
+  autoApproveSmallExpenses Boolean @default(true)
+
+  owner               User?                @relation("InvestorOwnedProperties", fields: [ownerId], references: [id])
+  manager             User?                @relation("ManagerAssignedProperties", fields: [managerId], references: [id])
+  units               Unit[]
+  investments         Investment[]
+  profitDistributions ProfitDistribution[]
+  PropertyProfits     PropertyProfit[]
+  ledger              LedgerEntry[]
+  expenses            Expense[]
+  shareListings       ShareListing[]
+  maintenanceRequests MaintenanceRequest[]
+  investmentOffer     InvestmentOffer?
+  shares              InvestorShare[]
+  shareTx             ShareTransaction[]
+  managerInvites      ManagerInvite[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  account       Account?
+  ProfitRequest ProfitRequest[]
+
+  @@unique([title, phase])
+  @@index([title])
+  @@index([location])
+  @@index([ownerId])
+  @@index([managerId])
+}
+
+model ManagerInvite {
+  id String @id @default(uuid())
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  invitedById String
+  invitedBy   User @relation("ManagerInviteSender", fields: [invitedById], references: [id])
+
+  managerUserId String?
+  managerUser   User? @relation("ManagerInviteAcceptedBy", fields: [managerUserId], references: [id])
+
+  email String
+  phone String?
+
+  token String @unique
+
+  status InviteStatus @default(PENDING)
+
+  expiresAt  DateTime
+  acceptedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([propertyId])
+  @@index([email])
+  @@index([status])
 }
 
 model Unit {
@@ -98,15 +505,20 @@ model Unit {
   rentAmount Int
   rentCycle  RentCycle  @default(MONTHLY)
   status     UnitStatus @default(VACANT)
-  propertyId String
 
-  property  Property       @relation(fields: [propertyId], references: [id])
-  contracts RentContract[]
-  residents Resident[]
-  invoices  RentInvoice[]
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  residents           Resident[]
+  contracts           RentContract[]
+  rentInvoices        RentInvoice[]
+  maintenanceRequests MaintenanceRequest[]
+  expenses            Expense[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([propertyId, number])
 }
 
 model Resident {
@@ -121,43 +533,55 @@ model Resident {
   createdBy User? @relation("ResidentCreator", fields: [createdById], references: [id])
   unit      Unit? @relation(fields: [unitId], references: [id])
 
-  contracts RentContract[]
-  invoices  RentInvoice[]
+  contracts           RentContract[]
+  invoices            RentInvoice[]
+  maintenanceRequests MaintenanceRequest[]
+  reviews             ServiceProviderReview[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model RentContract {
-  id                String   @id @default(uuid())
-  unitId            String
-  residentId        String
-  rentAmount        Int
-  depositAmount     Int
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  residentId String
+  unitId     String
+
+  rentAmount    Decimal
+  depositAmount Decimal
+  serviceCharge Decimal @default(0)
+  garbageFee    Decimal @default(0)
+
   initialTermMonths Int
   startDate         DateTime
   billingAnchorDay  Int
-  nextBillableDate  DateTime
+  nextBillingDate   DateTime
   isActive          Boolean  @default(true)
 
-  unit     Unit     @relation(fields: [unitId], references: [id])
   resident Resident @relation(fields: [residentId], references: [id])
+  unit     Unit     @relation(fields: [unitId], references: [id])
 
   invoices RentInvoice[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model RentInvoice {
-  id             String        @id @default(uuid())
+  id String @id @default(uuid())
+
   rentContractId String
   residentId     String
   unitId         String
-  period         String
-  amountDue      Int
-  status         InvoiceStatus @default(ISSUED)
-  dueDate        DateTime
+
+  kind    InvoiceKind @default(RENT)
+  period  String
+  dueDate DateTime
+
+  totalAmount Decimal
+  paidAmount  Decimal @default(0)
+
+  status InvoiceStatus @default(ISSUED)
 
   rentContract RentContract @relation(fields: [rentContractId], references: [id])
   resident     Resident     @relation(fields: [residentId], references: [id])
@@ -169,34 +593,86 @@ model RentInvoice {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([rentContractId, period])
+  @@unique([rentContractId, period, kind])
+  @@index([status, dueDate])
+  @@index([residentId, kind, status, dueDate])
+  @@index([unitId, kind])
 }
 
 model Payment {
-  id          String          @id @default(uuid())
-  invoiceId   String
-  amount      Int
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  amount      Decimal
   channel     PaymentChannel
   provider    PaymentProvider
   providerRef String          @unique
   status      PaymentStatus
 
-  invoice RentInvoice   @relation(fields: [invoiceId], references: [id])
-  ledger  LedgerEntry[]
+  invoiceId String
+  invoice   RentInvoice @relation(fields: [invoiceId], references: [id])
+
+  ledgerEntries LedgerEntry[]
+}
+
+model Account {
+  id String @id @default(uuid())
+
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id])
+
+  propertyId String?   @unique
+  property   Property? @relation(fields: [propertyId], references: [id])
+
+  type AccountType
+
+  balance Decimal @default(0)
+
+  ledgerEntries LedgerEntry[]
 
   createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model LedgerEntry {
-  id        String     @id @default(uuid())
-  invoiceId String?
-  paymentId String?
-  amount    Int
-  type      LedgerType
-  note      String?
+  id String @id @default(uuid())
 
-  invoice RentInvoice? @relation(fields: [invoiceId], references: [id])
-  payment Payment?     @relation(fields: [paymentId], references: [id])
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  debit  Decimal @default(0)
+  credit Decimal @default(0)
+
+  source    LedgerSource
+  reference String?
+
+  propertyId    String?
+  rentInvoiceId String?
+  paymentId     String?
+  payoutId      String?
+
+  property    Property?    @relation(fields: [propertyId], references: [id])
+  rentInvoice RentInvoice? @relation(fields: [rentInvoiceId], references: [id])
+  payment     Payment?     @relation(fields: [paymentId], references: [id])
+  payout      Payout?      @relation(fields: [payoutId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([accountId])
+}
+
+model Payout {
+  id        String       @id @default(uuid())
+  userId    String
+  amount    Int
+  currency  String
+  status    PayoutStatus
+  narration String?
+  reference String       @unique
+
+  user   User          @relation(fields: [userId], references: [id])
+  ledger LedgerEntry[]
 
   createdAt DateTime @default(now())
 }
@@ -211,4 +687,671 @@ model Investment {
   investor User     @relation(fields: [investorId], references: [id])
 
   createdAt DateTime @default(now())
+}
+
+model ScheduledReport {
+  id        String     @id @default(uuid())
+  type      ReportType
+  cron      String
+  createdBy String
+
+  creator User        @relation("ReportCreator", fields: [createdBy], references: [id])
+  runs    ReportRun[]
+
+  createdAt DateTime @default(now())
+}
+
+model ReportRun {
+  id String @id @default(uuid())
+
+  type ReportType
+
+  scheduleId String?
+  schedule   ScheduledReport? @relation(fields: [scheduleId], references: [id])
+
+  status ReportRunStatus @default(PENDING)
+  output Json?
+  error  String?
+
+  executedBy String
+  executor   User   @relation("ReportExecutor", fields: [executedBy], references: [id])
+
+  executedAt DateTime @default(now())
+
+  @@index([scheduleId])
+}
+
+model Subscription {
+  id String @id @default(uuid())
+
+  investorId String?
+  investor   User? @relation(fields: [investorId], references: [id])
+
+  planId String
+  status SubscriptionStatus
+
+  startedAt        DateTime
+  trialEndsAt      DateTime?
+  currentPeriodEnd DateTime
+
+  usageSnapshots   UsageSnapshot[]
+  platformInvoices PlatformInvoice[]
+
+  canceledAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@index([investorId])
+  @@index([status])
+}
+
+model SubscriptionPlan {
+  id              String          @id @default(uuid())
+  name            String
+  billingInterval BillingInterval
+  price           Int
+  trialDays       Int             @default(0)
+  isActive        Boolean         @default(true)
+
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UsageSnapshot {
+  id             String          @id @default(uuid())
+  subscriptionId String
+  metric         UsageMetricType
+  value          Int
+
+  recordedAt DateTime @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([subscriptionId, metric])
+}
+
+model PlatformInvoice {
+  id             String @id @default(uuid())
+  subscriptionId String
+
+  amountDue Float
+  currency  String                @default("USD")
+  status    PlatformInvoiceStatus
+
+  periodStart DateTime
+  periodEnd   DateTime
+  dueDate     DateTime
+
+  issuedAt DateTime?
+  paidAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([subscriptionId])
+}
+
+model Expense {
+  id String @id @default(uuid())
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  unitId String?
+  unit   Unit? @relation(fields: [unitId], references: [id])
+
+  maintenanceRequestId String?
+  maintenanceRequest   MaintenanceRequest? @relation(fields: [maintenanceRequestId], references: [id])
+
+  title       String
+  description String?
+  category    ExpenseCategory
+  amount      Float
+  currency    String @default("UGX")
+
+  vendorName       String?
+  receiptUrl       String?
+  notes            String?
+  paymentReference String?
+  rejectionReason  String?
+
+  paymentChannel  PaymentChannel?
+  paymentProvider PaymentProvider?
+  paidByUserId    String?
+  paidByUser      User?            @relation("ExpensePaidBy", fields: [paidByUserId], references: [id])
+
+  status ExpenseStatus @default(DRAFT)
+
+  isAboveApprovalThreshold Boolean @default(false)
+  autoApproved             Boolean @default(false)
+
+  expenseDate DateTime
+  submittedAt DateTime?
+  reviewedAt  DateTime?
+  paidAt      DateTime?
+
+  createdById String
+  createdBy   User   @relation("ExpenseCreator", fields: [createdById], references: [id])
+
+  reviewedById String?
+  reviewedBy   User? @relation("ExpenseReviewer", fields: [reviewedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([propertyId])
+  @@index([unitId])
+  @@index([maintenanceRequestId])
+  @@index([createdById])
+  @@index([reviewedById])
+  @@index([paidByUserId])
+  @@index([status])
+  @@index([category])
+  @@index([expenseDate])
+  @@index([paymentChannel])
+}
+
+model Wallet {
+  id String @id @default(uuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  balance Decimal @default(0)
+
+  transactions WalletTransaction[]
+  withdrawals  WithdrawalRequest[]
+
+  createdAt DateTime @default(now())
+}
+
+model WalletTransaction {
+  id String @id @default(uuid())
+
+  walletId String
+  wallet   Wallet @relation(fields: [walletId], references: [id])
+
+  type   WalletTransactionType
+  status WalletTransactionStatus
+
+  amount Decimal
+
+  reference String?
+
+  createdAt DateTime @default(now())
+}
+
+model WithdrawalRequest {
+  id String @id @default(uuid())
+
+  walletId String
+  wallet   Wallet @relation(fields: [walletId], references: [id])
+
+  investorId String
+  investor   User   @relation(fields: [investorId], references: [id])
+
+  amount Float
+
+  method WithdrawalMethod @default(MOBILE_MONEY)
+
+  phoneNumber   String?
+  bankName      String?
+  accountName   String?
+  accountNumber String?
+  cardLast4     String?
+
+  status WithdrawalStatus @default(PENDING)
+
+  payoutReference String?
+  failureReason   String?
+
+  approvedAt  DateTime?
+  processingAt DateTime?
+  completedAt DateTime?
+  failedAt    DateTime?
+  rejectedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([investorId])
+  @@index([walletId])
+  @@index([status])
+  @@index([method])
+}
+
+model ProfitDistribution {
+  id         String @id @default(uuid())
+  propertyId String
+  investorId String
+
+  amount Decimal
+
+  periodMonth Int
+  periodYear  Int
+
+  createdAt DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id])
+  investor User     @relation(fields: [investorId], references: [id])
+
+  @@unique([propertyId, investorId, periodMonth, periodYear])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model InvestmentOffer {
+  id            String  @id @default(uuid())
+  propertyId    String  @unique
+  totalShares   Int
+  pricePerShare Float
+  sharesSold    Int     @default(0)
+  isActive      Boolean @default(true)
+
+  property Property @relation(fields: [propertyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  investorShares InvestorShare[]
+}
+
+model InvestorShare {
+  id         String  @id @default(uuid())
+  investorId String
+  propertyId String
+  offerId    String?
+
+  sharesOwned Int
+  amountPaid  Float
+
+  source InvestmentSource @default(ADMIN)
+
+  investor User             @relation(fields: [investorId], references: [id])
+  property Property         @relation(fields: [propertyId], references: [id])
+  offer    InvestmentOffer? @relation(fields: [offerId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  transactions ShareTransaction[]
+
+  @@unique([investorId, propertyId])
+}
+
+model ShareTransaction {
+  id String @id @default(uuid())
+
+  investorId      String
+  propertyId      String
+  investorShareId String
+
+  shares Int
+  amount Float
+
+  type ShareTransactionType
+
+  investor User     @relation(fields: [investorId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
+
+  investorShare InvestorShare @relation(fields: [investorShareId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model ShareListing {
+  id         String @id @default(uuid())
+  investorId String
+  propertyId String
+
+  shares        Int
+  pricePerShare Float
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  investor User     @relation(fields: [investorId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
+}
+
+model MaintenanceRequest {
+  id String @id @default(uuid())
+
+  propertyId String
+  unitId     String
+  residentId String
+
+  property Property @relation(fields: [propertyId], references: [id])
+  unit     Unit     @relation(fields: [unitId], references: [id])
+  resident Resident @relation(fields: [residentId], references: [id])
+
+  category MaintenanceCategory?
+
+  title       String
+  description String
+
+  requiresInspection Boolean @default(true)
+
+  status MaintenanceStatus @default(PENDING)
+
+  priority MaintenancePriority @default(MEDIUM)
+
+  assignedProviderId String?
+  assignedProvider   ServiceProvider? @relation(fields: [assignedProviderId], references: [id])
+
+  estimatedCost Float?
+
+  paymentResponsibility MaintenancePaymentResponsibility?
+
+  paidByUserId String?
+  paidAt       DateTime?
+
+  paymentReference String?
+  paymentChannel   PaymentChannel?
+  paymentProvider  PaymentProvider?
+
+  propertyShare Float?
+  residentShare Float?
+
+  inspectionScheduledAt DateTime?
+  workScheduledAt       DateTime?
+  workCompletedAt       DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  photos     MaintenancePhoto[]
+  quotes     MaintenanceQuote[]
+  dispatches MaintenanceDispatch[]
+  reviews    ServiceProviderReview[]
+  payouts    ProviderPayout[]
+  expenses   Expense[]
+
+  @@index([propertyId])
+  @@index([unitId])
+  @@index([residentId])
+  @@index([assignedProviderId])
+  @@index([paidByUserId])
+  @@index([status])
+  @@index([paymentChannel])
+}
+
+model ServiceProvider {
+  id String @id @default(uuid())
+
+  userId String @unique
+  user   User   @relation("ProviderUser", fields: [userId], references: [id])
+
+  type ServiceProviderType
+
+  rating      Float?
+  reviewCount Int    @default(0)
+
+  isActive Boolean @default(true)
+
+  verificationStatus ProviderVerificationStatus @default(PENDING)
+
+  companyName   String?
+  licenseNumber String?
+
+  city String?
+
+  latitude  Float?
+  longitude Float?
+
+  serviceRadiusKm Int?
+
+  managerId String?
+  manager   User?   @relation("ProviderManager", fields: [managerId], references: [id])
+
+  source ProviderSource @default(PLATFORM)
+
+  assignments MaintenanceRequest[]
+  quotes      MaintenanceQuote[]
+  dispatches  MaintenanceDispatch[]
+  reviews     ServiceProviderReview[]
+  payouts     ProviderPayout[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MaintenancePhoto {
+  id String @id @default(uuid())
+
+  requestId String
+  request   MaintenanceRequest @relation(fields: [requestId], references: [id])
+
+  url String
+
+  createdAt DateTime @default(now())
+}
+
+model MaintenanceQuote {
+  id String @id @default(uuid())
+
+  requestId String
+  request   MaintenanceRequest @relation(fields: [requestId], references: [id])
+
+  providerId String
+  provider   ServiceProvider @relation(fields: [providerId], references: [id])
+
+  totalAmount Float
+
+  laborCost     Float?
+  materialsCost Float?
+
+  estimatedDurationHours Int?
+
+  severity DamageSeverity?
+
+  notes String?
+
+  status QuoteStatus @default(PENDING)
+
+  createdAt  DateTime  @default(now())
+  acceptedAt DateTime?
+
+  items MaintenanceQuoteItem[]
+}
+
+model MaintenanceQuoteItem {
+  id String @id @default(uuid())
+
+  quoteId String
+  quote   MaintenanceQuote @relation(fields: [quoteId], references: [id])
+
+  description String
+  quantity    Int
+  unitPrice   Float
+
+  total Float
+}
+
+model MaintenanceDispatch {
+  id String @id @default(uuid())
+
+  requestId String
+  request   MaintenanceRequest @relation(fields: [requestId], references: [id])
+
+  providerId String
+  provider   ServiceProvider @relation(fields: [providerId], references: [id])
+
+  status DispatchStatus @default(SENT)
+
+  sentAt      DateTime  @default(now())
+  viewedAt    DateTime?
+  respondedAt DateTime?
+
+  @@unique([requestId, providerId])
+}
+
+model ServiceProviderReview {
+  id String @id @default(uuid())
+
+  providerId String
+  provider   ServiceProvider @relation(fields: [providerId], references: [id])
+
+  requestId String
+  request   MaintenanceRequest @relation(fields: [requestId], references: [id])
+
+  residentId String
+  resident   Resident @relation(fields: [residentId], references: [id])
+
+  rating  Int
+  comment String?
+
+  createdAt DateTime @default(now())
+}
+
+model ProviderPayout {
+  id String @id @default(uuid())
+
+  providerId String
+  provider   ServiceProvider @relation(fields: [providerId], references: [id])
+
+  requestId String
+  request   MaintenanceRequest @relation(fields: [requestId], references: [id])
+
+  totalAmount     Float
+  platformFee     Float
+  providerEarning Float
+
+  status PayoutStatus
+
+  paymentChannel   PaymentChannel?
+  paymentProvider  PaymentProvider?
+  paymentReference String?
+  paidAt           DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([paymentChannel])
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String @id @default(uuid())
+  conversationId String
+  userId         String
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id             String    @id @default(uuid())
+  conversationId String
+  senderId       String
+  content        String
+  createdAt      DateTime  @default(now())
+  readAt         DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       User         @relation(fields: [senderId], references: [id])
+}
+
+model KycVerification {
+  id     String @id @default(uuid())
+  userId String @unique
+
+  fullName    String
+  dateOfBirth DateTime
+  nationality String
+  address     String
+
+  idType   String
+  idNumber String
+
+  documentUrl String?
+
+  status KycStatus @default(PENDING)
+
+  reviewedBy String?
+  reviewedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model PropertyProfit {
+  id String @id @default(uuid())
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  periodMonth Int
+  periodYear  Int
+
+  totalProfit       Float
+  distributedAmount Float @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@unique([propertyId, periodMonth, periodYear])
+}
+
+model ProfitRequest {
+  id String @id @default(uuid())
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  amount Float
+
+  status String @default("PENDING")
+
+  createdBy String
+  creator   User   @relation(fields: [createdBy], references: [id])
+
+  votes ProfitVote[]
+
+  createdAt DateTime @default(now())
+
+  expiresAt   DateTime?
+  processedAt DateTime?
+}
+
+model ProfitVote {
+  id String @id @default(uuid())
+
+  requestId  String
+  investorId String
+
+  vote Boolean
+
+  request  ProfitRequest @relation(fields: [requestId], references: [id])
+  investor User          @relation(fields: [investorId], references: [id])
+
+  @@unique([requestId, investorId])
 }
