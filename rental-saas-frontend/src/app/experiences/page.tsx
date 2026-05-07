@@ -15,10 +15,6 @@ export default function ExperiencesPage() {
 
           <div className="links">
             <a href="/">Home</a>
-            <a href="/#solution">Solution</a>
-            <a href="/#platform">Platform</a>
-            <a href="/experiences">Experiences</a>
-            <a href="/#faq">FAQ</a>
           </div>
 
           <div className="actions">
