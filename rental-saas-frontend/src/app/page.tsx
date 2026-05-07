@@ -64,11 +64,7 @@ export default function HomePage() {
         </a>
 
         <nav className="landing-nav-links" aria-label="Landing navigation">
-          <a href="#solution">Solution</a>
-          <a href="#platform">Platform</a>
           <a href="/experiences">Experiences</a>
-          <a href="#why">Why Zyprent</a>
-          <a href="#faq">FAQ</a>
         </nav>
 
         <div className="landing-nav-actions">
