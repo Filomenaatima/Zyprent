@@ -35,6 +35,8 @@ export default function ExperiencesPage() {
         </nav>
 
         <section className="hero">
+          <div className="heroBgGlow" />
+
           <div className="copy">
             <p className="eyebrow">Welcome to Zyprent Experiences</p>
 
@@ -81,9 +83,6 @@ export default function ExperiencesPage() {
           </div>
 
           <div className="visual">
-            <div className="blueAura" />
-            <div className="imageBlend" />
-
             <img
               src="/experiences/hero-person.png"
               alt="Professional using Zyprent workspace"
@@ -134,8 +133,8 @@ export default function ExperiencesPage() {
           overflow: hidden;
           color: #ffffff;
           background:
-            radial-gradient(circle at 77% 48%, rgba(38, 104, 255, 0.52), transparent 29%),
-            radial-gradient(circle at 92% 10%, rgba(105, 167, 255, 0.18), transparent 23%),
+            radial-gradient(circle at 76% 50%, rgba(39, 103, 255, 0.5), transparent 30%),
+            radial-gradient(circle at 92% 12%, rgba(105, 167, 255, 0.16), transparent 24%),
             linear-gradient(135deg, #030713 0%, #050817 48%, #071327 100%);
         }
 
@@ -143,6 +142,7 @@ export default function ExperiencesPage() {
           width: min(1440px, calc(100% - 70px));
           height: 100vh;
           margin: 0 auto;
+          position: relative;
         }
 
         .nav {
@@ -152,7 +152,7 @@ export default function ExperiencesPage() {
           justify-content: space-between;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           position: relative;
-          z-index: 10;
+          z-index: 20;
         }
 
         .brand {
@@ -220,6 +220,20 @@ export default function ExperiencesPage() {
           align-items: center;
           gap: 26px;
           position: relative;
+        }
+
+        .heroBgGlow {
+          position: absolute;
+          right: -140px;
+          top: -80px;
+          width: 880px;
+          height: 760px;
+          z-index: 0;
+          pointer-events: none;
+          background:
+            radial-gradient(circle at 60% 52%, rgba(62, 125, 255, 0.72), rgba(31, 74, 180, 0.32) 38%, transparent 68%),
+            linear-gradient(to right, rgba(5, 8, 23, 0.92) 0%, rgba(5, 8, 23, 0.2) 36%, transparent 58%);
+          filter: blur(2px);
         }
 
         .copy {
@@ -347,38 +361,14 @@ export default function ExperiencesPage() {
           height: 100%;
           min-height: 560px;
           overflow: visible;
-        }
-
-        .blueAura {
-          position: absolute;
-          right: 30px;
-          top: 56px;
-          width: 610px;
-          height: 610px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(64, 120, 255, 0.82), rgba(36, 84, 210, 0.38) 38%, transparent 68%);
-          filter: blur(16px);
-          z-index: 1;
-        }
-
-        .imageBlend {
-          position: absolute;
-          right: -80px;
-          bottom: -70px;
-          width: 820px;
-          height: 650px;
           z-index: 2;
-          pointer-events: none;
-          background:
-            radial-gradient(circle at 62% 46%, rgba(59, 124, 255, 0.44), transparent 35%),
-            linear-gradient(to right, #050817 0%, rgba(5, 8, 23, 0.78) 18%, rgba(5, 8, 23, 0.2) 38%, transparent 58%);
         }
 
         .heroPerson {
           position: absolute;
-          right: -58px;
-          bottom: -2px;
-          height: 97%;
+          right: -78px;
+          bottom: 0;
+          height: 98%;
           width: auto;
           max-width: none;
           object-fit: contain;
@@ -386,11 +376,11 @@ export default function ExperiencesPage() {
           z-index: 3;
           filter: drop-shadow(0 34px 78px rgba(0, 0, 0, 0.34));
           -webkit-mask-image:
-            linear-gradient(to right, transparent 0%, #000 14%, #000 100%),
-            linear-gradient(to top, transparent 0%, #000 7%, #000 100%);
+            linear-gradient(to right, transparent 0%, #000 16%, #000 100%),
+            linear-gradient(to top, transparent 0%, #000 6%, #000 100%);
           mask-image:
-            linear-gradient(to right, transparent 0%, #000 14%, #000 100%),
-            linear-gradient(to top, transparent 0%, #000 7%, #000 100%);
+            linear-gradient(to right, transparent 0%, #000 16%, #000 100%),
+            linear-gradient(to top, transparent 0%, #000 6%, #000 100%);
         }
 
         .visual::before {
@@ -400,8 +390,8 @@ export default function ExperiencesPage() {
           z-index: 4;
           pointer-events: none;
           background:
-            linear-gradient(to right, #050817 0%, rgba(5, 8, 23, 0.74) 16%, rgba(5, 8, 23, 0.24) 34%, transparent 56%),
-            linear-gradient(to top, #050817 0%, rgba(5, 8, 23, 0.32) 12%, transparent 30%);
+            linear-gradient(to right, rgba(5, 8, 23, 0.96) 0%, rgba(5, 8, 23, 0.56) 18%, rgba(5, 8, 23, 0.12) 36%, transparent 58%),
+            linear-gradient(to top, #050817 0%, rgba(5, 8, 23, 0.24) 10%, transparent 28%);
         }
 
         .card {
@@ -460,12 +450,12 @@ export default function ExperiencesPage() {
 
         .receipt {
           top: 128px;
-          left: 34px;
+          left: 38px;
         }
 
         .metric {
           top: 258px;
-          right: -4px;
+          right: -22px;
           display: block;
           min-width: 172px;
           padding: 18px 20px;
@@ -578,11 +568,11 @@ export default function ExperiencesPage() {
             min-height: 520px;
           }
 
-          .blueAura {
-            right: -30px;
-            top: 70px;
-            width: 360px;
-            height: 360px;
+          .heroBgGlow {
+            right: -220px;
+            top: 120px;
+            width: 520px;
+            height: 520px;
           }
 
           .heroPerson {
