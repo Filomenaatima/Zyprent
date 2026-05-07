@@ -39,7 +39,7 @@ export default function ExperiencesPage() {
             <p className="eyebrow">Welcome to Zyprent Experiences</p>
 
             <h1>
-              Property work
+              Property work,
               <br />
               built around
               <br />
@@ -81,7 +81,7 @@ export default function ExperiencesPage() {
           </div>
 
           <div className="heroVisual">
-            <div className="visualGlow" />
+            <div className="blueGlow" />
 
             <img
               src="/experiences/hero-person.png"
@@ -89,23 +89,27 @@ export default function ExperiencesPage() {
               className="heroPerson"
             />
 
-            <div className="floatingCard cardOne">
-              <small>Resident payment</small>
-              <strong>Receipt saved</strong>
+            <div className="infoCard receiptCard">
+              <div className="cardIcon">▣</div>
+              <div>
+                <small>Resident payment</small>
+                <strong>Receipt saved</strong>
+              </div>
             </div>
 
-            <div className="floatingCard cardTwo">
+            <div className="infoCard metricCard">
+              <div className="cardIcon">▥</div>
               <strong>550+</strong>
               <small>Actions tracked</small>
             </div>
 
-            <div className="floatingCard cardThree">
-              <small>Team workflow</small>
-              <strong>Manager approved</strong>
+            <div className="infoCard workflowCard">
+              <div className="cardIcon">♙</div>
+              <div>
+                <small>Team workflow</small>
+                <strong>Manager approved</strong>
+              </div>
             </div>
-
-            <div className="floatingIcon iconOne">✓</div>
-            <div className="floatingIcon iconTwo">💬</div>
           </div>
         </section>
       </div>
@@ -114,14 +118,15 @@ export default function ExperiencesPage() {
         .experiencesPage {
           min-height: 100vh;
           background:
-            radial-gradient(circle at 82% 4%, rgba(70, 104, 255, 0.22), transparent 28%),
-            linear-gradient(135deg, #030712 0%, #050817 48%, #071227 100%);
+            radial-gradient(circle at 76% 48%, rgba(36, 95, 255, 0.42), transparent 31%),
+            radial-gradient(circle at 100% 0%, rgba(67, 104, 255, 0.18), transparent 28%),
+            linear-gradient(135deg, #030713 0%, #050817 48%, #071327 100%);
           color: #ffffff;
-          overflow-x: hidden;
+          overflow: hidden;
         }
 
         .pageShell {
-          width: min(1240px, calc(100% - 64px));
+          width: min(1440px, calc(100% - 64px));
           margin: 0 auto;
         }
 
@@ -130,27 +135,27 @@ export default function ExperiencesPage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .brand {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 14px;
           color: #ffffff;
           text-decoration: none;
         }
 
         .brand span {
-          width: 40px;
-          height: 40px;
+          width: 42px;
+          height: 42px;
           border-radius: 12px;
           display: grid;
           place-items: center;
           background: #ffffff;
           color: #040816;
           font-weight: 950;
-          font-size: 20px;
+          font-size: 21px;
         }
 
         .brand strong {
@@ -161,12 +166,12 @@ export default function ExperiencesPage() {
 
         .navLinks {
           display: flex;
-          gap: 32px;
+          gap: 34px;
         }
 
         .navLinks a,
         .navActions a {
-          color: rgba(255, 255, 255, 0.82);
+          color: rgba(255, 255, 255, 0.84);
           text-decoration: none;
           font-size: 15px;
           font-weight: 850;
@@ -175,7 +180,7 @@ export default function ExperiencesPage() {
         .navActions {
           display: flex;
           align-items: center;
-          gap: 18px;
+          gap: 20px;
         }
 
         .demoButton {
@@ -187,57 +192,62 @@ export default function ExperiencesPage() {
           justify-content: center;
           background: linear-gradient(135deg, #69a7ff, #4a55ff);
           color: #ffffff !important;
-          box-shadow: 0 18px 42px rgba(75, 88, 255, 0.32);
+          box-shadow: 0 18px 42px rgba(75, 88, 255, 0.34);
         }
 
         .hero {
           height: calc(100vh - 88px);
-          min-height: 520px;
-          max-height: 610px;
+          max-height: 680px;
+          min-height: 560px;
           display: grid;
-          grid-template-columns: 0.88fr 1.12fr;
-          gap: 48px;
+          grid-template-columns: 0.92fr 1.08fr;
           align-items: center;
-          padding: 18px 0 26px;
+          gap: 42px;
+          position: relative;
+        }
+
+        .heroText {
+          position: relative;
+          z-index: 5;
         }
 
         .eyebrow {
           margin: 0;
-          color: #6eadff;
+          color: #69a7ff;
           font-size: 12px;
           font-weight: 950;
-          letter-spacing: 0.14em;
+          letter-spacing: 0.18em;
           text-transform: uppercase;
         }
 
         .heroText h1 {
-          margin: 18px 0 18px;
-          max-width: 560px;
-          font-size: clamp(46px, 4.4vw, 68px);
-          line-height: 0.94;
-          letter-spacing: -0.065em;
+          margin: 24px 0 22px;
+          max-width: 640px;
+          font-size: clamp(56px, 5.4vw, 88px);
+          line-height: 0.96;
+          letter-spacing: -0.075em;
         }
 
         .subtext {
-          max-width: 500px;
+          max-width: 560px;
           margin: 0;
           color: rgba(255, 255, 255, 0.72);
-          font-size: 18px;
+          font-size: 20px;
           line-height: 1.55;
         }
 
         .heroButtons {
           display: flex;
-          gap: 14px;
-          margin-top: 28px;
+          gap: 18px;
+          margin-top: 32px;
           flex-wrap: wrap;
         }
 
         .primary,
         .secondary {
-          height: 54px;
-          padding: 0 26px;
-          border-radius: 16px;
+          height: 58px;
+          padding: 0 32px;
+          border-radius: 18px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -249,17 +259,17 @@ export default function ExperiencesPage() {
         .primary {
           color: #ffffff;
           background: linear-gradient(135deg, #69a7ff, #4a55ff);
-          box-shadow: 0 18px 42px rgba(75, 88, 255, 0.34);
+          box-shadow: 0 18px 42px rgba(75, 88, 255, 0.36);
         }
 
         .secondary {
           color: #ffffff;
-          border: 1px solid rgba(255, 255, 255, 0.14);
+          border: 1px solid rgba(255, 255, 255, 0.18);
           background: rgba(255, 255, 255, 0.02);
         }
 
         .socialProof {
-          margin-top: 28px;
+          margin-top: 34px;
           display: flex;
           align-items: center;
           gap: 16px;
@@ -270,16 +280,16 @@ export default function ExperiencesPage() {
         }
 
         .avatars span {
-          width: 36px;
-          height: 36px;
+          width: 42px;
+          height: 42px;
           border-radius: 50%;
-          margin-left: -9px;
+          margin-left: -10px;
           border: 3px solid #040816;
+          background: #d8a06b;
         }
 
         .avatars span:first-child {
           margin-left: 0;
-          background: #d8a06b;
         }
 
         .avatars span:nth-child(2) {
@@ -296,155 +306,137 @@ export default function ExperiencesPage() {
         }
 
         .socialProof strong {
-          font-size: 14px;
+          font-size: 15px;
           font-weight: 950;
         }
 
         .socialProof small {
-          margin-top: 4px;
+          margin-top: 5px;
           color: rgba(255, 255, 255, 0.68);
-          font-size: 13px;
+          font-size: 14px;
         }
 
         .heroVisual {
           position: relative;
-          height: 500px;
-          border-radius: 34px;
-          overflow: hidden;
-          background:
-            radial-gradient(circle at 63% 42%, rgba(63, 122, 255, 0.48), transparent 34%),
-            radial-gradient(circle at 98% 0%, rgba(103, 161, 255, 0.22), transparent 36%),
-            linear-gradient(135deg, #061024 0%, #0a1836 48%, #101944 100%);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 32px 90px rgba(0, 0, 0, 0.36);
+          height: 100%;
+          min-height: 560px;
+          overflow: visible;
         }
 
-        .visualGlow {
+        .blueGlow {
           position: absolute;
-          right: 54px;
-          top: 48px;
-          width: 370px;
-          height: 370px;
+          right: 60px;
+          top: 76px;
+          width: 540px;
+          height: 540px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(92, 140, 255, 0.5), transparent 68%);
+          background: radial-gradient(circle, rgba(65, 116, 255, 0.72), transparent 68%);
           filter: blur(18px);
           z-index: 1;
         }
 
         .heroPerson {
           position: absolute;
-          right: -8px;
-          bottom: -4px;
-          width: 76%;
-          height: 94%;
-          object-fit: cover;
-          object-position: center bottom;
+          right: -20px;
+          bottom: 0;
+          height: 96%;
+          width: auto;
+          max-width: 82%;
+          object-fit: contain;
+          object-position: bottom right;
           z-index: 2;
-          border-bottom-right-radius: 34px;
-          -webkit-mask-image: linear-gradient(to right, transparent 0%, black 12%, black 100%);
-          mask-image: linear-gradient(to right, transparent 0%, black 12%, black 100%);
+          filter: drop-shadow(0 30px 70px rgba(0, 0, 0, 0.32));
         }
 
-        .heroVisual::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          z-index: 2;
-          pointer-events: none;
-          background:
-            linear-gradient(to right, rgba(6, 16, 36, 0.92) 0%, rgba(6, 16, 36, 0.45) 30%, transparent 55%),
-            linear-gradient(to top, rgba(6, 16, 36, 0.24), transparent 42%);
-        }
-
-        .floatingCard,
-        .floatingIcon {
+        .infoCard {
           position: absolute;
           z-index: 4;
+          display: flex;
+          align-items: center;
+          gap: 13px;
+          padding: 14px 16px;
+          border-radius: 18px;
+          background: rgba(12, 25, 58, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          box-shadow: 0 20px 46px rgba(0, 0, 0, 0.26);
+          backdrop-filter: blur(18px);
         }
 
-        .floatingCard {
-          padding: 11px 14px;
-          border-radius: 16px;
-          background: rgba(16, 31, 68, 0.72);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          backdrop-filter: blur(16px);
-          box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
-        }
-
-        .floatingCard small {
+        .infoCard small {
           display: block;
           color: rgba(255, 255, 255, 0.72);
           font-size: 10px;
           font-weight: 950;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.09em;
           text-transform: uppercase;
         }
 
-        .floatingCard strong {
+        .infoCard strong {
           display: block;
           margin-top: 5px;
           color: #ffffff;
-          font-size: 16px;
+          font-size: 20px;
           font-weight: 950;
           line-height: 1.05;
         }
 
-        .cardOne {
-          left: 34px;
-          top: 104px;
-        }
-
-        .cardTwo {
-          right: 42px;
-          top: 160px;
-          min-width: 112px;
-        }
-
-        .cardTwo strong {
-          margin: 0;
-          font-size: 30px;
-          letter-spacing: -0.05em;
-        }
-
-        .cardTwo small {
-          margin-top: 2px;
-        }
-
-        .cardThree {
-          left: 92px;
-          bottom: 76px;
-        }
-
-        .floatingIcon {
+        .cardIcon {
           width: 38px;
           height: 38px;
-          border-radius: 50%;
+          border-radius: 10px;
           display: grid;
           place-items: center;
-          font-size: 16px;
+          color: #ffffff;
+          font-size: 17px;
           font-weight: 950;
-          box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24);
+          background: linear-gradient(135deg, #68a6ff, #4a55ff);
+          box-shadow: 0 12px 24px rgba(75, 88, 255, 0.32);
+          flex: 0 0 auto;
         }
 
-        .iconOne {
-          right: 138px;
-          top: 86px;
-          background: #f4c300;
-          color: #071027;
+        .receiptCard {
+          top: 148px;
+          left: 56px;
         }
 
-        .iconTwo {
-          right: 72px;
-          bottom: 110px;
-          background: #1f6fff;
+        .metricCard {
+          top: 276px;
+          right: 22px;
+          display: block;
+          min-width: 170px;
+          padding: 18px 20px;
+        }
+
+        .metricCard .cardIcon {
+          margin-bottom: 12px;
+        }
+
+        .metricCard strong {
+          margin-top: 0;
+          font-size: 42px;
+          letter-spacing: -0.06em;
+        }
+
+        .metricCard small {
+          margin-top: 4px;
+        }
+
+        .workflowCard {
+          left: 74px;
+          bottom: 92px;
         }
 
         @media (max-width: 1100px) {
+          .experiencesPage {
+            overflow-y: auto;
+          }
+
           .hero {
             height: auto;
             max-height: none;
+            min-height: auto;
             grid-template-columns: 1fr;
-            padding: 44px 0 60px;
+            padding: 48px 0 60px;
           }
 
           .heroText {
@@ -461,11 +453,15 @@ export default function ExperiencesPage() {
           .socialProof {
             justify-content: center;
           }
+
+          .heroVisual {
+            height: 620px;
+          }
         }
 
         @media (max-width: 760px) {
           .pageShell {
-            width: min(100% - 28px, 1240px);
+            width: min(100% - 28px, 1440px);
           }
 
           .nav {
@@ -474,6 +470,11 @@ export default function ExperiencesPage() {
 
           .brand strong {
             font-size: 24px;
+          }
+
+          .brand span {
+            width: 36px;
+            height: 36px;
           }
 
           .navLinks,
@@ -501,28 +502,46 @@ export default function ExperiencesPage() {
           }
 
           .heroVisual {
-            height: 430px;
-            border-radius: 28px;
+            height: 520px;
+            min-height: 520px;
+          }
+
+          .blueGlow {
+            right: -30px;
+            top: 70px;
+            width: 360px;
+            height: 360px;
           }
 
           .heroPerson {
-            width: 96%;
-            right: -80px;
+            right: -90px;
+            max-width: none;
+            height: 92%;
           }
 
-          .cardOne {
-            left: 18px;
-            top: 52px;
+          .receiptCard {
+            top: 54px;
+            left: 0;
           }
 
-          .cardTwo {
-            right: 16px;
-            top: 114px;
+          .metricCard {
+            top: 142px;
+            right: 0;
+            min-width: 132px;
           }
 
-          .cardThree {
-            left: 18px;
-            bottom: 48px;
+          .metricCard strong {
+            font-size: 30px;
+          }
+
+          .workflowCard {
+            left: 0;
+            bottom: 58px;
+          }
+
+          .infoCard {
+            transform: scale(0.88);
+            transform-origin: left center;
           }
         }
       `}</style>
