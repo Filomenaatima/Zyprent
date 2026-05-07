@@ -70,11 +70,13 @@ export default function ExperiencesPage() {
           <div className="visual">
             <div className="glow" />
 
-            <img
-              src="/experiences/hero-person.png"
-              alt="Professional using Zyprent workspace"
-              className="person"
-            />
+            <div className="personCrop">
+              <img
+                src="/experiences/hero-person.png"
+                alt="Professional using Zyprent workspace"
+                className="person"
+              />
+            </div>
 
             <div className="floatCard receipt">
               <span className="icon">▣</span>
@@ -331,32 +333,35 @@ export default function ExperiencesPage() {
           z-index: 1;
         }
 
-        .person {
+        .personCrop {
           position: absolute;
           right: -82px;
           bottom: 0;
-          height: 98%;
-          width: auto;
-          object-fit: contain;
+          width: 760px;
+          height: 675px;
+          overflow: hidden;
           z-index: 3;
-          filter: drop-shadow(0 34px 78px rgba(0, 0, 0, 0.34));
-          -webkit-mask-image:
-            linear-gradient(to right, transparent 0%, transparent 10%, #000 26%, #000 100%),
-            linear-gradient(to top, transparent 0%, #000 7%, #000 100%);
-          mask-image:
-            linear-gradient(to right, transparent 0%, transparent 10%, #000 26%, #000 100%),
-            linear-gradient(to top, transparent 0%, #000 7%, #000 100%);
+          -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 18%, #000 100%);
+          mask-image: linear-gradient(to right, transparent 0%, #000 18%, #000 100%);
         }
 
-        .visual::before {
+        .person {
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          height: 100%;
+          width: auto;
+          object-fit: contain;
+          filter: drop-shadow(0 34px 78px rgba(0, 0, 0, 0.34));
+        }
+
+        .personCrop::before {
           content: "";
           position: absolute;
           inset: 0;
-          z-index: 4;
+          z-index: 2;
           pointer-events: none;
-          background:
-            linear-gradient(to right, #050817 0%, rgba(5, 8, 23, 0.68) 16%, rgba(5, 8, 23, 0.16) 35%, transparent 62%),
-            linear-gradient(to top, #050817 0%, rgba(5, 8, 23, 0.22) 10%, transparent 28%);
+          background: linear-gradient(to right, rgba(5, 8, 23, 0.95) 0%, rgba(5, 8, 23, 0.28) 20%, transparent 42%);
         }
 
         .floatCard {
@@ -407,7 +412,7 @@ export default function ExperiencesPage() {
 
         .receipt {
           top: 128px;
-          left: 74px;
+          left: 104px;
         }
 
         .metric {
@@ -429,7 +434,7 @@ export default function ExperiencesPage() {
         }
 
         .workflow {
-          left: 80px;
+          left: 108px;
           bottom: 86px;
         }
       `}</style>
