@@ -1,21 +1,24 @@
 "use client";
 
+const DEMO_FORM_LINK =
+  "https://docs.google.com/forms/d/e/1FAIpQLSec8xBGT1T70S0YZJCp-7h6lAt1XrcfKYHmTdbtzl5WgrujGw/viewform";
+
 export default function ExperiencesPage() {
   return (
     <main className="experiencesPage">
       <div className="experiencesContainer">
         <nav className="experiencesNav">
-          <div className="brand">
+          <a href="/" className="brand">
             <div className="brandLogo">Z</div>
             <span>Zyprent</span>
-          </div>
+          </a>
 
           <div className="navLinks">
             <a href="/">Home</a>
-            <a href="/">Solution</a>
-            <a href="/">Platform</a>
+            <a href="/#solution">Solution</a>
+            <a href="/#platform">Platform</a>
             <a href="/experiences">Experiences</a>
-            <a href="/">FAQ</a>
+            <a href="/#faq">FAQ</a>
           </div>
 
           <div className="navActions">
@@ -23,9 +26,14 @@ export default function ExperiencesPage() {
               Sign In
             </a>
 
-            <button className="demoBtn">
+            <a
+              href={DEMO_FORM_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="demoBtn"
+            >
               Request Demo
-            </button>
+            </a>
           </div>
         </nav>
 
@@ -45,19 +53,24 @@ export default function ExperiencesPage() {
               </h1>
 
               <p>
-                From residents paying rent to managers approving work,
-                Zyprent keeps every property experience clear,
-                connected and easy to follow.
+                From residents paying rent to managers approving work, Zyprent
+                keeps every property experience clear, connected and easy to
+                follow.
               </p>
 
               <div className="heroActions">
-                <button className="primaryBtn">
+                <a
+                  href={DEMO_FORM_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="primaryBtn"
+                >
                   Request Demo
-                </button>
+                </a>
 
-                <button className="secondaryBtn">
+                <a href="/login" className="secondaryBtn">
                   Explore Platform
-                </button>
+                </a>
               </div>
 
               <div className="heroUsers">
@@ -69,10 +82,7 @@ export default function ExperiencesPage() {
 
                 <div>
                   <strong>Built for every role</strong>
-
-                  <p>
-                    Residents · Managers · Providers · Investors
-                  </p>
+                  <p>Residents · Managers · Providers · Investors</p>
                 </div>
               </div>
             </div>
@@ -83,7 +93,7 @@ export default function ExperiencesPage() {
 
                 <img
                   src="/experiences/hero-person.png"
-                  alt="Professional property manager"
+                  alt="Professional property manager holding a laptop"
                   className="heroPersonImage"
                 />
 
@@ -111,61 +121,62 @@ export default function ExperiencesPage() {
         .experiencesPage {
           min-height: 100vh;
           background:
-            radial-gradient(
-              circle at top right,
-              rgba(67, 97, 255, 0.22),
-              transparent 30%
-            ),
+            radial-gradient(circle at 78% 0%, rgba(65, 98, 255, 0.2), transparent 31%),
+            radial-gradient(circle at 72% 44%, rgba(44, 122, 255, 0.13), transparent 34%),
             #040816;
-          color: white;
-          overflow: hidden;
+          color: #ffffff;
+          overflow-x: hidden;
         }
 
         .experiencesContainer {
-          width: min(1400px, 92%);
+          width: min(1240px, calc(100% - 64px));
           margin: 0 auto;
         }
 
         .experiencesNav {
-          height: 92px;
+          height: 90px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          border-bottom: 1px solid rgba(255,255,255,.08);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .brand {
           display: flex;
           align-items: center;
           gap: 12px;
-          font-size: 34px;
-          font-weight: 700;
+          color: #ffffff;
+          text-decoration: none;
+          font-size: 30px;
+          font-weight: 900;
+          letter-spacing: -0.05em;
         }
 
         .brandLogo {
           width: 40px;
           height: 40px;
           border-radius: 12px;
-          background: white;
+          background: #ffffff;
           color: #040816;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 800;
+          display: grid;
+          place-items: center;
           font-size: 20px;
+          font-weight: 950;
+          letter-spacing: 0;
         }
 
         .navLinks {
           display: flex;
           align-items: center;
-          gap: 34px;
+          gap: 32px;
         }
 
-        .navLinks a {
-          color: rgba(255,255,255,.78);
+        .navLinks a,
+        .signInBtn {
+          color: rgba(255, 255, 255, 0.82);
           text-decoration: none;
-          font-size: 16px;
-          font-weight: 600;
+          font-size: 15px;
+          font-weight: 800;
         }
 
         .navActions {
@@ -174,196 +185,172 @@ export default function ExperiencesPage() {
           gap: 18px;
         }
 
-        .signInBtn {
-          color: white;
-          text-decoration: none;
-          font-weight: 700;
-        }
-
         .demoBtn {
-          height: 52px;
-          padding: 0 26px;
-          border: none;
-          border-radius: 16px;
-          background:
-            linear-gradient(
-              135deg,
-              #6ea8ff,
-              #4c58ff
-            );
-          color: white;
-          font-size: 16px;
-          font-weight: 700;
-          cursor: pointer;
-          box-shadow:
-            0 16px 40px rgba(76,88,255,.35);
+          height: 50px;
+          padding: 0 24px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 15px;
+          background: linear-gradient(135deg, #68a6ff, #4a55ff);
+          color: #ffffff;
+          text-decoration: none;
+          font-size: 15px;
+          font-weight: 900;
+          box-shadow: 0 16px 40px rgba(75, 88, 255, 0.32);
         }
 
         .experiencesHero {
-          min-height: calc(100vh - 92px);
+          height: calc(100vh - 90px);
+          max-height: 600px;
+          min-height: 500px;
           display: flex;
           align-items: center;
-          padding: 40px 0;
+          padding: 18px 0 22px;
         }
 
         .heroContent {
           width: 100%;
           display: grid;
-          grid-template-columns: 1fr 1.05fr;
+          grid-template-columns: 0.92fr 1.08fr;
           gap: 44px;
           align-items: center;
         }
 
         .heroEyebrow {
-          font-size: 15px;
+          display: inline-block;
+          color: #68a6ff;
+          font-size: 12px;
+          font-weight: 950;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
-          letter-spacing: .12em;
-          color: #73a8ff;
-          font-weight: 700;
         }
 
         .heroLeft h1 {
-          font-size: clamp(64px, 5vw, 92px);
-          line-height: .92;
-          letter-spacing: -.06em;
-          margin: 22px 0;
-          max-width: 620px;
+          max-width: 560px;
+          margin: 18px 0 16px;
+          font-size: clamp(46px, 4.2vw, 68px);
+          line-height: 0.94;
+          letter-spacing: -0.065em;
         }
 
         .heroLeft p {
-          max-width: 560px;
-          font-size: 22px;
-          line-height: 1.65;
-          color: rgba(255,255,255,.72);
+          max-width: 510px;
+          margin: 0;
+          color: rgba(255, 255, 255, 0.72);
+          font-size: 18px;
+          line-height: 1.5;
         }
 
         .heroActions {
           display: flex;
-          gap: 16px;
-          margin-top: 36px;
+          gap: 14px;
+          margin-top: 28px;
+          flex-wrap: wrap;
         }
 
         .primaryBtn,
         .secondaryBtn {
-          height: 58px;
-          padding: 0 30px;
-          border-radius: 18px;
-          border: none;
-          cursor: pointer;
-          font-size: 17px;
-          font-weight: 700;
-          transition: .25s ease;
+          height: 54px;
+          padding: 0 26px;
+          border-radius: 16px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          font-size: 16px;
+          font-weight: 900;
         }
 
         .primaryBtn {
-          background:
-            linear-gradient(
-              135deg,
-              #6aa4ff,
-              #4b57ff
-            );
-          color: white;
-          box-shadow:
-            0 18px 40px rgba(77,108,255,.35);
+          color: #ffffff;
+          background: linear-gradient(135deg, #68a6ff, #4a55ff);
+          box-shadow: 0 16px 38px rgba(75, 88, 255, 0.34);
         }
 
         .secondaryBtn {
-          background: transparent;
-          border: 1px solid rgba(255,255,255,.12);
-          color: white;
+          color: #ffffff;
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          background: rgba(255, 255, 255, 0.02);
         }
 
         .heroUsers {
           display: flex;
           align-items: center;
-          gap: 18px;
-          margin-top: 34px;
-        }
-
-        .heroUsers strong {
-          display: block;
-          font-size: 16px;
-        }
-
-        .heroUsers p {
-          margin: 4px 0 0;
-          font-size: 15px;
+          gap: 16px;
+          margin-top: 28px;
         }
 
         .heroAvatars {
           display: flex;
+          align-items: center;
         }
 
         .heroAvatars span {
-          width: 42px;
-          height: 42px;
+          width: 36px;
+          height: 36px;
           border-radius: 50%;
           border: 3px solid #040816;
-          margin-left: -10px;
+          margin-left: -9px;
         }
 
-        .heroAvatars span:nth-child(1) {
+        .heroAvatars span:first-child {
+          margin-left: 0;
           background: #d8a06b;
         }
 
         .heroAvatars span:nth-child(2) {
-          background: #dfe5f6;
+          background: #e2e7f7;
         }
 
         .heroAvatars span:nth-child(3) {
-          background:
-            linear-gradient(
-              135deg,
-              #7db0ff,
-              #4b57ff
-            );
+          background: linear-gradient(135deg, #7fb3ff, #4a55ff);
         }
 
-        .heroRight {
-          position: relative;
+        .heroUsers strong {
+          display: block;
+          font-size: 14px;
+          font-weight: 950;
+        }
+
+        .heroUsers p {
+          margin-top: 4px;
+          color: rgba(255, 255, 255, 0.68);
+          font-size: 13px;
+          line-height: 1.2;
         }
 
         .heroImageCard {
           position: relative;
-          height: 720px;
-          border-radius: 42px;
+          height: 500px;
+          border-radius: 34px;
           overflow: hidden;
           background:
-            radial-gradient(
-              circle at top right,
-              rgba(86,124,255,.28),
-              transparent 32%
-            ),
-            linear-gradient(
-              180deg,
-              rgba(14,22,52,.98),
-              rgba(10,15,35,.98)
-            );
-          border: 1px solid rgba(255,255,255,.08);
+            radial-gradient(circle at 68% 31%, rgba(64, 119, 255, 0.42), transparent 34%),
+            radial-gradient(circle at 8% 84%, rgba(28, 69, 145, 0.24), transparent 34%),
+            linear-gradient(135deg, #061024 0%, #0b1b3d 48%, #111a42 100%);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 30px 86px rgba(0, 0, 0, 0.35);
         }
 
         .heroGlow {
           position: absolute;
-          width: 540px;
-          height: 540px;
+          width: 390px;
+          height: 390px;
+          top: 58px;
+          right: 68px;
           border-radius: 50%;
-          background:
-            radial-gradient(
-              circle,
-              rgba(89,130,255,.48),
-              transparent 70%
-            );
-          top: 90px;
-          right: 40px;
-          filter: blur(20px);
+          background: radial-gradient(circle, rgba(84, 132, 255, 0.5), transparent 68%);
+          filter: blur(18px);
         }
 
         .heroPersonImage {
           position: absolute;
-          right: -20px;
+          right: 24px;
           bottom: 0;
-          width: 88%;
+          width: 68%;
           height: auto;
+          max-height: 95%;
           object-fit: contain;
           z-index: 2;
         }
@@ -371,46 +358,69 @@ export default function ExperiencesPage() {
         .floatingCard {
           position: absolute;
           z-index: 3;
+          padding: 12px 15px;
+          border-radius: 16px;
+          background: rgba(18, 30, 62, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.12);
           backdrop-filter: blur(14px);
-          background: rgba(18,28,58,.74);
-          border: 1px solid rgba(255,255,255,.1);
-          border-radius: 24px;
-          padding: 18px 22px;
-          box-shadow:
-            0 20px 40px rgba(0,0,0,.24);
+          box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
         }
 
         .floatingCard span {
           display: block;
-          font-size: 13px;
-          color: rgba(255,255,255,.72);
+          color: rgba(255, 255, 255, 0.72);
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
-          letter-spacing: .08em;
         }
 
         .floatingCard strong {
           display: block;
-          margin-top: 6px;
-          font-size: 30px;
-          color: white;
+          margin-top: 5px;
+          color: #ffffff;
+          font-size: 16px;
+          font-weight: 950;
+          line-height: 1.05;
+        }
+
+        .rightCard strong {
+          margin-top: 0;
+          font-size: 28px;
+          letter-spacing: -0.04em;
+        }
+
+        .rightCard span {
+          margin-top: 2px;
         }
 
         .topCard {
-          top: 120px;
-          left: 42px;
+          top: 86px;
+          left: 34px;
         }
 
         .rightCard {
-          top: 200px;
-          right: 40px;
+          top: 135px;
+          right: 34px;
         }
 
         .bottomCard {
-          left: 50px;
-          bottom: 90px;
+          left: 60px;
+          bottom: 70px;
         }
 
         @media (max-width: 1100px) {
+          .experiencesPage {
+            overflow-y: auto;
+          }
+
+          .experiencesHero {
+            height: auto;
+            max-height: none;
+            min-height: auto;
+            padding: 44px 0 60px;
+          }
+
           .heroContent {
             grid-template-columns: 1fr;
           }
@@ -419,8 +429,10 @@ export default function ExperiencesPage() {
             text-align: center;
           }
 
+          .heroLeft h1,
           .heroLeft p {
-            margin-inline: auto;
+            margin-left: auto;
+            margin-right: auto;
           }
 
           .heroActions,
@@ -429,42 +441,92 @@ export default function ExperiencesPage() {
           }
 
           .heroImageCard {
-            height: 620px;
-          }
-
-          .heroLeft h1 {
-            font-size: 72px;
+            height: 520px;
           }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 760px) {
+          .experiencesContainer {
+            width: min(100% - 28px, 1240px);
+          }
+
+          .experiencesNav {
+            height: 78px;
+          }
+
+          .brand {
+            font-size: 24px;
+          }
+
+          .brandLogo {
+            width: 36px;
+            height: 36px;
+          }
+
           .navLinks {
             display: none;
           }
 
+          .navActions {
+            gap: 10px;
+          }
+
+          .signInBtn {
+            display: none;
+          }
+
+          .demoBtn {
+            height: 44px;
+            padding: 0 16px;
+            border-radius: 13px;
+            font-size: 13px;
+          }
+
           .heroLeft h1 {
-            font-size: 54px;
+            font-size: 44px;
           }
 
           .heroLeft p {
-            font-size: 18px;
+            font-size: 16px;
           }
 
-          .heroActions {
-            flex-direction: column;
+          .primaryBtn,
+          .secondaryBtn {
+            width: 100%;
+          }
+
+          .heroUsers {
+            align-items: flex-start;
           }
 
           .heroImageCard {
-            height: 520px;
+            height: 430px;
+            border-radius: 28px;
           }
 
           .heroPersonImage {
-            width: 100%;
-            right: -20px;
+            width: 86%;
+            right: -36px;
+          }
+
+          .topCard {
+            top: 46px;
+            left: 18px;
+          }
+
+          .rightCard {
+            top: 116px;
+            right: 16px;
+          }
+
+          .bottomCard {
+            left: 18px;
+            bottom: 42px;
           }
 
           .floatingCard {
-            transform: scale(.9);
+            transform: scale(0.86);
+            transform-origin: left center;
           }
         }
       `}</style>
