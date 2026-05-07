@@ -23,7 +23,12 @@ export default function ExperiencesPage() {
 
           <div className="actions">
             <a href="/login">Sign In</a>
-            <a href={DEMO_FORM_LINK} target="_blank" rel="noopener noreferrer" className="demo">
+            <a
+              href={DEMO_FORM_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="demo"
+            >
               Request Demo
             </a>
           </div>
@@ -47,20 +52,27 @@ export default function ExperiencesPage() {
             </p>
 
             <div className="buttons">
-              <a href={DEMO_FORM_LINK} target="_blank" rel="noopener noreferrer" className="primary">
+              <a
+                href={DEMO_FORM_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="primary"
+              >
                 Request Demo
               </a>
+
               <a href="/login" className="secondary">
                 Explore Platform
               </a>
             </div>
 
             <div className="proof">
-              <div className="avatars">
-                <span />
-                <span />
-                <span />
+              <div className="people">
+                <span className="personOne">R</span>
+                <span className="personTwo">M</span>
+                <span className="personThree">I</span>
               </div>
+
               <div>
                 <strong>Built for every role</strong>
                 <small>Residents · Managers · Providers · Investors</small>
@@ -69,16 +81,21 @@ export default function ExperiencesPage() {
           </div>
 
           <div className="visual">
-            <div className="glow" />
+            <div className="blueAura" />
+            <div className="imageBlend" />
 
             <img
               src="/experiences/hero-person.png"
               alt="Professional using Zyprent workspace"
-              className="person"
+              className="heroPerson"
             />
 
             <div className="card receipt">
-              <i>▣</i>
+              <i>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 4h14v16l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2-2 1.2V4Zm4 5h6M9 13h6" />
+                </svg>
+              </i>
               <div>
                 <small>Resident payment</small>
                 <strong>Receipt saved</strong>
@@ -86,13 +103,21 @@ export default function ExperiencesPage() {
             </div>
 
             <div className="card metric">
-              <i>▥</i>
+              <i>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 20V9m7 11V4m7 16v-8" />
+                </svg>
+              </i>
               <strong>550+</strong>
               <small>Actions tracked</small>
             </div>
 
             <div className="card workflow">
-              <i>♙</i>
+              <i>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM4 20c.7-3 2.1-5 4-5s3.3 2 4 5m0 0c.7-3 2.1-5 4-5s3.3 2 4 5" />
+                </svg>
+              </i>
               <div>
                 <small>Team workflow</small>
                 <strong>Manager approved</strong>
@@ -107,10 +132,10 @@ export default function ExperiencesPage() {
           width: 100%;
           height: 100vh;
           overflow: hidden;
-          color: #fff;
+          color: #ffffff;
           background:
-            radial-gradient(circle at 78% 48%, rgba(34, 96, 255, 0.48), transparent 30%),
-            radial-gradient(circle at 92% 12%, rgba(105, 167, 255, 0.18), transparent 24%),
+            radial-gradient(circle at 77% 48%, rgba(38, 104, 255, 0.52), transparent 29%),
+            radial-gradient(circle at 92% 10%, rgba(105, 167, 255, 0.18), transparent 23%),
             linear-gradient(135deg, #030713 0%, #050817 48%, #071327 100%);
         }
 
@@ -126,13 +151,15 @@ export default function ExperiencesPage() {
           align-items: center;
           justify-content: space-between;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          position: relative;
+          z-index: 10;
         }
 
         .brand {
           display: flex;
           align-items: center;
           gap: 14px;
-          color: #fff;
+          color: #ffffff;
           text-decoration: none;
         }
 
@@ -142,7 +169,7 @@ export default function ExperiencesPage() {
           border-radius: 12px;
           display: grid;
           place-items: center;
-          background: #fff;
+          background: #ffffff;
           color: #030713;
           font-size: 21px;
           font-weight: 950;
@@ -156,6 +183,7 @@ export default function ExperiencesPage() {
 
         .links {
           display: flex;
+          align-items: center;
           gap: 34px;
         }
 
@@ -179,8 +207,9 @@ export default function ExperiencesPage() {
           border-radius: 15px;
           display: inline-flex;
           align-items: center;
+          justify-content: center;
+          color: #ffffff !important;
           background: linear-gradient(135deg, #69a7ff, #4a55ff);
-          color: #fff !important;
           box-shadow: 0 18px 42px rgba(75, 88, 255, 0.34);
         }
 
@@ -189,14 +218,14 @@ export default function ExperiencesPage() {
           display: grid;
           grid-template-columns: 0.88fr 1.12fr;
           align-items: center;
-          gap: 32px;
+          gap: 26px;
           position: relative;
         }
 
         .copy {
           position: relative;
-          z-index: 10;
-          padding-bottom: 20px;
+          z-index: 8;
+          padding-bottom: 12px;
         }
 
         .eyebrow {
@@ -244,13 +273,13 @@ export default function ExperiencesPage() {
         }
 
         .primary {
-          color: #fff;
+          color: #ffffff;
           background: linear-gradient(135deg, #69a7ff, #4a55ff);
           box-shadow: 0 18px 42px rgba(75, 88, 255, 0.36);
         }
 
         .secondary {
-          color: #fff;
+          color: #ffffff;
           border: 1px solid rgba(255, 255, 255, 0.18);
           background: rgba(255, 255, 255, 0.02);
         }
@@ -262,28 +291,38 @@ export default function ExperiencesPage() {
           gap: 16px;
         }
 
-        .avatars {
+        .people {
           display: flex;
         }
 
-        .avatars span {
+        .people span {
           width: 42px;
           height: 42px;
           border-radius: 50%;
           margin-left: -10px;
           border: 3px solid #040816;
+          display: grid;
+          place-items: center;
+          font-size: 13px;
+          font-weight: 950;
+          color: #071027;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
         }
 
-        .avatars span:first-child {
+        .people span:first-child {
           margin-left: 0;
-          background: #d8a06b;
         }
 
-        .avatars span:nth-child(2) {
-          background: #e7ecf9;
+        .personOne {
+          background: linear-gradient(135deg, #f2b574, #bd7540);
         }
 
-        .avatars span:nth-child(3) {
+        .personTwo {
+          background: linear-gradient(135deg, #ffffff, #dbe3f4);
+        }
+
+        .personThree {
+          color: #ffffff !important;
           background: linear-gradient(135deg, #7eb5ff, #4a55ff);
         }
 
@@ -307,53 +346,67 @@ export default function ExperiencesPage() {
           position: relative;
           height: 100%;
           min-height: 560px;
+          overflow: visible;
         }
 
-        .glow {
+        .blueAura {
           position: absolute;
-          right: 42px;
-          top: 72px;
-          width: 560px;
-          height: 560px;
+          right: 30px;
+          top: 56px;
+          width: 610px;
+          height: 610px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(65, 116, 255, 0.78), transparent 68%);
-          filter: blur(18px);
+          background: radial-gradient(circle, rgba(64, 120, 255, 0.82), rgba(36, 84, 210, 0.38) 38%, transparent 68%);
+          filter: blur(16px);
           z-index: 1;
         }
 
-        .person {
+        .imageBlend {
           position: absolute;
-          right: -30px;
-          bottom: 0;
-          height: 96%;
-          max-width: 86%;
+          right: -80px;
+          bottom: -70px;
+          width: 820px;
+          height: 650px;
+          z-index: 2;
+          pointer-events: none;
+          background:
+            radial-gradient(circle at 62% 46%, rgba(59, 124, 255, 0.44), transparent 35%),
+            linear-gradient(to right, #050817 0%, rgba(5, 8, 23, 0.78) 18%, rgba(5, 8, 23, 0.2) 38%, transparent 58%);
+        }
+
+        .heroPerson {
+          position: absolute;
+          right: -58px;
+          bottom: -2px;
+          height: 97%;
           width: auto;
+          max-width: none;
           object-fit: contain;
           object-position: bottom right;
-          z-index: 2;
-          filter: drop-shadow(0 32px 72px rgba(0, 0, 0, 0.34));
+          z-index: 3;
+          filter: drop-shadow(0 34px 78px rgba(0, 0, 0, 0.34));
           -webkit-mask-image:
-            linear-gradient(to right, transparent 0%, #000 12%, #000 100%),
-            linear-gradient(to top, transparent 0%, #000 8%, #000 100%);
+            linear-gradient(to right, transparent 0%, #000 14%, #000 100%),
+            linear-gradient(to top, transparent 0%, #000 7%, #000 100%);
           mask-image:
-            linear-gradient(to right, transparent 0%, #000 12%, #000 100%),
-            linear-gradient(to top, transparent 0%, #000 8%, #000 100%);
+            linear-gradient(to right, transparent 0%, #000 14%, #000 100%),
+            linear-gradient(to top, transparent 0%, #000 7%, #000 100%);
         }
 
         .visual::before {
           content: "";
           position: absolute;
           inset: 0;
-          z-index: 3;
+          z-index: 4;
           pointer-events: none;
           background:
-            linear-gradient(to right, #050817 0%, rgba(5, 8, 23, 0.72) 20%, transparent 46%),
-            linear-gradient(to top, #050817 0%, rgba(5, 8, 23, 0.35) 12%, transparent 32%);
+            linear-gradient(to right, #050817 0%, rgba(5, 8, 23, 0.74) 16%, rgba(5, 8, 23, 0.24) 34%, transparent 56%),
+            linear-gradient(to top, #050817 0%, rgba(5, 8, 23, 0.32) 12%, transparent 30%);
         }
 
         .card {
           position: absolute;
-          z-index: 5;
+          z-index: 6;
           display: flex;
           align-items: center;
           gap: 13px;
@@ -371,13 +424,20 @@ export default function ExperiencesPage() {
           border-radius: 10px;
           display: grid;
           place-items: center;
-          color: #fff;
-          font-style: normal;
-          font-size: 17px;
-          font-weight: 950;
+          color: #ffffff;
           background: linear-gradient(135deg, #68a6ff, #4a55ff);
           box-shadow: 0 12px 24px rgba(75, 88, 255, 0.32);
           flex: 0 0 auto;
+        }
+
+        .card svg {
+          width: 20px;
+          height: 20px;
+          stroke: currentColor;
+          stroke-width: 2;
+          fill: none;
+          stroke-linecap: round;
+          stroke-linejoin: round;
         }
 
         .card small {
@@ -392,22 +452,22 @@ export default function ExperiencesPage() {
         .card strong {
           display: block;
           margin-top: 5px;
-          color: #fff;
+          color: #ffffff;
           font-size: 20px;
           font-weight: 950;
           line-height: 1.05;
         }
 
         .receipt {
-          top: 132px;
-          left: 56px;
+          top: 128px;
+          left: 34px;
         }
 
         .metric {
-          top: 250px;
-          right: 8px;
+          top: 258px;
+          right: -4px;
           display: block;
-          min-width: 168px;
+          min-width: 172px;
           padding: 18px 20px;
         }
 
@@ -422,13 +482,14 @@ export default function ExperiencesPage() {
         }
 
         .workflow {
-          left: 72px;
-          bottom: 84px;
+          left: 44px;
+          bottom: 86px;
         }
 
         @media (max-width: 1100px) {
           .page {
             height: auto;
+            min-height: 100vh;
             overflow-y: auto;
           }
 
@@ -459,6 +520,10 @@ export default function ExperiencesPage() {
 
           .visual {
             height: 620px;
+          }
+
+          .heroPerson {
+            right: 0;
           }
         }
 
@@ -513,17 +578,16 @@ export default function ExperiencesPage() {
             min-height: 520px;
           }
 
-          .glow {
+          .blueAura {
             right: -30px;
             top: 70px;
             width: 360px;
             height: 360px;
           }
 
-          .person {
-            right: -90px;
+          .heroPerson {
+            right: -100px;
             height: 92%;
-            max-width: none;
           }
 
           .receipt {
