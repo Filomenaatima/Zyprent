@@ -23,7 +23,12 @@ export default function ExperiencesPage() {
 
           <div className="actions">
             <a href="/login">Sign In</a>
-            <a href={DEMO_FORM_LINK} target="_blank" rel="noopener noreferrer" className="demo">
+            <a
+              href={DEMO_FORM_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="demo"
+            >
               Request Demo
             </a>
           </div>
@@ -46,9 +51,15 @@ export default function ExperiencesPage() {
             </p>
 
             <div className="buttons">
-              <a href={DEMO_FORM_LINK} target="_blank" rel="noopener noreferrer" className="primary">
+              <a
+                href={DEMO_FORM_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="primary"
+              >
                 Request Demo
               </a>
+
               <a href="/login" className="secondary">
                 Explore Platform
               </a>
@@ -60,6 +71,7 @@ export default function ExperiencesPage() {
                 <span>M</span>
                 <span>I</span>
               </div>
+
               <div>
                 <strong>Built for every role</strong>
                 <small>Residents · Managers · Providers · Investors</small>
@@ -103,10 +115,115 @@ export default function ExperiencesPage() {
         </section>
       </div>
 
+      <section className="controlSection">
+        <div className="controlInner">
+          <div className="controlVisual">
+            <div className="phoneMockup">
+              <div className="phoneTop" />
+              <div className="phoneHeader">
+                <span>9:41</span>
+                <strong>Zyprent</strong>
+              </div>
+
+              <div className="balanceCard">
+                <small>Collected this month</small>
+                <strong>UGX 48.2M</strong>
+                <span>Payments, maintenance and reports connected</span>
+              </div>
+
+              <div className="phoneGrid">
+                <div>
+                  <small>Units</small>
+                  <strong>42</strong>
+                </div>
+                <div>
+                  <small>Open jobs</small>
+                  <strong>06</strong>
+                </div>
+              </div>
+
+              <div className="phoneList">
+                <p>
+                  <span>Rent payment</span>
+                  <strong>Receipt saved</strong>
+                </p>
+                <p>
+                  <span>Maintenance</span>
+                  <strong>Provider assigned</strong>
+                </p>
+                <p>
+                  <span>Investor report</span>
+                  <strong>Ready</strong>
+                </p>
+              </div>
+            </div>
+
+            <div className="blackCard">
+              <small>Zyprent Card</small>
+              <strong>Property wallet</strong>
+              <span>UGX</span>
+            </div>
+
+            <div className="miniCard secureCard">
+              <span>✓</span>
+              <strong>Secure payments</strong>
+            </div>
+
+            <div className="miniCard recordCard">
+              <span>↗</span>
+              <strong>Records updated</strong>
+            </div>
+          </div>
+
+          <div className="controlCopy">
+            <p className="sectionEyebrow">Connected property control</p>
+
+            <h2>
+              Control every property experience from one connected workspace.
+            </h2>
+
+            <p>
+              Rent payments, maintenance updates, approvals, resident records
+              and investor activity stay organized in one place, so every role
+              knows what is happening.
+            </p>
+
+            <div className="controlButtons">
+              <a
+                href={DEMO_FORM_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="darkBtn"
+              >
+                Request Demo
+              </a>
+
+              <a href="/login" className="lightBtn">
+                Explore Platform
+              </a>
+            </div>
+
+            <div className="controlStat">
+              <div className="statAvatars">
+                <span>R</span>
+                <span>M</span>
+                <span>P</span>
+                <span>I</span>
+              </div>
+
+              <div>
+                <strong>4 core user roles</strong>
+                <small>Connected through one operating record</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <style jsx>{`
         .page {
           min-height: 100vh;
-          overflow: hidden;
+          overflow-x: hidden;
           color: white;
           background:
             radial-gradient(circle at 76% 48%, rgba(42, 105, 255, 0.45), transparent 31%),
@@ -436,6 +553,408 @@ export default function ExperiencesPage() {
         .workflow {
           left: 108px;
           bottom: 86px;
+        }
+
+        .controlSection {
+          background: linear-gradient(180deg, #f7f8fb 0%, #ffffff 100%);
+          color: #080b13;
+          padding: 96px 0 110px;
+        }
+
+        .controlInner {
+          width: min(1320px, calc(100% - 70px));
+          margin: 0 auto;
+          min-height: 720px;
+          display: grid;
+          grid-template-columns: 1.05fr 0.95fr;
+          align-items: center;
+          gap: 70px;
+        }
+
+        .controlVisual {
+          position: relative;
+          min-height: 640px;
+        }
+
+        .phoneMockup {
+          position: absolute;
+          left: 120px;
+          top: 20px;
+          width: 300px;
+          height: 590px;
+          border-radius: 44px;
+          background: linear-gradient(180deg, #ffffff, #eef2f8);
+          border: 10px solid #111318;
+          box-shadow: 0 32px 90px rgba(9, 20, 42, 0.18);
+          padding: 28px 20px;
+          overflow: hidden;
+          transform: rotate(-5deg);
+        }
+
+        .phoneTop {
+          width: 92px;
+          height: 24px;
+          border-radius: 999px;
+          background: #111318;
+          margin: 0 auto 20px;
+        }
+
+        .phoneHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          color: #111318;
+          font-size: 12px;
+          margin-bottom: 22px;
+        }
+
+        .balanceCard {
+          border-radius: 26px;
+          background: linear-gradient(135deg, #111827, #182546);
+          color: white;
+          padding: 22px;
+          box-shadow: 0 18px 40px rgba(31, 49, 93, 0.25);
+        }
+
+        .balanceCard small,
+        .balanceCard span {
+          display: block;
+          color: rgba(255, 255, 255, 0.65);
+          font-size: 11px;
+          font-weight: 800;
+        }
+
+        .balanceCard strong {
+          display: block;
+          margin: 8px 0;
+          font-size: 32px;
+          letter-spacing: -0.05em;
+        }
+
+        .phoneGrid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          margin-top: 16px;
+        }
+
+        .phoneGrid div {
+          background: white;
+          border-radius: 18px;
+          padding: 16px;
+          box-shadow: 0 12px 28px rgba(20, 29, 49, 0.08);
+        }
+
+        .phoneGrid small,
+        .phoneList span {
+          display: block;
+          color: #7a8294;
+          font-size: 11px;
+          font-weight: 800;
+        }
+
+        .phoneGrid strong {
+          display: block;
+          margin-top: 5px;
+          font-size: 24px;
+        }
+
+        .phoneList {
+          margin-top: 16px;
+          background: white;
+          border-radius: 22px;
+          padding: 14px 16px;
+          box-shadow: 0 12px 30px rgba(20, 29, 49, 0.08);
+        }
+
+        .phoneList p {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin: 0;
+          padding: 12px 0;
+          border-bottom: 1px solid #edf0f5;
+        }
+
+        .phoneList p:last-child {
+          border-bottom: none;
+        }
+
+        .phoneList strong {
+          font-size: 11px;
+          color: #111318;
+        }
+
+        .blackCard {
+          position: absolute;
+          left: 300px;
+          top: 190px;
+          width: 270px;
+          height: 180px;
+          border-radius: 28px;
+          padding: 26px;
+          color: white;
+          background:
+            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.12), transparent 28%),
+            linear-gradient(135deg, #151515, #050505);
+          box-shadow: 0 30px 80px rgba(0, 0, 0, 0.26);
+          transform: rotate(-7deg);
+        }
+
+        .blackCard small {
+          display: block;
+          color: rgba(255, 255, 255, 0.62);
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        .blackCard strong {
+          display: block;
+          margin-top: 32px;
+          font-size: 24px;
+          line-height: 1.05;
+        }
+
+        .blackCard span {
+          position: absolute;
+          right: 24px;
+          top: 24px;
+          font-weight: 950;
+        }
+
+        .miniCard {
+          position: absolute;
+          width: 170px;
+          min-height: 120px;
+          border-radius: 24px;
+          background: white;
+          padding: 22px;
+          box-shadow: 0 24px 70px rgba(25, 39, 75, 0.14);
+        }
+
+        .miniCard span {
+          width: 38px;
+          height: 38px;
+          border-radius: 13px;
+          display: grid;
+          place-items: center;
+          color: white;
+          background: linear-gradient(135deg, #69a7ff, #4a55ff);
+          font-weight: 950;
+        }
+
+        .miniCard strong {
+          display: block;
+          margin-top: 14px;
+          font-size: 18px;
+          line-height: 1.12;
+        }
+
+        .secureCard {
+          left: 10px;
+          top: 260px;
+        }
+
+        .recordCard {
+          left: 410px;
+          bottom: 70px;
+        }
+
+        .controlCopy h2 {
+          margin: 18px 0 24px;
+          max-width: 620px;
+          font-size: clamp(48px, 4vw, 72px);
+          line-height: 0.98;
+          letter-spacing: -0.07em;
+        }
+
+        .sectionEyebrow {
+          margin: 0;
+          color: #4a55ff;
+          font-size: 12px;
+          font-weight: 950;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+        }
+
+        .controlCopy p {
+          max-width: 560px;
+          color: #747b8b;
+          font-size: 18px;
+          line-height: 1.65;
+        }
+
+        .controlButtons {
+          display: flex;
+          gap: 16px;
+          margin-top: 34px;
+        }
+
+        .darkBtn,
+        .lightBtn {
+          height: 56px;
+          padding: 0 28px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          font-size: 15px;
+          font-weight: 900;
+        }
+
+        .darkBtn {
+          background: #101010;
+          color: white;
+        }
+
+        .lightBtn {
+          background: white;
+          color: #101010;
+          border: 1px solid #dfe3ea;
+        }
+
+        .controlStat {
+          margin-top: 52px;
+          display: flex;
+          align-items: center;
+          gap: 22px;
+        }
+
+        .statAvatars {
+          display: flex;
+        }
+
+        .statAvatars span {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          margin-left: -10px;
+          display: grid;
+          place-items: center;
+          color: white;
+          background: #111827;
+          border: 3px solid white;
+          font-size: 12px;
+          font-weight: 950;
+        }
+
+        .statAvatars span:first-child {
+          margin-left: 0;
+          background: #d8a06b;
+        }
+
+        .statAvatars span:nth-child(2) {
+          background: #4a55ff;
+        }
+
+        .statAvatars span:nth-child(3) {
+          background: #111827;
+        }
+
+        .statAvatars span:nth-child(4) {
+          background: #69a7ff;
+        }
+
+        .controlStat strong {
+          display: block;
+          font-size: 30px;
+          letter-spacing: -0.04em;
+        }
+
+        .controlStat small {
+          display: block;
+          max-width: 260px;
+          color: #7a8294;
+          margin-top: 4px;
+        }
+
+        @media (max-width: 1100px) {
+          .page {
+            overflow-y: auto;
+          }
+
+          .shell {
+            height: auto;
+            min-height: 100vh;
+          }
+
+          .hero {
+            height: auto;
+            min-height: calc(100vh - 86px);
+            grid-template-columns: 1fr;
+            padding: 50px 0 70px;
+          }
+
+          .visual {
+            min-height: 620px;
+          }
+
+          .controlInner {
+            grid-template-columns: 1fr;
+          }
+
+          .controlCopy {
+            order: -1;
+          }
+        }
+
+        @media (max-width: 760px) {
+          .shell,
+          .controlInner {
+            width: min(100% - 28px, 1440px);
+          }
+
+          .links,
+          .actions a:first-child {
+            display: none;
+          }
+
+          h1 {
+            font-size: 46px;
+          }
+
+          .sub {
+            font-size: 16px;
+          }
+
+          .buttons,
+          .controlButtons {
+            flex-direction: column;
+          }
+
+          .primary,
+          .secondary,
+          .darkBtn,
+          .lightBtn {
+            width: 100%;
+          }
+
+          .controlSection {
+            padding: 70px 0;
+          }
+
+          .controlVisual {
+            min-height: 580px;
+            transform: scale(0.82);
+            transform-origin: top center;
+          }
+
+          .phoneMockup {
+            left: 40px;
+          }
+
+          .blackCard {
+            left: 190px;
+          }
+
+          .secureCard {
+            left: -10px;
+          }
+
+          .recordCard {
+            left: 250px;
+          }
         }
       `}</style>
     </main>
