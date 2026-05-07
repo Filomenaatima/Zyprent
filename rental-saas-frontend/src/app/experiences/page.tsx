@@ -230,6 +230,16 @@ export default function ExperiencesPage() {
         </div>
       </section>
 
+      <section className="residentSection">
+        <div className="residentFrame">
+          <img
+            src="/experiences/resident-experience.png"
+            alt="Resident experience on Zyprent"
+            className="residentImage"
+          />
+        </div>
+      </section>
+
       <style jsx>{`
         .page {
           min-height: 100vh;
@@ -907,27 +917,48 @@ export default function ExperiencesPage() {
           margin-top: 4px;
         }
 
-        .providerImageSection {
+        .providerImageSection,
+        .residentSection {
           min-height: 100vh;
-          background: #eef3ff;
           padding: 34px 0;
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
-        .providerImageFrame {
+        .providerImageSection {
+          background: #eef3ff;
+        }
+
+        .residentSection {
+          background:
+            radial-gradient(circle at top left, rgba(89, 146, 255, 0.16), transparent 24%),
+            linear-gradient(180deg, #071327 0%, #050b18 100%);
+        }
+
+        .providerImageFrame,
+        .residentFrame {
           width: min(1480px, calc(100% - 70px));
           height: calc(100vh - 68px);
           min-height: 650px;
           border-radius: 34px;
           overflow: hidden;
+        }
+
+        .providerImageFrame {
           background: white;
           box-shadow: 0 28px 80px rgba(41, 67, 110, 0.12);
           border: 1px solid rgba(105, 167, 255, 0.2);
         }
 
-        .providerImage {
+        .residentFrame {
+          background: #071327;
+          box-shadow: 0 34px 90px rgba(0, 0, 0, 0.38);
+          border: 1px solid rgba(105, 167, 255, 0.14);
+        }
+
+        .providerImage,
+        .residentImage {
           width: 100%;
           height: 100%;
           display: block;
@@ -964,12 +995,14 @@ export default function ExperiencesPage() {
             order: -1;
           }
 
-          .providerImageFrame {
+          .providerImageFrame,
+          .residentFrame {
             height: auto;
             min-height: 0;
           }
 
-          .providerImage {
+          .providerImage,
+          .residentImage {
             height: auto;
             object-fit: contain;
           }
@@ -978,7 +1011,8 @@ export default function ExperiencesPage() {
         @media (max-width: 760px) {
           .shell,
           .controlFrame,
-          .providerImageFrame {
+          .providerImageFrame,
+          .residentFrame {
             width: min(100% - 28px, 1440px);
           }
 
@@ -1008,7 +1042,8 @@ export default function ExperiencesPage() {
           }
 
           .controlSection,
-          .providerImageSection {
+          .providerImageSection,
+          .residentSection {
             padding: 46px 0;
           }
 
