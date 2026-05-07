@@ -164,21 +164,6 @@ export default function ExperiencesPage() {
                 <span />
               </div>
             </div>
-
-            <div className="sideTile tileOne">
-              <span>✓</span>
-              <strong>Secure payments</strong>
-            </div>
-
-            <div className="sideTile tileTwo">
-              <span>↗</span>
-              <strong>Records updated</strong>
-            </div>
-
-            <div className="sideTile tileThree">
-              <span>•</span>
-              <strong>One app for all roles</strong>
-            </div>
           </div>
 
           <div className="controlCopy">
@@ -558,30 +543,30 @@ export default function ExperiencesPage() {
         .controlSection {
           background: #f5f8ff;
           color: #071027;
-          padding: 74px 0;
+          padding: 52px 0;
         }
 
         .controlFrame {
           width: min(1320px, calc(100% - 70px));
-          min-height: 720px;
+          min-height: calc(100vh - 104px);
           margin: 0 auto;
           border-radius: 34px;
           background:
-            radial-gradient(circle at 16% 78%, rgba(152, 195, 255, 0.3), transparent 32%),
-            radial-gradient(circle at 44% 34%, rgba(198, 222, 255, 0.55), transparent 26%),
+            radial-gradient(circle at 16% 78%, rgba(152, 195, 255, 0.28), transparent 32%),
+            radial-gradient(circle at 44% 34%, rgba(198, 222, 255, 0.5), transparent 26%),
             #ffffff;
           box-shadow: 0 28px 80px rgba(41, 67, 110, 0.1);
           display: grid;
           grid-template-columns: 1.05fr 0.95fr;
           align-items: center;
-          gap: 70px;
-          padding: 70px 78px;
+          gap: 64px;
+          padding: 44px 76px;
           overflow: hidden;
         }
 
         .controlVisual {
           position: relative;
-          min-height: 620px;
+          min-height: 560px;
         }
 
         .softOrb {
@@ -595,39 +580,39 @@ export default function ExperiencesPage() {
           width: 54px;
           height: 54px;
           background: #c8dcff;
-          right: 70px;
-          top: 100px;
+          right: 88px;
+          top: 96px;
         }
 
         .softOrb.two {
           width: 36px;
           height: 36px;
           background: #9fc5ff;
-          left: 80px;
-          bottom: 110px;
+          left: 90px;
+          bottom: 98px;
         }
 
         .phoneDevice {
           position: absolute;
-          left: 132px;
-          top: 22px;
-          width: 310px;
-          height: 590px;
-          border-radius: 48px;
+          left: 118px;
+          top: 0;
+          width: 292px;
+          height: 540px;
+          border-radius: 44px;
           background: linear-gradient(180deg, #ffffff, #edf4ff);
-          border: 10px solid #071027;
+          border: 9px solid #071027;
           box-shadow: 0 34px 90px rgba(23, 48, 88, 0.16);
-          padding: 26px 20px;
+          padding: 24px 18px;
           overflow: hidden;
           transform: rotate(-5deg);
         }
 
         .phoneNotch {
-          width: 92px;
-          height: 24px;
+          width: 86px;
+          height: 22px;
           border-radius: 999px;
           background: #071027;
-          margin: 0 auto 18px;
+          margin: 0 auto 16px;
         }
 
         .phoneStatus {
@@ -635,21 +620,21 @@ export default function ExperiencesPage() {
           justify-content: space-between;
           color: #071027;
           font-size: 12px;
-          margin-bottom: 18px;
+          margin-bottom: 16px;
         }
 
         .phoneWelcome {
           font-size: 12px;
           color: #7d8ba4;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
           font-weight: 800;
         }
 
         .phoneBalance {
-          border-radius: 28px;
+          border-radius: 26px;
           background: linear-gradient(135deg, #091a3d, #1d56d9);
           color: white;
-          padding: 22px;
+          padding: 20px;
           box-shadow: 0 22px 50px rgba(43, 101, 255, 0.24);
         }
 
@@ -658,14 +643,14 @@ export default function ExperiencesPage() {
           margin: 0;
           display: block;
           color: rgba(255, 255, 255, 0.72);
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 800;
         }
 
         .phoneBalance strong {
           display: block;
           margin: 8px 0;
-          font-size: 32px;
+          font-size: 30px;
           letter-spacing: -0.05em;
         }
 
@@ -673,25 +658,25 @@ export default function ExperiencesPage() {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 12px;
-          margin-top: 16px;
+          margin-top: 14px;
         }
 
         .phoneStats div,
         .phoneActivity {
           background: white;
-          border-radius: 20px;
+          border-radius: 18px;
           box-shadow: 0 14px 34px rgba(30, 60, 105, 0.08);
         }
 
         .phoneStats div {
-          padding: 16px;
+          padding: 14px;
         }
 
         .phoneStats small,
         .phoneActivity span {
           display: block;
           color: #7d8ba4;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 850;
         }
 
@@ -699,19 +684,19 @@ export default function ExperiencesPage() {
           display: block;
           margin-top: 5px;
           color: #071027;
-          font-size: 25px;
+          font-size: 23px;
         }
 
         .phoneActivity {
-          margin-top: 16px;
-          padding: 14px 16px;
+          margin-top: 14px;
+          padding: 12px 14px;
         }
 
         .phoneActivity p {
           display: flex;
           justify-content: space-between;
           margin: 0;
-          padding: 12px 0;
+          padding: 10px 0;
           border-bottom: 1px solid #edf2f8;
         }
 
@@ -720,44 +705,45 @@ export default function ExperiencesPage() {
         }
 
         .phoneActivity strong {
-          font-size: 11px;
+          font-size: 10px;
           color: #071027;
         }
 
         .propertyCard {
           position: absolute;
-          left: 300px;
-          top: 188px;
-          width: 284px;
-          height: 184px;
-          border-radius: 30px;
-          padding: 26px;
+          left: 340px;
+          top: 154px;
+          width: 250px;
+          height: 158px;
+          border-radius: 28px;
+          padding: 22px;
           color: white;
           background:
-            radial-gradient(circle at 82% 20%, rgba(160, 196, 255, 0.36), transparent 28%),
+            radial-gradient(circle at 82% 20%, rgba(160, 196, 255, 0.32), transparent 28%),
             linear-gradient(135deg, #06142f, #173f9e 64%, #76b6ff);
           box-shadow: 0 34px 84px rgba(33, 83, 181, 0.25);
-          transform: rotate(-7deg);
+          transform: rotate(-5deg);
+          z-index: 5;
         }
 
         .cardTop {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          font-size: 12px;
-          color: rgba(255, 255, 255, 0.75);
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.76);
           font-weight: 900;
         }
 
         .propertyCard h3 {
-          margin: 34px 0 8px;
-          font-size: 25px;
+          margin: 28px 0 8px;
+          font-size: 23px;
           line-height: 1.05;
         }
 
         .propertyCard p {
           margin: 0;
-          font-size: 12px;
+          font-size: 11px;
           line-height: 1.4;
           color: rgba(255, 255, 255, 0.72);
         }
@@ -765,7 +751,7 @@ export default function ExperiencesPage() {
         .cardLines {
           display: flex;
           gap: 8px;
-          margin-top: 18px;
+          margin-top: 16px;
         }
 
         .cardLines span {
@@ -786,53 +772,10 @@ export default function ExperiencesPage() {
           width: 34px;
         }
 
-        .sideTile {
-          position: absolute;
-          width: 170px;
-          min-height: 122px;
-          border-radius: 26px;
-          background: white;
-          padding: 22px;
-          box-shadow: 0 26px 72px rgba(31, 60, 108, 0.13);
-        }
-
-        .sideTile span {
-          width: 38px;
-          height: 38px;
-          border-radius: 13px;
-          display: grid;
-          place-items: center;
-          color: white;
-          background: linear-gradient(135deg, #7ebaff, #4a55ff);
-          font-weight: 950;
-        }
-
-        .sideTile strong {
-          display: block;
-          margin-top: 15px;
-          font-size: 18px;
-          line-height: 1.1;
-        }
-
-        .tileOne {
-          left: 16px;
-          top: 260px;
-        }
-
-        .tileTwo {
-          left: 420px;
-          bottom: 70px;
-        }
-
-        .tileThree {
-          left: 34px;
-          bottom: 84px;
-        }
-
         .controlCopy h2 {
           margin: 18px 0 24px;
           max-width: 620px;
-          font-size: clamp(48px, 4vw, 72px);
+          font-size: clamp(44px, 3.7vw, 66px);
           line-height: 0.98;
           letter-spacing: -0.07em;
         }
@@ -885,7 +828,7 @@ export default function ExperiencesPage() {
         }
 
         .controlStat {
-          margin-top: 52px;
+          margin-top: 44px;
           display: flex;
           align-items: center;
           gap: 22px;
@@ -1009,7 +952,7 @@ export default function ExperiencesPage() {
           }
 
           .controlVisual {
-            min-height: 580px;
+            min-height: 520px;
             transform: scale(0.82);
             transform-origin: top center;
           }
