@@ -39,11 +39,15 @@ export default function ExperiencesPage() {
 
       <section className="xpHero">
         <div className="xpHeroText">
-          <p>ZYPreNT EXPERIENCES</p>
-          <h1>Every property user gets a clearer workspace.</h1>
+          <p className="eyebrow">Welcome to Zyprent Experiences</p>
+
+          <h1>
+            Property work, built around real people.
+          </h1>
+
           <span>
-            A visual look at how Zyprent keeps managers, residents, service
-            providers and investors moving through one connected system.
+            From residents paying rent to managers approving work, Zyprent keeps
+            every property experience clear, connected and easy to follow.
           </span>
 
           <div className="xpHeroActions">
@@ -55,657 +59,483 @@ export default function ExperiencesPage() {
             >
               Request Demo
             </a>
-            <a href="/" className="landing-btn secondary large">
-              Back Home
+
+            <a href="/login" className="landing-btn secondary large">
+              Explore Platform
             </a>
           </div>
+
+          <div className="trustRow">
+            <div className="avatarStack">
+              <i />
+              <i />
+              <i />
+            </div>
+            <p>
+              <strong>Built for every role</strong>
+              <small>Residents · Managers · Providers · Investors</small>
+            </p>
+          </div>
         </div>
 
-        <div className="xpHeroVisual">
-          <div className="productWindow">
-            <div className="windowTop">
-              <i />
-              <i />
-              <i />
-              <strong>Zyprent Workspace</strong>
-            </div>
+        <div className="xpHeroVisual" aria-hidden="true">
+          <div className="heroGlow" />
 
-            <div className="windowBody">
-              <aside className="sideRail">
-                <span className="active" />
-                <span />
-                <span />
-                <span />
-                <span />
-              </aside>
+          <div className="personPhotoCard">
+            <div className="personFigure">
+              <div className="personHead">
+                <span className="hair" />
+                <span className="ear left" />
+                <span className="ear right" />
+                <span className="eye leftEye" />
+                <span className="eye rightEye" />
+                <span className="nose" />
+                <span className="smile" />
+              </div>
 
-              <div className="mainPanel">
-                <div className="bluePanel">
-                  <small>Live portfolio</small>
-                  <strong>UGX 48.2M</strong>
-                  <em>Collected this month</em>
-                </div>
+              <div className="shirt">
+                <span className="collar leftCollar" />
+                <span className="collar rightCollar" />
+                <span className="tie" />
+              </div>
 
-                <div className="miniStats">
-                  <div>
-                    <small>Units</small>
-                    <strong>42</strong>
-                  </div>
-                  <div>
-                    <small>Open jobs</small>
-                    <strong>06</strong>
-                  </div>
-                  <div>
-                    <small>Returns</small>
-                    <strong>18.4%</strong>
-                  </div>
-                </div>
-
-                <div className="activityList">
-                  <div>
-                    <span>Rent payment</span>
-                    <b>Receipt saved</b>
-                  </div>
-                  <div>
-                    <span>Maintenance</span>
-                    <b>Provider assigned</b>
-                  </div>
-                  <div>
-                    <span>Investor report</span>
-                    <b>Ready</b>
-                  </div>
-                </div>
+              <div className="laptop">
+                <span />
               </div>
             </div>
           </div>
 
-          <div className="floatingCard one">
-            <small>Resident</small>
-            <strong>Paid</strong>
+          <div className="floatingMetric topMetric">
+            <small>Resident payment</small>
+            <strong>Receipt saved</strong>
           </div>
 
-          <div className="floatingCard two">
-            <small>Provider</small>
-            <strong>Assigned</strong>
+          <div className="floatingMetric rightMetric">
+            <strong>550+</strong>
+            <small>Actions tracked</small>
           </div>
+
+          <div className="floatingMetric bottomMetric">
+            <small>Team workflow</small>
+            <strong>Manager approved</strong>
+          </div>
+
+          <div className="miniIcon iconOne">₦</div>
+          <div className="miniIcon iconTwo">✓</div>
+          <div className="miniIcon iconThree">💬</div>
         </div>
       </section>
 
-      <section className="xpRoles">
-        <div className="xpSectionHead">
-          <p>ROLE-BASED VIEWS</p>
-          <h2>Four experiences. One operating system.</h2>
-        </div>
-
-        <div className="roleGrid">
-          <article>
-            <div className="rolePreview residentPreview">
-              <div className="phoneMock">
-                <span />
-                <strong>Rent paid</strong>
-                <small>Receipt generated</small>
-              </div>
-            </div>
-            <p>Resident</p>
-            <h3>Payments and requests feel simple.</h3>
-          </article>
-
-          <article>
-            <div className="rolePreview managerPreview">
-              <div className="dashMock">
-                <i />
-                <i />
-                <i />
-                <i />
-              </div>
-            </div>
-            <p>Manager</p>
-            <h3>Property operations stay visible.</h3>
-          </article>
-
-          <article>
-            <div className="rolePreview providerPreview">
-              <div className="jobMock">
-                <span>Job request</span>
-                <strong>Quote approved</strong>
-                <small>Provider on site</small>
-              </div>
-            </div>
-            <p>Service provider</p>
-            <h3>Work orders become trackable.</h3>
-          </article>
-
-          <article>
-            <div className="rolePreview investorPreview">
-              <div className="chartMock">
-                <strong>18.4%</strong>
-                <div>
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </div>
-              </div>
-            </div>
-            <p>Investor</p>
-            <h3>Returns and expenses become clear.</h3>
-          </article>
-        </div>
-      </section>
-
-      <section className="xpShowcase">
+      <section className="brandStrip">
+        <span>Trusted workflow for property teams</span>
         <div>
-          <p>CONNECTED WORKFLOW</p>
-          <h2>One action updates the whole record.</h2>
-          <span>
-            Payments, maintenance, approvals and reports are tied to the right
-            property, user and timeline.
-          </span>
-        </div>
-
-        <div className="workflowList">
-          <section>
-            <b>01</b>
-            <strong>Resident pays rent</strong>
-          </section>
-          <section>
-            <b>02</b>
-            <strong>Manager sees the record</strong>
-          </section>
-          <section>
-            <b>03</b>
-            <strong>Provider completes work</strong>
-          </section>
-          <section>
-            <b>04</b>
-            <strong>Investor reviews performance</strong>
-          </section>
+          <strong>Payments</strong>
+          <strong>Maintenance</strong>
+          <strong>Residents</strong>
+          <strong>Investors</strong>
+          <strong>Reporting</strong>
         </div>
       </section>
 
-      <section className="xpFinal">
-        <p>BUILT FOR CONNECTED PROPERTY WORK</p>
-        <h2>Give every user a clearer way to work.</h2>
-        <span>
-          Zyprent brings people, payments, maintenance and property financials
-          into one clean workspace.
-        </span>
-
-        <div>
-          <a
-            href={DEMO_FORM_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="landing-btn primary large"
-          >
-            Request Demo
-          </a>
-          <a href="/" className="landing-btn secondary large">
-            Back Home
-          </a>
-        </div>
+      <section className="placeholderNext">
+        <p>Next section will be rebuilt after the hero is approved.</p>
       </section>
 
       <style jsx>{`
         .experiencePage {
           min-height: 100vh;
-          background: #050612;
+          background: #050814;
           color: #ffffff;
           overflow-x: hidden;
         }
 
         .xpNav {
           position: relative;
-          z-index: 10;
+          z-index: 20;
         }
 
         .xpHero {
           width: min(1120px, calc(100% - 40px));
           height: calc(100vh - 92px);
-          max-height: 610px;
-          min-height: 520px;
+          max-height: 640px;
+          min-height: 540px;
           margin: 0 auto;
           display: grid;
-          grid-template-columns: 0.82fr 1.18fr;
-          gap: 42px;
+          grid-template-columns: 0.9fr 1.1fr;
           align-items: center;
-          padding: 16px 0 28px;
+          gap: 42px;
+          padding: 18px 0 28px;
         }
 
-        .xpHeroText p,
-        .xpSectionHead p,
-        .xpShowcase p,
-        .xpFinal p {
+        .eyebrow {
           margin: 0;
-          color: #8fd0ff;
-          font-size: 11px;
-          font-weight: 950;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
+          color: #74b7ff;
+          font-size: 13px;
+          font-weight: 850;
         }
 
         .xpHeroText h1 {
-          margin: 14px 0 0;
-          font-size: clamp(38px, 4.9vw, 62px);
-          line-height: 0.96;
-          letter-spacing: -0.07em;
-          max-width: 560px;
+          margin: 18px 0 0;
+          max-width: 530px;
+          font-size: clamp(42px, 5vw, 66px);
+          line-height: 0.98;
+          letter-spacing: -0.06em;
         }
 
         .xpHeroText span {
           display: block;
-          margin-top: 18px;
           max-width: 500px;
-          color: rgba(255, 255, 255, 0.68);
+          margin-top: 20px;
+          color: rgba(255, 255, 255, 0.72);
           font-size: 16px;
           line-height: 1.55;
         }
 
         .xpHeroActions {
-          margin-top: 24px;
+          margin-top: 26px;
           display: flex;
-          gap: 12px;
+          gap: 14px;
           flex-wrap: wrap;
+        }
+
+        .trustRow {
+          margin-top: 22px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .avatarStack {
+          display: flex;
+        }
+
+        .avatarStack i {
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          margin-left: -8px;
+          border: 2px solid #050814;
+          background: linear-gradient(135deg, #8fd0ff, #3657f3);
+        }
+
+        .avatarStack i:first-child {
+          margin-left: 0;
+          background: linear-gradient(135deg, #f0b981, #6c3e26);
+        }
+
+        .avatarStack i:nth-child(2) {
+          background: linear-gradient(135deg, #ffffff, #8fa2d9);
+        }
+
+        .trustRow p {
+          margin: 0;
+        }
+
+        .trustRow strong,
+        .trustRow small {
+          display: block;
+        }
+
+        .trustRow strong {
+          font-size: 13px;
+        }
+
+        .trustRow small {
+          margin-top: 3px;
+          color: rgba(255, 255, 255, 0.58);
+          font-size: 12px;
         }
 
         .xpHeroVisual {
           position: relative;
-          min-height: 455px;
+          height: 500px;
           border-radius: 34px;
+          overflow: hidden;
           background:
-            radial-gradient(circle at 70% 12%, rgba(143, 208, 255, 0.22), transparent 32%),
-            linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035));
-          border: 1px solid rgba(205, 225, 255, 0.16);
-          box-shadow: 0 34px 90px rgba(0, 0, 0, 0.34);
-          overflow: hidden;
-          padding: 26px;
+            radial-gradient(circle at 58% 38%, rgba(55, 117, 255, 0.36), transparent 36%),
+            radial-gradient(circle at 84% 8%, rgba(143, 208, 255, 0.18), transparent 28%),
+            linear-gradient(145deg, #081225, #031026 52%, #061a35);
+          border: 1px solid rgba(180, 210, 255, 0.14);
+          box-shadow: 0 34px 95px rgba(0, 0, 0, 0.36);
         }
 
-        .productWindow {
-          height: 100%;
-          border-radius: 26px;
-          overflow: hidden;
-          background: rgba(6, 10, 30, 0.72);
-          border: 1px solid rgba(255, 255, 255, 0.14);
-          box-shadow: 0 28px 70px rgba(0, 0, 0, 0.36);
+        .heroGlow {
+          position: absolute;
+          right: 70px;
+          top: 45px;
+          width: 310px;
+          height: 310px;
+          border-radius: 50%;
+          background: rgba(67, 134, 255, 0.25);
+          filter: blur(8px);
         }
 
-        .windowTop {
-          height: 48px;
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          padding: 0 18px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          background: rgba(255, 255, 255, 0.06);
+        .personPhotoCard {
+          position: absolute;
+          right: 72px;
+          bottom: 0;
+          width: 290px;
+          height: 435px;
         }
 
-        .windowTop i {
+        .personFigure {
+          position: absolute;
+          inset: 0;
+        }
+
+        .personHead {
+          position: absolute;
+          top: 28px;
+          left: 50%;
+          width: 112px;
+          height: 124px;
+          transform: translateX(-50%);
+          border-radius: 42% 42% 46% 46%;
+          background: linear-gradient(135deg, #8a4f2d, #4b2417);
+          box-shadow: inset 14px 0 22px rgba(255, 255, 255, 0.1);
+        }
+
+        .hair {
+          position: absolute;
+          left: 6px;
+          top: -2px;
+          width: 100px;
+          height: 34px;
+          border-radius: 40px 40px 22px 22px;
+          background: #17110f;
+        }
+
+        .ear {
+          position: absolute;
+          top: 58px;
+          width: 16px;
+          height: 24px;
+          border-radius: 50%;
+          background: #62331f;
+        }
+
+        .ear.left {
+          left: -8px;
+        }
+
+        .ear.right {
+          right: -8px;
+        }
+
+        .eye {
+          position: absolute;
+          top: 62px;
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #111;
+        }
+
+        .leftEye {
+          left: 34px;
+        }
+
+        .rightEye {
+          right: 34px;
+        }
+
+        .nose {
+          position: absolute;
+          left: 52px;
+          top: 70px;
           width: 9px;
-          height: 9px;
+          height: 18px;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.34);
+          background: rgba(0, 0, 0, 0.16);
         }
 
-        .windowTop strong {
-          margin-left: auto;
-          font-size: 12px;
-          color: rgba(255, 255, 255, 0.58);
+        .smile {
+          position: absolute;
+          left: 43px;
+          bottom: 28px;
+          width: 28px;
+          height: 13px;
+          border-bottom: 3px solid rgba(0, 0, 0, 0.55);
+          border-radius: 0 0 999px 999px;
         }
 
-        .windowBody {
-          display: grid;
-          grid-template-columns: 120px 1fr;
-          min-height: 381px;
+        .shirt {
+          position: absolute;
+          left: 50%;
+          bottom: 36px;
+          width: 210px;
+          height: 275px;
+          transform: translateX(-50%);
+          border-radius: 64px 64px 18px 18px;
+          background: linear-gradient(135deg, #e8f3ff, #8ca8d6);
+          box-shadow: 0 28px 70px rgba(0, 0, 0, 0.35);
         }
 
-        .sideRail {
-          padding: 22px 18px;
-          background: rgba(255, 255, 255, 0.035);
-          border-right: 1px solid rgba(255, 255, 255, 0.08);
+        .collar {
+          position: absolute;
+          top: 0;
+          width: 58px;
+          height: 50px;
+          background: #ffffff;
+          clip-path: polygon(0 0, 100% 0, 50% 100%);
         }
 
-        .sideRail span {
+        .leftCollar {
+          left: 52px;
+        }
+
+        .rightCollar {
+          right: 52px;
+        }
+
+        .tie {
+          position: absolute;
+          top: 32px;
+          left: 50%;
+          width: 22px;
+          height: 150px;
+          transform: translateX(-50%);
+          background: linear-gradient(180deg, #0b1229, #152454);
+          clip-path: polygon(50% 0, 100% 16%, 70% 100%, 30% 100%, 0 16%);
+        }
+
+        .laptop {
+          position: absolute;
+          left: 0;
+          bottom: 58px;
+          width: 178px;
+          height: 112px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, #d7dce5, #8f9aad);
+          transform: rotate(-4deg);
+          box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
+        }
+
+        .laptop span {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 38px;
+          height: 38px;
+          transform: translate(-50%, -50%);
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.32);
+        }
+
+        .floatingMetric {
+          position: absolute;
+          padding: 14px 16px;
+          border-radius: 18px;
+          background: rgba(8, 20, 52, 0.72);
+          border: 1px solid rgba(143, 208, 255, 0.2);
+          backdrop-filter: blur(16px);
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+        }
+
+        .floatingMetric small {
           display: block;
-          height: 12px;
-          border-radius: 999px;
-          margin-bottom: 17px;
-          background: rgba(255, 255, 255, 0.18);
+          color: #8fd0ff;
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
         }
 
-        .sideRail span.active {
-          width: 78px;
-          background: #6aa9ff;
+        .floatingMetric strong {
+          display: block;
+          margin-top: 5px;
+          font-size: 16px;
         }
 
-        .mainPanel {
-          padding: 22px;
+        .topMetric {
+          left: 40px;
+          top: 188px;
         }
 
-        .bluePanel {
-          min-height: 126px;
-          border-radius: 24px;
-          padding: 22px;
-          background: linear-gradient(135deg, #0f1e5a, #315bea);
+        .rightMetric {
+          right: 36px;
+          top: 164px;
         }
 
-        .bluePanel small,
-        .miniStats small {
-          color: rgba(255, 255, 255, 0.66);
+        .rightMetric strong {
+          font-size: 31px;
+        }
+
+        .bottomMetric {
+          left: 98px;
+          bottom: 70px;
+        }
+
+        .miniIcon {
+          position: absolute;
+          width: 42px;
+          height: 42px;
+          display: grid;
+          place-items: center;
+          border-radius: 50%;
+          font-weight: 950;
+          background: #f5c400;
+          color: #071027;
+          box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+        }
+
+        .iconOne {
+          top: 60px;
+          left: 145px;
+          transform: rotate(-18deg);
+        }
+
+        .iconTwo {
+          right: 84px;
+          top: 100px;
+        }
+
+        .iconThree {
+          right: 52px;
+          bottom: 120px;
+          background: #0a60ff;
+          color: #fff;
+        }
+
+        .brandStrip {
+          background: #03040a;
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          padding: 28px 20px;
+          text-align: center;
+        }
+
+        .brandStrip span {
+          display: block;
+          margin-bottom: 18px;
+          color: rgba(255, 255, 255, 0.68);
+          font-size: 13px;
           font-weight: 800;
         }
 
-        .bluePanel strong {
-          display: block;
-          margin-top: 7px;
-          font-size: 34px;
-          letter-spacing: -0.06em;
-        }
-
-        .bluePanel em {
-          display: block;
-          margin-top: 5px;
-          color: rgba(255, 255, 255, 0.68);
-          font-style: normal;
-        }
-
-        .miniStats {
-          margin-top: 13px;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 10px;
-        }
-
-        .miniStats div {
-          padding: 15px;
-          border-radius: 18px;
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .miniStats strong {
-          display: block;
-          margin-top: 5px;
-          font-size: 22px;
-        }
-
-        .activityList {
-          margin-top: 13px;
-          padding: 6px;
-          border-radius: 18px;
-          background: rgba(255, 255, 255, 0.06);
-          border: 1px solid rgba(255, 255, 255, 0.09);
-        }
-
-        .activityList div {
+        .brandStrip div {
+          width: min(900px, 100%);
+          margin: 0 auto;
           display: flex;
           justify-content: space-between;
-          gap: 16px;
-          padding: 12px;
-          font-size: 13px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+          gap: 20px;
+          flex-wrap: wrap;
+          color: rgba(255, 255, 255, 0.76);
         }
 
-        .activityList div:last-child {
-          border-bottom: 0;
-        }
-
-        .activityList span {
-          color: rgba(255, 255, 255, 0.62);
-        }
-
-        .floatingCard {
-          position: absolute;
-          padding: 12px 16px;
-          border-radius: 18px;
-          background: rgba(255, 255, 255, 0.12);
-          border: 1px solid rgba(255, 255, 255, 0.16);
-          backdrop-filter: blur(16px);
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.24);
-        }
-
-        .floatingCard small {
-          display: block;
-          color: #8fd0ff;
-          font-weight: 950;
-          font-size: 10px;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-        }
-
-        .floatingCard strong {
-          display: block;
-          margin-top: 4px;
-        }
-
-        .floatingCard.one {
-          left: 10px;
-          bottom: 42px;
-        }
-
-        .floatingCard.two {
-          right: 14px;
-          top: 76px;
-        }
-
-        .xpRoles,
-        .xpShowcase,
-        .xpFinal {
+        .placeholderNext {
           width: min(1120px, calc(100% - 40px));
           margin: 0 auto;
-        }
-
-        .xpRoles {
-          padding: 58px 0 72px;
-        }
-
-        .xpSectionHead {
+          padding: 80px 0;
+          color: rgba(255, 255, 255, 0.58);
           text-align: center;
-          max-width: 660px;
-          margin: 0 auto;
-        }
-
-        .xpSectionHead h2,
-        .xpShowcase h2,
-        .xpFinal h2 {
-          margin: 10px 0 0;
-          font-size: clamp(32px, 4vw, 52px);
-          line-height: 1;
-          letter-spacing: -0.065em;
-        }
-
-        .roleGrid {
-          margin-top: 28px;
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 16px;
-        }
-
-        .roleGrid article {
-          min-height: 290px;
-          padding: 16px;
-          border-radius: 28px;
-          background: rgba(255, 255, 255, 0.055);
-          border: 1px solid rgba(205, 225, 255, 0.14);
-        }
-
-        .rolePreview {
-          height: 142px;
-          border-radius: 22px;
-          margin-bottom: 16px;
-          position: relative;
-          overflow: hidden;
-          background:
-            radial-gradient(circle at 60% 22%, rgba(143, 208, 255, 0.22), transparent 36%),
-            rgba(255, 255, 255, 0.065);
-        }
-
-        .phoneMock,
-        .jobMock,
-        .chartMock,
-        .dashMock {
-          position: absolute;
-          inset: 18px;
-          border-radius: 18px;
-          padding: 16px;
-          background: rgba(5, 8, 28, 0.7);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-        }
-
-        .phoneMock span {
-          display: block;
-          width: 38px;
-          height: 5px;
-          margin: 0 auto 18px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.28);
-        }
-
-        .phoneMock strong,
-        .jobMock strong,
-        .chartMock strong {
-          display: block;
-          color: #fff;
-          font-size: 18px;
-          line-height: 1.05;
-        }
-
-        .phoneMock small,
-        .jobMock small {
-          display: block;
-          margin-top: 9px;
-          color: #8fd0ff;
-        }
-
-        .dashMock {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 10px;
-        }
-
-        .dashMock i {
-          border-radius: 12px;
-          background: rgba(106, 169, 255, 0.28);
-        }
-
-        .jobMock span,
-        .chartMock > span {
-          color: #8fd0ff;
-        }
-
-        .chartMock div {
-          height: 64px;
-          display: flex;
-          align-items: end;
-          gap: 7px;
-          margin-top: 14px;
-        }
-
-        .chartMock i {
-          flex: 1;
-          border-radius: 9px 9px 0 0;
-          background: linear-gradient(180deg, #8fd0ff, #4057f2);
-        }
-
-        .chartMock i:nth-child(1) { height: 34%; }
-        .chartMock i:nth-child(2) { height: 55%; }
-        .chartMock i:nth-child(3) { height: 76%; }
-        .chartMock i:nth-child(4) { height: 100%; }
-
-        .roleGrid article p {
-          margin: 0;
-          color: #8fd0ff;
-          font-size: 11px;
-          font-weight: 950;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-        }
-
-        .roleGrid article h3 {
-          margin: 10px 0 0;
-          font-size: 21px;
-          line-height: 1.08;
-          letter-spacing: -0.05em;
-        }
-
-        .xpShowcase {
-          padding: 34px;
-          border-radius: 32px;
-          display: grid;
-          grid-template-columns: 0.86fr 1.14fr;
-          gap: 28px;
-          align-items: center;
-          background: rgba(255, 255, 255, 0.055);
-          border: 1px solid rgba(205, 225, 255, 0.14);
-        }
-
-        .xpShowcase span,
-        .xpFinal span {
-          display: block;
-          margin-top: 14px;
-          color: rgba(255, 255, 255, 0.66);
-          line-height: 1.6;
-        }
-
-        .workflowList {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
-        }
-
-        .workflowList section {
-          padding: 18px;
-          border-radius: 20px;
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.11);
-        }
-
-        .workflowList b {
-          display: block;
-          color: #8fd0ff;
-          font-size: 13px;
-          margin-bottom: 8px;
-        }
-
-        .workflowList strong {
-          font-size: 17px;
-        }
-
-        .xpFinal {
-          margin: 64px auto 56px;
-          padding: 54px 28px;
-          text-align: center;
-          border-radius: 32px;
-          background:
-            radial-gradient(circle at 50% 0%, rgba(89, 112, 255, 0.18), transparent 40%),
-            rgba(255, 255, 255, 0.055);
-          border: 1px solid rgba(205, 225, 255, 0.14);
-        }
-
-        .xpFinal span {
-          max-width: 620px;
-          margin-left: auto;
-          margin-right: auto;
-        }
-
-        .xpFinal div {
-          margin-top: 24px;
-          display: flex;
-          justify-content: center;
-          gap: 12px;
-          flex-wrap: wrap;
         }
 
         @media (max-width: 980px) {
-          .xpHero,
-          .xpShowcase {
+          .xpHero {
             height: auto;
             max-height: none;
             grid-template-columns: 1fr;
-          }
-
-          .roleGrid {
-            grid-template-columns: repeat(2, 1fr);
           }
         }
 
@@ -720,22 +550,29 @@ export default function ExperiencesPage() {
           }
 
           .xpHeroVisual {
-            min-height: auto;
-            padding: 16px;
+            height: 470px;
           }
 
-          .windowBody {
-            grid-template-columns: 1fr;
+          .personPhotoCard {
+            right: 14px;
+            transform: scale(0.85);
+            transform-origin: bottom right;
           }
 
-          .sideRail {
-            display: none;
+          .floatingMetric {
+            transform: scale(0.84);
           }
 
-          .miniStats,
-          .roleGrid,
-          .workflowList {
-            grid-template-columns: 1fr;
+          .topMetric {
+            left: 16px;
+          }
+
+          .bottomMetric {
+            left: 18px;
+          }
+
+          .brandStrip div {
+            justify-content: center;
           }
         }
       `}</style>
