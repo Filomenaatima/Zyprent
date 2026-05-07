@@ -6,395 +6,200 @@ const DEMO_FORM_LINK =
 export default function ExperiencesPage() {
   return (
     <main className="experiencePage">
-      <div className="heroBackground" />
+      <div className="heroImage" />
 
-      <div className="pageShell">
-        <nav className="topbar">
-          <a href="/" className="logo">
-            <span>Z</span>
-            <strong>Zyprent</strong>
-          </a>
-
-          <div className="navLinks">
-            <a href="/">Home</a>
-            <a href="/#solution">Solution</a>
-            <a href="/#platform">Platform</a>
-            <a href="/experiences">Experiences</a>
-            <a href="/#faq">FAQ</a>
-          </div>
-
-          <div className="navActions">
-            <a href="/login" className="signin">
-              Sign In
-            </a>
-
-            <a
-              href={DEMO_FORM_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="demoButton"
-            >
-              Request Demo
-            </a>
-          </div>
-        </nav>
-
-        <section className="heroSection">
-          <div className="heroContent">
-            <p className="eyebrow">
-              Welcome to Zyprent Experiences
-            </p>
-
-            <h1>
-              Property work,
-              <br />
-              built around
-              <br />
-              real people.
-            </h1>
-
-            <p className="description">
-              Residents, managers, providers and investors stay connected
-              through one clean property workflow.
-            </p>
-
-            <div className="heroButtons">
-              <a
-                href={DEMO_FORM_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="primaryBtn"
-              >
-                Request Demo
-              </a>
-
-              <a href="/login" className="secondaryBtn">
-                Explore Platform
-              </a>
-            </div>
-
-            <div className="roleRow">
-              <div className="avatars">
-                <span className="avatar orange">R</span>
-                <span className="avatar white">M</span>
-                <span className="avatar blue">I</span>
-              </div>
-
-              <div className="roleText">
-                <strong>Built for every role</strong>
-                <small>
-                  Residents · Managers · Providers · Investors
-                </small>
-              </div>
-            </div>
-          </div>
-        </section>
+      <div className="clickLayer">
+        <a href="/" className="logoLink" aria-label="Go to homepage" />
+        <a href="/" className="homeLink">Home</a>
+        <a href="/#solution" className="solutionLink">Solution</a>
+        <a href="/#platform" className="platformLink">Platform</a>
+        <a href="/experiences" className="experiencesLink">Experiences</a>
+        <a href="/#faq" className="faqLink">FAQ</a>
+        <a href="/login" className="signinLink">Sign In</a>
+        <a
+          href={DEMO_FORM_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="demoLink"
+        >
+          Request Demo
+        </a>
+        <a
+          href={DEMO_FORM_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ctaPrimary"
+        >
+          Request Demo
+        </a>
+        <a href="/login" className="ctaSecondary">
+          Explore Platform
+        </a>
       </div>
 
       <style jsx>{`
         .experiencePage {
           position: relative;
+          width: 100%;
           min-height: 100vh;
           overflow: hidden;
           background: #040816;
-          color: white;
         }
 
-        .heroBackground {
-         position: absolute;
-         inset: 0;
-         background-image: url("/experiences/hero-reference.png");
-         background-size: cover;
-         background-position: 72% center;
-         background-repeat: no-repeat;
-         z-index: 0;
-         transform: scale(0.94);
-         transform-origin: center;
-        }
-
-        .heroBackground::after {
-          content: "";
+        .heroImage {
           position: absolute;
           inset: 0;
-          background:
-            linear-gradient(
-              to right,
-              rgba(4, 8, 22, 0.92) 0%,
-              rgba(4, 8, 22, 0.82) 28%,
-              rgba(4, 8, 22, 0.55) 42%,
-              rgba(4, 8, 22, 0.1) 62%,
-              rgba(4, 8, 22, 0.05) 100%
-            );
+          background-image: url("/experiences/hero-reference.png");
+          background-size: contain;
+          background-position: center top;
+          background-repeat: no-repeat;
+          background-color: #040816;
         }
 
-        .pageShell {
+        .clickLayer {
           position: relative;
-          z-index: 2;
-          width: min(1440px, calc(100% - 64px));
+          z-index: 5;
+          width: min(1440px, 100%);
+          height: 100vh;
           margin: 0 auto;
         }
 
-        .topbar {
-          height: 92px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 1px solid rgba(255,255,255,0.08);
+        .clickLayer a {
+          position: absolute;
+          text-indent: -9999px;
+          overflow: hidden;
         }
 
-        .logo {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          text-decoration: none;
-          color: white;
+        .logoLink {
+          left: 42px;
+          top: 24px;
+          width: 210px;
+          height: 56px;
         }
 
-        .logo span {
-          width: 44px;
-          height: 44px;
-          border-radius: 14px;
-          background: white;
-          color: #040816;
-          display: grid;
-          place-items: center;
-          font-weight: 900;
-          font-size: 22px;
+        .homeLink {
+          left: 455px;
+          top: 32px;
+          width: 64px;
+          height: 40px;
         }
 
-        .logo strong {
-          font-size: 30px;
-          font-weight: 900;
-          letter-spacing: -0.05em;
+        .solutionLink {
+          left: 565px;
+          top: 32px;
+          width: 90px;
+          height: 40px;
         }
 
-        .navLinks {
-          display: flex;
-          gap: 34px;
+        .platformLink {
+          left: 690px;
+          top: 32px;
+          width: 90px;
+          height: 40px;
         }
 
-        .navLinks a,
-        .signin {
-          color: rgba(255,255,255,0.88);
-          text-decoration: none;
-          font-size: 15px;
-          font-weight: 800;
+        .experiencesLink {
+          left: 798px;
+          top: 32px;
+          width: 128px;
+          height: 40px;
         }
 
-        .navActions {
-          display: flex;
-          align-items: center;
-          gap: 20px;
+        .faqLink {
+          left: 945px;
+          top: 32px;
+          width: 60px;
+          height: 40px;
         }
 
-        .demoButton {
-          height: 50px;
-          padding: 0 28px;
-          border-radius: 16px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          text-decoration: none;
-          color: white;
-          font-size: 15px;
-          font-weight: 900;
-          background: linear-gradient(135deg,#70a8ff,#5560ff);
-          box-shadow: 0 18px 40px rgba(79,95,255,0.35);
+        .signinLink {
+          right: 210px;
+          top: 32px;
+          width: 72px;
+          height: 40px;
         }
 
-        .heroSection {
-          min-height: calc(100vh - 92px);
-          display: flex;
-          align-items: center;
-        }
-
-        .heroContent {
-         width: 100%;
-         max-width: 620px;
-         padding: 72px 0 120px;
-        }
-
-        .eyebrow {
-          margin: 0 0 24px;
-          color: #69a7ff;
-          font-size: 12px;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: 0.18em;
-        }
-
-        h1 {
-          margin: 0;
-          font-size: clamp(52px, 4.5vw, 78px);
-          line-height: 0.94;
-          letter-spacing: -0.08em;
-          font-weight: 900;
-        }
-
-        .description {
-          margin-top: 30px;
-          max-width: 560px;
-          color: rgba(255,255,255,0.78);
-          font-size: 19px;
-          line-height: 1.6;
-        }
-
-        .heroButtons {
-          display: flex;
-          gap: 18px;
-          margin-top: 34px;
-        }
-
-        .primaryBtn,
-        .secondaryBtn {
+        .demoLink {
+          right: 42px;
+          top: 20px;
+          width: 160px;
           height: 58px;
-          padding: 0 32px;
-          border-radius: 18px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          text-decoration: none;
-          font-size: 16px;
-          font-weight: 900;
         }
 
-        .primaryBtn {
-          color: white;
-          background: linear-gradient(135deg,#70a8ff,#5560ff);
-          box-shadow: 0 20px 44px rgba(79,95,255,0.34);
+        .ctaPrimary {
+          left: 45px;
+          top: 590px;
+          width: 210px;
+          height: 66px;
         }
 
-        .secondaryBtn {
-          color: white;
-          border: 1px solid rgba(255,255,255,0.14);
-          background: rgba(255,255,255,0.03);
-        }
-
-        .roleRow {
-          margin-top: 36px;
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-
-        .avatars {
-          display: flex;
-        }
-
-        .avatar {
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          margin-left: -10px;
-          border: 3px solid #040816;
-          display: grid;
-          place-items: center;
-          font-size: 13px;
-          font-weight: 900;
-          box-shadow: 0 12px 26px rgba(0,0,0,0.24);
-        }
-
-        .avatar:first-child {
-          margin-left: 0;
-        }
-
-        .orange {
-          background: linear-gradient(135deg,#efbb7d,#bb7541);
-          color: #0b1020;
-        }
-
-        .white {
-          background: linear-gradient(135deg,#ffffff,#d9e1f0);
-          color: #0b1020;
-        }
-
-        .blue {
-          background: linear-gradient(135deg,#7eb5ff,#4f5fff);
-        }
-
-        .roleText strong {
-          display: block;
-          font-size: 15px;
-          font-weight: 900;
-        }
-
-        .roleText small {
-          display: block;
-          margin-top: 4px;
-          color: rgba(255,255,255,0.68);
-          font-size: 14px;
+        .ctaSecondary {
+          left: 285px;
+          top: 590px;
+          width: 230px;
+          height: 66px;
         }
 
         @media (max-width: 1100px) {
-          .navLinks {
+          .experiencePage {
+            overflow-y: auto;
+          }
+
+          .heroImage {
+            position: relative;
+            min-height: 100vh;
+            background-size: cover;
+            background-position: 64% top;
+          }
+
+          .clickLayer {
+            position: absolute;
+            inset: 0;
+          }
+
+          .homeLink,
+          .solutionLink,
+          .platformLink,
+          .experiencesLink,
+          .faqLink {
             display: none;
-          }
-
-          .heroBackground {
-            background-position: 72% top;
-          }
-
-          h1 {
-            font-size: 58px;
           }
         }
 
         @media (max-width: 760px) {
-          .pageShell {
-            width: calc(100% - 28px);
+          .heroImage {
+            background-position: 70% top;
           }
 
-          .topbar {
-            height: 78px;
+          .logoLink {
+            left: 16px;
+            top: 18px;
+            width: 160px;
           }
 
-          .logo strong {
-            font-size: 24px;
-          }
-
-          .logo span {
-            width: 38px;
-            height: 38px;
-          }
-
-          .signin {
+          .signinLink {
             display: none;
           }
 
-          .demoButton {
-            height: 44px;
-            padding: 0 18px;
-            font-size: 13px;
+          .demoLink {
+            right: 16px;
+            top: 18px;
+            width: 138px;
+            height: 50px;
           }
 
-          .heroSection {
-            align-items: flex-start;
-            padding-top: 36px;
+          .ctaPrimary {
+            left: 24px;
+            top: 575px;
+            width: calc(100% - 48px);
+            height: 58px;
           }
 
-          .heroContent {
-            padding-bottom: 120px;
-          }
-
-          .heroBackground {
-            background-position: 78% top;
-          }
-
-          h1 {
-            font-size: 48px;
-          }
-
-          .description {
-            font-size: 16px;
-          }
-
-          .heroButtons {
-            flex-direction: column;
-          }
-
-          .primaryBtn,
-          .secondaryBtn {
-            width: 100%;
+          .ctaSecondary {
+            left: 24px;
+            top: 646px;
+            width: calc(100% - 48px);
+            height: 58px;
           }
         }
       `}</style>
