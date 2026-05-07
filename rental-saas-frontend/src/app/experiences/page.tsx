@@ -35,8 +35,6 @@ export default function ExperiencesPage() {
         </nav>
 
         <section className="hero">
-          <div className="heroBgGlow" />
-
           <div className="copy">
             <p className="eyebrow">Welcome to Zyprent Experiences</p>
 
@@ -83,6 +81,8 @@ export default function ExperiencesPage() {
           </div>
 
           <div className="visual">
+            <div className="visualGlow" />
+
             <img
               src="/experiences/hero-person.png"
               alt="Professional using Zyprent workspace"
@@ -133,8 +133,8 @@ export default function ExperiencesPage() {
           overflow: hidden;
           color: #ffffff;
           background:
-            radial-gradient(circle at 76% 50%, rgba(39, 103, 255, 0.5), transparent 30%),
-            radial-gradient(circle at 92% 12%, rgba(105, 167, 255, 0.16), transparent 24%),
+            radial-gradient(circle at 74% 48%, rgba(45, 108, 255, 0.5), transparent 32%),
+            radial-gradient(circle at 94% 12%, rgba(105, 167, 255, 0.16), transparent 24%),
             linear-gradient(135deg, #030713 0%, #050817 48%, #071327 100%);
         }
 
@@ -222,18 +222,15 @@ export default function ExperiencesPage() {
           position: relative;
         }
 
-        .heroBgGlow {
+        .hero::before {
+          content: "";
           position: absolute;
-          right: -140px;
-          top: -80px;
-          width: 880px;
-          height: 760px;
-          z-index: 0;
+          inset: 0;
           pointer-events: none;
+          z-index: 0;
           background:
-            radial-gradient(circle at 60% 52%, rgba(62, 125, 255, 0.72), rgba(31, 74, 180, 0.32) 38%, transparent 68%),
-            linear-gradient(to right, rgba(5, 8, 23, 0.92) 0%, rgba(5, 8, 23, 0.2) 36%, transparent 58%);
-          filter: blur(2px);
+            radial-gradient(circle at 78% 48%, rgba(50, 118, 255, 0.5), rgba(35, 78, 180, 0.18) 34%, transparent 62%),
+            linear-gradient(to right, #050817 0%, rgba(5, 8, 23, 0.92) 39%, rgba(5, 8, 23, 0.35) 58%, transparent 78%);
         }
 
         .copy {
@@ -364,23 +361,36 @@ export default function ExperiencesPage() {
           z-index: 2;
         }
 
+        .visualGlow {
+          position: absolute;
+          right: -58px;
+          top: 38px;
+          width: 720px;
+          height: 680px;
+          z-index: 1;
+          pointer-events: none;
+          background:
+            radial-gradient(circle at 68% 46%, rgba(56, 122, 255, 0.72), rgba(31, 75, 180, 0.26) 42%, transparent 70%);
+          filter: blur(14px);
+        }
+
         .heroPerson {
           position: absolute;
-          right: -78px;
+          right: -92px;
           bottom: 0;
-          height: 98%;
-          width: auto;
-          max-width: none;
-          object-fit: contain;
-          object-position: bottom right;
+          width: 860px;
+          height: 640px;
+          max-height: 98%;
+          object-fit: cover;
+          object-position: right bottom;
           z-index: 3;
           filter: drop-shadow(0 34px 78px rgba(0, 0, 0, 0.34));
           -webkit-mask-image:
-            linear-gradient(to right, transparent 0%, #000 16%, #000 100%),
-            linear-gradient(to top, transparent 0%, #000 6%, #000 100%);
+            linear-gradient(to right, transparent 0%, transparent 24%, #000 43%, #000 100%),
+            linear-gradient(to top, transparent 0%, #000 7%, #000 100%);
           mask-image:
-            linear-gradient(to right, transparent 0%, #000 16%, #000 100%),
-            linear-gradient(to top, transparent 0%, #000 6%, #000 100%);
+            linear-gradient(to right, transparent 0%, transparent 24%, #000 43%, #000 100%),
+            linear-gradient(to top, transparent 0%, #000 7%, #000 100%);
         }
 
         .visual::before {
@@ -390,7 +400,7 @@ export default function ExperiencesPage() {
           z-index: 4;
           pointer-events: none;
           background:
-            linear-gradient(to right, rgba(5, 8, 23, 0.96) 0%, rgba(5, 8, 23, 0.56) 18%, rgba(5, 8, 23, 0.12) 36%, transparent 58%),
+            linear-gradient(to right, rgba(5, 8, 23, 0.9) 0%, rgba(5, 8, 23, 0.42) 22%, rgba(5, 8, 23, 0.08) 42%, transparent 64%),
             linear-gradient(to top, #050817 0%, rgba(5, 8, 23, 0.24) 10%, transparent 28%);
         }
 
@@ -450,12 +460,12 @@ export default function ExperiencesPage() {
 
         .receipt {
           top: 128px;
-          left: 38px;
+          left: 66px;
         }
 
         .metric {
           top: 258px;
-          right: -22px;
+          right: -28px;
           display: block;
           min-width: 172px;
           padding: 18px 20px;
@@ -472,7 +482,7 @@ export default function ExperiencesPage() {
         }
 
         .workflow {
-          left: 44px;
+          left: 74px;
           bottom: 86px;
         }
 
@@ -568,16 +578,17 @@ export default function ExperiencesPage() {
             min-height: 520px;
           }
 
-          .heroBgGlow {
-            right: -220px;
-            top: 120px;
+          .visualGlow {
+            right: -160px;
+            top: 70px;
             width: 520px;
             height: 520px;
           }
 
           .heroPerson {
-            right: -100px;
-            height: 92%;
+            right: -120px;
+            width: 620px;
+            height: 500px;
           }
 
           .receipt {
