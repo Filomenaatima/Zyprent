@@ -5,15 +5,17 @@ const DEMO_FORM_LINK =
 
 export default function ExperiencesPage() {
   return (
-    <main className="page">
-      <div className="shell">
-        <nav className="nav">
-          <a href="/" className="brand">
+    <main className="experiencePage">
+      <div className="heroBackground" />
+
+      <div className="pageShell">
+        <nav className="topbar">
+          <a href="/" className="logo">
             <span>Z</span>
             <strong>Zyprent</strong>
           </a>
 
-          <div className="links">
+          <div className="navLinks">
             <a href="/">Home</a>
             <a href="/#solution">Solution</a>
             <a href="/#platform">Platform</a>
@@ -21,22 +23,27 @@ export default function ExperiencesPage() {
             <a href="/#faq">FAQ</a>
           </div>
 
-          <div className="actions">
-            <a href="/login">Sign In</a>
+          <div className="navActions">
+            <a href="/login" className="signin">
+              Sign In
+            </a>
+
             <a
               href={DEMO_FORM_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="demo"
+              className="demoButton"
             >
               Request Demo
             </a>
           </div>
         </nav>
 
-        <section className="hero">
-          <div className="copy">
-            <p className="eyebrow">Welcome to Zyprent Experiences</p>
+        <section className="heroSection">
+          <div className="heroContent">
+            <p className="eyebrow">
+              Welcome to Zyprent Experiences
+            </p>
 
             <h1>
               Property work,
@@ -46,80 +53,38 @@ export default function ExperiencesPage() {
               real people.
             </h1>
 
-            <p className="sub">
+            <p className="description">
               Residents, managers, providers and investors stay connected
               through one clean property workflow.
             </p>
 
-            <div className="buttons">
+            <div className="heroButtons">
               <a
                 href={DEMO_FORM_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="primary"
+                className="primaryBtn"
               >
                 Request Demo
               </a>
 
-              <a href="/login" className="secondary">
+              <a href="/login" className="secondaryBtn">
                 Explore Platform
               </a>
             </div>
 
-            <div className="proof">
-              <div className="people">
-                <span className="personOne">R</span>
-                <span className="personTwo">M</span>
-                <span className="personThree">I</span>
+            <div className="roleRow">
+              <div className="avatars">
+                <span className="avatar orange">R</span>
+                <span className="avatar white">M</span>
+                <span className="avatar blue">I</span>
               </div>
 
-              <div>
+              <div className="roleText">
                 <strong>Built for every role</strong>
-                <small>Residents · Managers · Providers · Investors</small>
-              </div>
-            </div>
-          </div>
-
-          <div className="visual">
-            <div className="visualGlow" />
-
-            <img
-              src="/experiences/hero-person.png"
-              alt="Professional using Zyprent workspace"
-              className="heroPerson"
-            />
-
-            <div className="card receipt">
-              <i>
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M5 4h14v16l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2-2 1.2V4Zm4 5h6M9 13h6" />
-                </svg>
-              </i>
-              <div>
-                <small>Resident payment</small>
-                <strong>Receipt saved</strong>
-              </div>
-            </div>
-
-            <div className="card metric">
-              <i>
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M5 20V9m7 11V4m7 16v-8" />
-                </svg>
-              </i>
-              <strong>550+</strong>
-              <small>Actions tracked</small>
-            </div>
-
-            <div className="card workflow">
-              <i>
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM4 20c.7-3 2.1-5 4-5s3.3 2 4 5m0 0c.7-3 2.1-5 4-5s3.3 2 4 5" />
-                </svg>
-              </i>
-              <div>
-                <small>Team workflow</small>
-                <strong>Manager approved</strong>
+                <small>
+                  Residents · Managers · Providers · Investors
+                </small>
               </div>
             </div>
           </div>
@@ -127,152 +92,160 @@ export default function ExperiencesPage() {
       </div>
 
       <style jsx>{`
-        .page {
-          width: 100%;
-          height: 100vh;
-          overflow: hidden;
-          color: #ffffff;
-          background:
-            radial-gradient(circle at 74% 48%, rgba(45, 108, 255, 0.5), transparent 32%),
-            radial-gradient(circle at 94% 12%, rgba(105, 167, 255, 0.16), transparent 24%),
-            linear-gradient(135deg, #030713 0%, #050817 48%, #071327 100%);
-        }
-
-        .shell {
-          width: min(1440px, calc(100% - 70px));
-          height: 100vh;
-          margin: 0 auto;
+        .experiencePage {
           position: relative;
+          min-height: 100vh;
+          overflow: hidden;
+          background: #040816;
+          color: white;
         }
 
-        .nav {
-          height: 86px;
+        .heroBackground {
+          position: absolute;
+          inset: 0;
+          background-image: url("/experiences/hero-reference.png");
+          background-size: cover;
+          background-position: center top;
+          background-repeat: no-repeat;
+          z-index: 0;
+        }
+
+        .heroBackground::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(
+              to right,
+              rgba(4, 8, 22, 0.92) 0%,
+              rgba(4, 8, 22, 0.82) 28%,
+              rgba(4, 8, 22, 0.55) 42%,
+              rgba(4, 8, 22, 0.1) 62%,
+              rgba(4, 8, 22, 0.05) 100%
+            );
+        }
+
+        .pageShell {
+          position: relative;
+          z-index: 2;
+          width: min(1440px, calc(100% - 64px));
+          margin: 0 auto;
+        }
+
+        .topbar {
+          height: 92px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          position: relative;
-          z-index: 20;
+          border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
-        .brand {
+        .logo {
           display: flex;
           align-items: center;
           gap: 14px;
-          color: #ffffff;
           text-decoration: none;
+          color: white;
         }
 
-        .brand span {
-          width: 42px;
-          height: 42px;
-          border-radius: 12px;
+        .logo span {
+          width: 44px;
+          height: 44px;
+          border-radius: 14px;
+          background: white;
+          color: #040816;
           display: grid;
           place-items: center;
-          background: #ffffff;
-          color: #030713;
-          font-size: 21px;
-          font-weight: 950;
+          font-weight: 900;
+          font-size: 22px;
         }
 
-        .brand strong {
+        .logo strong {
           font-size: 30px;
-          font-weight: 950;
-          letter-spacing: -0.06em;
+          font-weight: 900;
+          letter-spacing: -0.05em;
         }
 
-        .links {
+        .navLinks {
           display: flex;
-          align-items: center;
           gap: 34px;
         }
 
-        .links a,
-        .actions a {
-          color: rgba(255, 255, 255, 0.84);
+        .navLinks a,
+        .signin {
+          color: rgba(255,255,255,0.88);
           text-decoration: none;
           font-size: 15px;
-          font-weight: 850;
+          font-weight: 800;
         }
 
-        .actions {
+        .navActions {
           display: flex;
           align-items: center;
           gap: 20px;
         }
 
-        .demo {
+        .demoButton {
           height: 50px;
-          padding: 0 24px;
-          border-radius: 15px;
+          padding: 0 28px;
+          border-radius: 16px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          color: #ffffff !important;
-          background: linear-gradient(135deg, #69a7ff, #4a55ff);
-          box-shadow: 0 18px 42px rgba(75, 88, 255, 0.34);
+          text-decoration: none;
+          color: white;
+          font-size: 15px;
+          font-weight: 900;
+          background: linear-gradient(135deg,#70a8ff,#5560ff);
+          box-shadow: 0 18px 40px rgba(79,95,255,0.35);
         }
 
-        .hero {
-          height: calc(100vh - 86px);
-          display: grid;
-          grid-template-columns: 0.88fr 1.12fr;
+        .heroSection {
+          min-height: calc(100vh - 92px);
+          display: flex;
           align-items: center;
-          gap: 26px;
-          position: relative;
         }
 
-        .hero::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          z-index: 0;
-          background:
-            radial-gradient(circle at 78% 48%, rgba(50, 118, 255, 0.5), rgba(35, 78, 180, 0.18) 34%, transparent 62%),
-            linear-gradient(to right, #050817 0%, rgba(5, 8, 23, 0.92) 39%, rgba(5, 8, 23, 0.35) 58%, transparent 78%);
-        }
-
-        .copy {
-          position: relative;
-          z-index: 8;
-          padding-bottom: 12px;
+        .heroContent {
+          width: 100%;
+          max-width: 620px;
+          padding: 40px 0 80px;
         }
 
         .eyebrow {
-          margin: 0;
+          margin: 0 0 24px;
           color: #69a7ff;
           font-size: 12px;
-          font-weight: 950;
-          letter-spacing: 0.18em;
+          font-weight: 900;
           text-transform: uppercase;
+          letter-spacing: 0.18em;
         }
 
         h1 {
-          margin: 24px 0 22px;
-          max-width: 640px;
-          font-size: clamp(54px, 5vw, 82px);
-          line-height: 0.96;
-          letter-spacing: -0.075em;
-        }
-
-        .sub {
-          max-width: 560px;
           margin: 0;
-          color: rgba(255, 255, 255, 0.74);
-          font-size: 19px;
-          line-height: 1.55;
+          font-size: clamp(58px, 5vw, 86px);
+          line-height: 0.95;
+          letter-spacing: -0.08em;
+          font-weight: 900;
         }
 
-        .buttons {
+        .description {
+          margin-top: 30px;
+          max-width: 560px;
+          color: rgba(255,255,255,0.78);
+          font-size: 19px;
+          line-height: 1.6;
+        }
+
+        .heroButtons {
           display: flex;
           gap: 18px;
-          margin-top: 32px;
+          margin-top: 34px;
         }
 
-        .primary,
-        .secondary {
-          height: 56px;
+        .primaryBtn,
+        .secondaryBtn {
+          height: 58px;
           padding: 0 32px;
           border-radius: 18px;
           display: inline-flex;
@@ -280,340 +253,146 @@ export default function ExperiencesPage() {
           justify-content: center;
           text-decoration: none;
           font-size: 16px;
-          font-weight: 950;
+          font-weight: 900;
         }
 
-        .primary {
-          color: #ffffff;
-          background: linear-gradient(135deg, #69a7ff, #4a55ff);
-          box-shadow: 0 18px 42px rgba(75, 88, 255, 0.36);
+        .primaryBtn {
+          color: white;
+          background: linear-gradient(135deg,#70a8ff,#5560ff);
+          box-shadow: 0 20px 44px rgba(79,95,255,0.34);
         }
 
-        .secondary {
-          color: #ffffff;
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          background: rgba(255, 255, 255, 0.02);
+        .secondaryBtn {
+          color: white;
+          border: 1px solid rgba(255,255,255,0.14);
+          background: rgba(255,255,255,0.03);
         }
 
-        .proof {
-          margin-top: 34px;
+        .roleRow {
+          margin-top: 36px;
           display: flex;
           align-items: center;
           gap: 16px;
         }
 
-        .people {
+        .avatars {
           display: flex;
         }
 
-        .people span {
-          width: 42px;
-          height: 42px;
+        .avatar {
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
           margin-left: -10px;
           border: 3px solid #040816;
           display: grid;
           place-items: center;
           font-size: 13px;
-          font-weight: 950;
-          color: #071027;
-          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+          font-weight: 900;
+          box-shadow: 0 12px 26px rgba(0,0,0,0.24);
         }
 
-        .people span:first-child {
+        .avatar:first-child {
           margin-left: 0;
         }
 
-        .personOne {
-          background: linear-gradient(135deg, #f2b574, #bd7540);
+        .orange {
+          background: linear-gradient(135deg,#efbb7d,#bb7541);
+          color: #0b1020;
         }
 
-        .personTwo {
-          background: linear-gradient(135deg, #ffffff, #dbe3f4);
+        .white {
+          background: linear-gradient(135deg,#ffffff,#d9e1f0);
+          color: #0b1020;
         }
 
-        .personThree {
-          color: #ffffff !important;
-          background: linear-gradient(135deg, #7eb5ff, #4a55ff);
+        .blue {
+          background: linear-gradient(135deg,#7eb5ff,#4f5fff);
         }
 
-        .proof strong,
-        .proof small {
+        .roleText strong {
           display: block;
-        }
-
-        .proof strong {
           font-size: 15px;
-          font-weight: 950;
+          font-weight: 900;
         }
 
-        .proof small {
-          margin-top: 5px;
-          color: rgba(255, 255, 255, 0.68);
+        .roleText small {
+          display: block;
+          margin-top: 4px;
+          color: rgba(255,255,255,0.68);
           font-size: 14px;
         }
 
-        .visual {
-          position: relative;
-          height: 100%;
-          min-height: 560px;
-          overflow: visible;
-          z-index: 2;
-        }
-
-        .visualGlow {
-          position: absolute;
-          right: -58px;
-          top: 38px;
-          width: 720px;
-          height: 680px;
-          z-index: 1;
-          pointer-events: none;
-          background:
-            radial-gradient(circle at 68% 46%, rgba(56, 122, 255, 0.72), rgba(31, 75, 180, 0.26) 42%, transparent 70%);
-          filter: blur(14px);
-        }
-
-        .heroPerson {
-          position: absolute;
-          right: -92px;
-          bottom: 0;
-          width: 860px;
-          height: 640px;
-          max-height: 98%;
-          object-fit: cover;
-          object-position: right bottom;
-          z-index: 3;
-          filter: drop-shadow(0 34px 78px rgba(0, 0, 0, 0.34));
-          -webkit-mask-image:
-            linear-gradient(to right, transparent 0%, transparent 24%, #000 43%, #000 100%),
-            linear-gradient(to top, transparent 0%, #000 7%, #000 100%);
-          mask-image:
-            linear-gradient(to right, transparent 0%, transparent 24%, #000 43%, #000 100%),
-            linear-gradient(to top, transparent 0%, #000 7%, #000 100%);
-        }
-
-        .visual::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          z-index: 4;
-          pointer-events: none;
-          background:
-            linear-gradient(to right, rgba(5, 8, 23, 0.9) 0%, rgba(5, 8, 23, 0.42) 22%, rgba(5, 8, 23, 0.08) 42%, transparent 64%),
-            linear-gradient(to top, #050817 0%, rgba(5, 8, 23, 0.24) 10%, transparent 28%);
-        }
-
-        .card {
-          position: absolute;
-          z-index: 6;
-          display: flex;
-          align-items: center;
-          gap: 13px;
-          padding: 13px 16px;
-          border-radius: 18px;
-          background: rgba(12, 25, 58, 0.72);
-          border: 1px solid rgba(255, 255, 255, 0.14);
-          box-shadow: 0 20px 46px rgba(0, 0, 0, 0.26);
-          backdrop-filter: blur(18px);
-        }
-
-        .card i {
-          width: 38px;
-          height: 38px;
-          border-radius: 10px;
-          display: grid;
-          place-items: center;
-          color: #ffffff;
-          background: linear-gradient(135deg, #68a6ff, #4a55ff);
-          box-shadow: 0 12px 24px rgba(75, 88, 255, 0.32);
-          flex: 0 0 auto;
-        }
-
-        .card svg {
-          width: 20px;
-          height: 20px;
-          stroke: currentColor;
-          stroke-width: 2;
-          fill: none;
-          stroke-linecap: round;
-          stroke-linejoin: round;
-        }
-
-        .card small {
-          display: block;
-          color: rgba(255, 255, 255, 0.72);
-          font-size: 10px;
-          font-weight: 950;
-          letter-spacing: 0.09em;
-          text-transform: uppercase;
-        }
-
-        .card strong {
-          display: block;
-          margin-top: 5px;
-          color: #ffffff;
-          font-size: 20px;
-          font-weight: 950;
-          line-height: 1.05;
-        }
-
-        .receipt {
-          top: 128px;
-          left: 66px;
-        }
-
-        .metric {
-          top: 258px;
-          right: -28px;
-          display: block;
-          min-width: 172px;
-          padding: 18px 20px;
-        }
-
-        .metric i {
-          margin-bottom: 12px;
-        }
-
-        .metric strong {
-          margin-top: 0;
-          font-size: 42px;
-          letter-spacing: -0.06em;
-        }
-
-        .workflow {
-          left: 74px;
-          bottom: 86px;
-        }
-
         @media (max-width: 1100px) {
-          .page {
-            height: auto;
-            min-height: 100vh;
-            overflow-y: auto;
+          .navLinks {
+            display: none;
           }
 
-          .shell {
-            height: auto;
+          .heroBackground {
+            background-position: 72% top;
           }
 
-          .hero {
-            height: auto;
-            grid-template-columns: 1fr;
-            padding: 48px 0 60px;
-          }
-
-          .copy {
-            text-align: center;
-          }
-
-          h1,
-          .sub {
-            margin-left: auto;
-            margin-right: auto;
-          }
-
-          .buttons,
-          .proof {
-            justify-content: center;
-          }
-
-          .visual {
-            height: 620px;
-          }
-
-          .heroPerson {
-            right: 0;
+          h1 {
+            font-size: 58px;
           }
         }
 
         @media (max-width: 760px) {
-          .shell {
-            width: min(100% - 28px, 1440px);
+          .pageShell {
+            width: calc(100% - 28px);
           }
 
-          .nav {
+          .topbar {
             height: 78px;
           }
 
-          .brand strong {
+          .logo strong {
             font-size: 24px;
           }
 
-          .brand span {
-            width: 36px;
-            height: 36px;
+          .logo span {
+            width: 38px;
+            height: 38px;
           }
 
-          .links,
-          .actions a:first-child {
+          .signin {
             display: none;
           }
 
-          .demo {
+          .demoButton {
             height: 44px;
-            padding: 0 16px;
+            padding: 0 18px;
             font-size: 13px;
           }
 
-          h1 {
-            font-size: 44px;
+          .heroSection {
+            align-items: flex-start;
+            padding-top: 36px;
           }
 
-          .sub {
+          .heroContent {
+            padding-bottom: 120px;
+          }
+
+          .heroBackground {
+            background-position: 78% top;
+          }
+
+          h1 {
+            font-size: 48px;
+          }
+
+          .description {
             font-size: 16px;
           }
 
-          .buttons {
+          .heroButtons {
             flex-direction: column;
           }
 
-          .primary,
-          .secondary {
+          .primaryBtn,
+          .secondaryBtn {
             width: 100%;
-          }
-
-          .visual {
-            height: 520px;
-            min-height: 520px;
-          }
-
-          .visualGlow {
-            right: -160px;
-            top: 70px;
-            width: 520px;
-            height: 520px;
-          }
-
-          .heroPerson {
-            right: -120px;
-            width: 620px;
-            height: 500px;
-          }
-
-          .receipt {
-            top: 54px;
-            left: 0;
-          }
-
-          .metric {
-            top: 142px;
-            right: 0;
-            min-width: 132px;
-          }
-
-          .metric strong {
-            font-size: 30px;
-          }
-
-          .workflow {
-            left: 0;
-            bottom: 58px;
-          }
-
-          .card {
-            transform: scale(0.88);
-            transform-origin: left center;
           }
         }
       `}</style>
