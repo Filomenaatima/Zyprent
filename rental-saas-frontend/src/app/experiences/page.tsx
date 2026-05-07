@@ -101,13 +101,15 @@ export default function ExperiencesPage() {
         }
 
         .heroBackground {
-          position: absolute;
-          inset: 0;
-          background-image: url("/experiences/hero-reference.png");
-          background-size: cover;
-          background-position: center top;
-          background-repeat: no-repeat;
-          z-index: 0;
+         position: absolute;
+         inset: 0;
+         background-image: url("/experiences/hero-reference.png");
+         background-size: cover;
+         background-position: 72% center;
+         background-repeat: no-repeat;
+         z-index: 0;
+         transform: scale(0.94);
+         transform-origin: center;
         }
 
         .heroBackground::after {
@@ -207,9 +209,9 @@ export default function ExperiencesPage() {
         }
 
         .heroContent {
-          width: 100%;
-          max-width: 620px;
-          padding: 40px 0 80px;
+         width: 100%;
+         max-width: 620px;
+         padding: 72px 0 120px;
         }
 
         .eyebrow {
@@ -223,8 +225,8 @@ export default function ExperiencesPage() {
 
         h1 {
           margin: 0;
-          font-size: clamp(58px, 5vw, 86px);
-          line-height: 0.95;
+          font-size: clamp(52px, 4.5vw, 78px);
+          line-height: 0.94;
           letter-spacing: -0.08em;
           font-weight: 900;
         }
