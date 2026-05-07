@@ -223,7 +223,7 @@ export default function ExperiencesPage() {
       <section className="providerImageSection">
         <div className="providerImageFrame">
           <img
-            src="/experiences/service-provider-section.png"
+            src="/experiences/service-provider-section-v2.png"
             alt="Service provider experience on Zyprent"
             className="providerImage"
           />
