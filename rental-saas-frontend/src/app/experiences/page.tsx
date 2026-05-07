@@ -23,12 +23,7 @@ export default function ExperiencesPage() {
 
           <div className="actions">
             <a href="/login">Sign In</a>
-            <a
-              href={DEMO_FORM_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="demo"
-            >
+            <a href={DEMO_FORM_LINK} target="_blank" rel="noopener noreferrer" className="demo">
               Request Demo
             </a>
           </div>
@@ -51,15 +46,9 @@ export default function ExperiencesPage() {
             </p>
 
             <div className="buttons">
-              <a
-                href={DEMO_FORM_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="primary"
-              >
+              <a href={DEMO_FORM_LINK} target="_blank" rel="noopener noreferrer" className="primary">
                 Request Demo
               </a>
-
               <a href="/login" className="secondary">
                 Explore Platform
               </a>
@@ -71,7 +60,6 @@ export default function ExperiencesPage() {
                 <span>M</span>
                 <span>I</span>
               </div>
-
               <div>
                 <strong>Built for every role</strong>
                 <small>Residents · Managers · Providers · Investors</small>
@@ -116,40 +104,45 @@ export default function ExperiencesPage() {
       </div>
 
       <section className="controlSection">
-        <div className="controlInner">
+        <div className="controlFrame">
           <div className="controlVisual">
-            <div className="phoneMockup">
-              <div className="phoneTop" />
-              <div className="phoneHeader">
+            <div className="softOrb one" />
+            <div className="softOrb two" />
+
+            <div className="phoneDevice">
+              <div className="phoneNotch" />
+              <div className="phoneStatus">
                 <span>9:41</span>
                 <strong>Zyprent</strong>
               </div>
 
-              <div className="balanceCard">
+              <div className="phoneWelcome">Property workspace</div>
+
+              <div className="phoneBalance">
                 <small>Collected this month</small>
                 <strong>UGX 48.2M</strong>
-                <span>Payments, maintenance and reports connected</span>
+                <p>Rent, service requests and investor records in sync.</p>
               </div>
 
-              <div className="phoneGrid">
+              <div className="phoneStats">
                 <div>
                   <small>Units</small>
                   <strong>42</strong>
                 </div>
                 <div>
-                  <small>Open jobs</small>
-                  <strong>06</strong>
+                  <small>Paid</small>
+                  <strong>31</strong>
                 </div>
               </div>
 
-              <div className="phoneList">
+              <div className="phoneActivity">
                 <p>
                   <span>Rent payment</span>
-                  <strong>Receipt saved</strong>
+                  <strong>Saved</strong>
                 </p>
                 <p>
                   <span>Maintenance</span>
-                  <strong>Provider assigned</strong>
+                  <strong>Assigned</strong>
                 </p>
                 <p>
                   <span>Investor report</span>
@@ -158,20 +151,33 @@ export default function ExperiencesPage() {
               </div>
             </div>
 
-            <div className="blackCard">
-              <small>Zyprent Card</small>
-              <strong>Property wallet</strong>
-              <span>UGX</span>
+            <div className="propertyCard">
+              <div className="cardTop">
+                <span>Zyprent Wallet</span>
+                <strong>UGX</strong>
+              </div>
+              <h3>Property wallet</h3>
+              <p>Collections, expenses and owner reports tracked clearly.</p>
+              <div className="cardLines">
+                <span />
+                <span />
+                <span />
+              </div>
             </div>
 
-            <div className="miniCard secureCard">
+            <div className="sideTile tileOne">
               <span>✓</span>
               <strong>Secure payments</strong>
             </div>
 
-            <div className="miniCard recordCard">
+            <div className="sideTile tileTwo">
               <span>↗</span>
               <strong>Records updated</strong>
+            </div>
+
+            <div className="sideTile tileThree">
+              <span>•</span>
+              <strong>One app for all roles</strong>
             </div>
           </div>
 
@@ -183,22 +189,16 @@ export default function ExperiencesPage() {
             </h2>
 
             <p>
-              Rent payments, maintenance updates, approvals, resident records
-              and investor activity stay organized in one place, so every role
-              knows what is happening.
+              Rent payments, maintenance updates, approvals, resident records and
+              investor activity stay organized in one place, so every role knows
+              what is happening.
             </p>
 
             <div className="controlButtons">
-              <a
-                href={DEMO_FORM_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="darkBtn"
-              >
+              <a href={DEMO_FORM_LINK} target="_blank" rel="noopener noreferrer" className="blueBtn">
                 Request Demo
               </a>
-
-              <a href="/login" className="lightBtn">
+              <a href="/login" className="outlineBtn">
                 Explore Platform
               </a>
             </div>
@@ -213,7 +213,7 @@ export default function ExperiencesPage() {
 
               <div>
                 <strong>4 core user roles</strong>
-                <small>Connected through one operating record</small>
+                <small>Residents, managers, providers and investors connected.</small>
               </div>
             </div>
           </div>
@@ -556,208 +556,277 @@ export default function ExperiencesPage() {
         }
 
         .controlSection {
-          background: linear-gradient(180deg, #f7f8fb 0%, #ffffff 100%);
-          color: #080b13;
-          padding: 96px 0 110px;
+          background: #f5f8ff;
+          color: #071027;
+          padding: 74px 0;
         }
 
-        .controlInner {
+        .controlFrame {
           width: min(1320px, calc(100% - 70px));
-          margin: 0 auto;
           min-height: 720px;
+          margin: 0 auto;
+          border-radius: 34px;
+          background:
+            radial-gradient(circle at 16% 78%, rgba(152, 195, 255, 0.3), transparent 32%),
+            radial-gradient(circle at 44% 34%, rgba(198, 222, 255, 0.55), transparent 26%),
+            #ffffff;
+          box-shadow: 0 28px 80px rgba(41, 67, 110, 0.1);
           display: grid;
           grid-template-columns: 1.05fr 0.95fr;
           align-items: center;
           gap: 70px;
+          padding: 70px 78px;
+          overflow: hidden;
         }
 
         .controlVisual {
           position: relative;
-          min-height: 640px;
+          min-height: 620px;
         }
 
-        .phoneMockup {
+        .softOrb {
           position: absolute;
-          left: 120px;
-          top: 20px;
-          width: 300px;
+          border-radius: 50%;
+          filter: blur(8px);
+          opacity: 0.9;
+        }
+
+        .softOrb.one {
+          width: 54px;
+          height: 54px;
+          background: #c8dcff;
+          right: 70px;
+          top: 100px;
+        }
+
+        .softOrb.two {
+          width: 36px;
+          height: 36px;
+          background: #9fc5ff;
+          left: 80px;
+          bottom: 110px;
+        }
+
+        .phoneDevice {
+          position: absolute;
+          left: 132px;
+          top: 22px;
+          width: 310px;
           height: 590px;
-          border-radius: 44px;
-          background: linear-gradient(180deg, #ffffff, #eef2f8);
-          border: 10px solid #111318;
-          box-shadow: 0 32px 90px rgba(9, 20, 42, 0.18);
-          padding: 28px 20px;
+          border-radius: 48px;
+          background: linear-gradient(180deg, #ffffff, #edf4ff);
+          border: 10px solid #071027;
+          box-shadow: 0 34px 90px rgba(23, 48, 88, 0.16);
+          padding: 26px 20px;
           overflow: hidden;
           transform: rotate(-5deg);
         }
 
-        .phoneTop {
+        .phoneNotch {
           width: 92px;
           height: 24px;
           border-radius: 999px;
-          background: #111318;
-          margin: 0 auto 20px;
+          background: #071027;
+          margin: 0 auto 18px;
         }
 
-        .phoneHeader {
+        .phoneStatus {
           display: flex;
-          align-items: center;
           justify-content: space-between;
-          color: #111318;
+          color: #071027;
           font-size: 12px;
-          margin-bottom: 22px;
+          margin-bottom: 18px;
         }
 
-        .balanceCard {
-          border-radius: 26px;
-          background: linear-gradient(135deg, #111827, #182546);
+        .phoneWelcome {
+          font-size: 12px;
+          color: #7d8ba4;
+          margin-bottom: 12px;
+          font-weight: 800;
+        }
+
+        .phoneBalance {
+          border-radius: 28px;
+          background: linear-gradient(135deg, #091a3d, #1d56d9);
           color: white;
           padding: 22px;
-          box-shadow: 0 18px 40px rgba(31, 49, 93, 0.25);
+          box-shadow: 0 22px 50px rgba(43, 101, 255, 0.24);
         }
 
-        .balanceCard small,
-        .balanceCard span {
+        .phoneBalance small,
+        .phoneBalance p {
+          margin: 0;
           display: block;
-          color: rgba(255, 255, 255, 0.65);
+          color: rgba(255, 255, 255, 0.72);
           font-size: 11px;
           font-weight: 800;
         }
 
-        .balanceCard strong {
+        .phoneBalance strong {
           display: block;
           margin: 8px 0;
           font-size: 32px;
           letter-spacing: -0.05em;
         }
 
-        .phoneGrid {
+        .phoneStats {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 12px;
           margin-top: 16px;
         }
 
-        .phoneGrid div {
+        .phoneStats div,
+        .phoneActivity {
           background: white;
-          border-radius: 18px;
+          border-radius: 20px;
+          box-shadow: 0 14px 34px rgba(30, 60, 105, 0.08);
+        }
+
+        .phoneStats div {
           padding: 16px;
-          box-shadow: 0 12px 28px rgba(20, 29, 49, 0.08);
         }
 
-        .phoneGrid small,
-        .phoneList span {
+        .phoneStats small,
+        .phoneActivity span {
           display: block;
-          color: #7a8294;
+          color: #7d8ba4;
           font-size: 11px;
-          font-weight: 800;
+          font-weight: 850;
         }
 
-        .phoneGrid strong {
+        .phoneStats strong {
           display: block;
           margin-top: 5px;
-          font-size: 24px;
+          color: #071027;
+          font-size: 25px;
         }
 
-        .phoneList {
+        .phoneActivity {
           margin-top: 16px;
-          background: white;
-          border-radius: 22px;
           padding: 14px 16px;
-          box-shadow: 0 12px 30px rgba(20, 29, 49, 0.08);
         }
 
-        .phoneList p {
+        .phoneActivity p {
           display: flex;
-          align-items: center;
           justify-content: space-between;
           margin: 0;
           padding: 12px 0;
-          border-bottom: 1px solid #edf0f5;
+          border-bottom: 1px solid #edf2f8;
         }
 
-        .phoneList p:last-child {
+        .phoneActivity p:last-child {
           border-bottom: none;
         }
 
-        .phoneList strong {
+        .phoneActivity strong {
           font-size: 11px;
-          color: #111318;
+          color: #071027;
         }
 
-        .blackCard {
+        .propertyCard {
           position: absolute;
           left: 300px;
-          top: 190px;
-          width: 270px;
-          height: 180px;
-          border-radius: 28px;
+          top: 188px;
+          width: 284px;
+          height: 184px;
+          border-radius: 30px;
           padding: 26px;
           color: white;
           background:
-            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.12), transparent 28%),
-            linear-gradient(135deg, #151515, #050505);
-          box-shadow: 0 30px 80px rgba(0, 0, 0, 0.26);
+            radial-gradient(circle at 82% 20%, rgba(160, 196, 255, 0.36), transparent 28%),
+            linear-gradient(135deg, #06142f, #173f9e 64%, #76b6ff);
+          box-shadow: 0 34px 84px rgba(33, 83, 181, 0.25);
           transform: rotate(-7deg);
         }
 
-        .blackCard small {
-          display: block;
-          color: rgba(255, 255, 255, 0.62);
+        .cardTop {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
           font-size: 12px;
-          font-weight: 800;
+          color: rgba(255, 255, 255, 0.75);
+          font-weight: 900;
         }
 
-        .blackCard strong {
-          display: block;
-          margin-top: 32px;
-          font-size: 24px;
+        .propertyCard h3 {
+          margin: 34px 0 8px;
+          font-size: 25px;
           line-height: 1.05;
         }
 
-        .blackCard span {
-          position: absolute;
-          right: 24px;
-          top: 24px;
-          font-weight: 950;
+        .propertyCard p {
+          margin: 0;
+          font-size: 12px;
+          line-height: 1.4;
+          color: rgba(255, 255, 255, 0.72);
         }
 
-        .miniCard {
+        .cardLines {
+          display: flex;
+          gap: 8px;
+          margin-top: 18px;
+        }
+
+        .cardLines span {
+          height: 7px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.35);
+        }
+
+        .cardLines span:nth-child(1) {
+          width: 46px;
+        }
+
+        .cardLines span:nth-child(2) {
+          width: 72px;
+        }
+
+        .cardLines span:nth-child(3) {
+          width: 34px;
+        }
+
+        .sideTile {
           position: absolute;
           width: 170px;
-          min-height: 120px;
-          border-radius: 24px;
+          min-height: 122px;
+          border-radius: 26px;
           background: white;
           padding: 22px;
-          box-shadow: 0 24px 70px rgba(25, 39, 75, 0.14);
+          box-shadow: 0 26px 72px rgba(31, 60, 108, 0.13);
         }
 
-        .miniCard span {
+        .sideTile span {
           width: 38px;
           height: 38px;
           border-radius: 13px;
           display: grid;
           place-items: center;
           color: white;
-          background: linear-gradient(135deg, #69a7ff, #4a55ff);
+          background: linear-gradient(135deg, #7ebaff, #4a55ff);
           font-weight: 950;
         }
 
-        .miniCard strong {
+        .sideTile strong {
           display: block;
-          margin-top: 14px;
+          margin-top: 15px;
           font-size: 18px;
-          line-height: 1.12;
+          line-height: 1.1;
         }
 
-        .secureCard {
-          left: 10px;
+        .tileOne {
+          left: 16px;
           top: 260px;
         }
 
-        .recordCard {
-          left: 410px;
+        .tileTwo {
+          left: 420px;
           bottom: 70px;
+        }
+
+        .tileThree {
+          left: 34px;
+          bottom: 84px;
         }
 
         .controlCopy h2 {
@@ -779,7 +848,7 @@ export default function ExperiencesPage() {
 
         .controlCopy p {
           max-width: 560px;
-          color: #747b8b;
+          color: #718098;
           font-size: 18px;
           line-height: 1.65;
         }
@@ -790,8 +859,8 @@ export default function ExperiencesPage() {
           margin-top: 34px;
         }
 
-        .darkBtn,
-        .lightBtn {
+        .blueBtn,
+        .outlineBtn {
           height: 56px;
           padding: 0 28px;
           border-radius: 999px;
@@ -803,15 +872,16 @@ export default function ExperiencesPage() {
           font-weight: 900;
         }
 
-        .darkBtn {
-          background: #101010;
+        .blueBtn {
+          background: linear-gradient(135deg, #69a7ff, #4a55ff);
           color: white;
+          box-shadow: 0 18px 36px rgba(74, 85, 255, 0.24);
         }
 
-        .lightBtn {
+        .outlineBtn {
           background: white;
-          color: #101010;
-          border: 1px solid #dfe3ea;
+          color: #071027;
+          border: 1px solid #dfe7f3;
         }
 
         .controlStat {
@@ -833,7 +903,7 @@ export default function ExperiencesPage() {
           display: grid;
           place-items: center;
           color: white;
-          background: #111827;
+          background: #071027;
           border: 3px solid white;
           font-size: 12px;
           font-weight: 950;
@@ -841,7 +911,7 @@ export default function ExperiencesPage() {
 
         .statAvatars span:first-child {
           margin-left: 0;
-          background: #d8a06b;
+          background: #7ebaff;
         }
 
         .statAvatars span:nth-child(2) {
@@ -849,7 +919,7 @@ export default function ExperiencesPage() {
         }
 
         .statAvatars span:nth-child(3) {
-          background: #111827;
+          background: #071027;
         }
 
         .statAvatars span:nth-child(4) {
@@ -864,8 +934,8 @@ export default function ExperiencesPage() {
 
         .controlStat small {
           display: block;
-          max-width: 260px;
-          color: #7a8294;
+          max-width: 280px;
+          color: #718098;
           margin-top: 4px;
         }
 
@@ -890,7 +960,7 @@ export default function ExperiencesPage() {
             min-height: 620px;
           }
 
-          .controlInner {
+          .controlFrame {
             grid-template-columns: 1fr;
           }
 
@@ -901,7 +971,7 @@ export default function ExperiencesPage() {
 
         @media (max-width: 760px) {
           .shell,
-          .controlInner {
+          .controlFrame {
             width: min(100% - 28px, 1440px);
           }
 
@@ -925,35 +995,23 @@ export default function ExperiencesPage() {
 
           .primary,
           .secondary,
-          .darkBtn,
-          .lightBtn {
+          .blueBtn,
+          .outlineBtn {
             width: 100%;
           }
 
           .controlSection {
-            padding: 70px 0;
+            padding: 46px 0;
+          }
+
+          .controlFrame {
+            padding: 42px 24px;
           }
 
           .controlVisual {
             min-height: 580px;
             transform: scale(0.82);
             transform-origin: top center;
-          }
-
-          .phoneMockup {
-            left: 40px;
-          }
-
-          .blackCard {
-            left: 190px;
-          }
-
-          .secureCard {
-            left: -10px;
-          }
-
-          .recordCard {
-            left: 250px;
           }
         }
       `}</style>
