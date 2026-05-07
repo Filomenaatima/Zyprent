@@ -1,75 +1,39 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-
 const DEMO_FORM_LINK =
   "https://docs.google.com/forms/d/e/1FAIpQLSec8xBGT1T70S0YZJCp-7h6lAt1XrcfKYHmTdbtzl5WgrujGw/viewform";
 
 export default function ExperiencesPage() {
   return (
-    <main className="relative overflow-hidden bg-[#030712] text-white min-h-screen">
-      {/* background */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(71,103,255,0.30),transparent_35%),linear-gradient(to_bottom,#020617,#020817)]" />
+    <main className="page">
+      <div className="shell">
+        <nav className="nav">
+          <a href="/" className="brand">
+            <span>Z</span>
+            <strong>Zyprent</strong>
+          </a>
 
-      {/* subtle texture */}
-      <div
-        className="absolute inset-0 opacity-[0.035]"
-        style={{
-          backgroundImage:
-            "url('https://www.transparenttextures.com/patterns/asfalt-dark.png')",
-        }}
-      />
+          <div className="links">
+            <a href="/">Home</a>
+            <a href="/#solution">Solution</a>
+            <a href="/#platform">Platform</a>
+            <a href="/experiences">Experiences</a>
+            <a href="/#faq">FAQ</a>
+          </div>
 
-      <div className="relative z-10 max-w-[1380px] mx-auto px-8 lg:px-12">
-        {/* NAV */}
-        <header className="h-[105px] border-b border-white/10 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-4">
-            <div className="w-[44px] h-[44px] rounded-2xl bg-white text-black flex items-center justify-center font-black text-xl">
-              Z
-            </div>
-
-            <span className="text-[28px] font-black tracking-tight">
-              Zyprent
-            </span>
-          </Link>
-
-          <nav className="hidden lg:flex items-center gap-14 text-[17px] font-semibold text-white/92">
-            <Link href="/">Home</Link>
-            <Link href="/#solution">Solution</Link>
-            <Link href="/#platform">Platform</Link>
-            <Link href="/experiences">Experiences</Link>
-            <Link href="/#faq">FAQ</Link>
-          </nav>
-
-          <div className="flex items-center gap-7">
-            <Link
-              href="/login"
-              className="hidden md:block text-[17px] font-semibold text-white/90"
-            >
-              Sign In
-            </Link>
-
-            <a
-              href={DEMO_FORM_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="h-[54px] px-8 rounded-2xl bg-gradient-to-r from-[#6EA8FF] to-[#5B61FF] flex items-center justify-center font-bold text-[17px] shadow-[0_0_35px_rgba(92,107,255,0.45)] transition-all duration-300 hover:scale-[1.03]"
-            >
+          <div className="actions">
+            <a href="/login">Sign In</a>
+            <a href={DEMO_FORM_LINK} target="_blank" rel="noopener noreferrer" className="demo">
               Request Demo
             </a>
           </div>
-        </header>
+        </nav>
 
-        {/* HERO */}
-        <section className="relative grid lg:grid-cols-[0.95fr_1.05fr] items-center min-h-[calc(100vh-105px)] pt-10 pb-16">
-          {/* LEFT */}
-          <div className="relative z-20 max-w-[620px]">
-            <p className="text-[#6EA8FF] uppercase tracking-[0.22em] text-[15px] font-bold mb-8">
-              Welcome to Zyprent Experiences
-            </p>
+        <section className="hero">
+          <div className="copy">
+            <p className="eyebrow">Welcome to Zyprent Experiences</p>
 
-            <h1 className="text-[68px] leading-[0.93] font-black tracking-[-0.05em]">
+            <h1>
               Property work,
               <br />
               built around
@@ -77,213 +41,398 @@ export default function ExperiencesPage() {
               real people.
             </h1>
 
-            <p className="mt-10 text-[22px] leading-[1.65] text-white/78 max-w-[620px]">
-              Residents, managers, providers and investors stay connected
-              through one clean property workflow.
+            <p className="sub">
+              Residents, managers, providers and investors stay connected through one clean property workflow.
             </p>
 
-            <div className="flex flex-wrap gap-5 mt-12">
-              <a
-                href={DEMO_FORM_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="h-[68px] px-10 rounded-[22px] bg-gradient-to-r from-[#6EA8FF] to-[#5B61FF] flex items-center justify-center text-[20px] font-bold shadow-[0_0_40px_rgba(92,107,255,0.40)]"
-              >
+            <div className="buttons">
+              <a href={DEMO_FORM_LINK} target="_blank" rel="noopener noreferrer" className="primary">
                 Request Demo
               </a>
-
-              <Link
-                href="/login"
-                className="h-[68px] px-10 rounded-[22px] border border-white/12 bg-white/[0.03] backdrop-blur-md flex items-center justify-center text-[20px] font-bold hover:bg-white/[0.06] transition-all"
-              >
+              <a href="/login" className="secondary">
                 Explore Platform
-              </Link>
+              </a>
             </div>
 
-            {/* users */}
-            <div className="flex items-center gap-5 mt-14">
-              <div className="flex -space-x-4">
-                <div className="w-[56px] h-[56px] rounded-full overflow-hidden border-[3px] border-[#030712]">
-                  <Image
-                    src="/experiences/avatar1.jpg"
-                    alt="user"
-                    width={56}
-                    height={56}
-                    className="object-cover"
-                  />
-                </div>
-
-                <div className="w-[56px] h-[56px] rounded-full overflow-hidden border-[3px] border-[#030712]">
-                  <Image
-                    src="/experiences/avatar2.jpg"
-                    alt="user"
-                    width={56}
-                    height={56}
-                    className="object-cover"
-                  />
-                </div>
-
-                <div className="w-[56px] h-[56px] rounded-full overflow-hidden border-[3px] border-[#030712]">
-                  <Image
-                    src="/experiences/avatar3.jpg"
-                    alt="user"
-                    width={56}
-                    height={56}
-                    className="object-cover"
-                  />
-                </div>
+            <div className="proof">
+              <div className="people">
+                <span>R</span>
+                <span>M</span>
+                <span>I</span>
               </div>
-
               <div>
-                <p className="font-bold text-[24px] leading-none">
-                  Built for every role
-                </p>
-
-                <p className="text-white/65 text-[18px] mt-2">
-                  Residents · Managers · Providers · Investors
-                </p>
+                <strong>Built for every role</strong>
+                <small>Residents · Managers · Providers · Investors</small>
               </div>
             </div>
           </div>
 
-          {/* RIGHT */}
-          <div className="relative h-[880px] flex items-end justify-end">
-            {/* blue glow */}
-            <div className="absolute right-[80px] top-[80px] w-[700px] h-[700px] rounded-full bg-[#3467ff]/30 blur-[120px]" />
+          <div className="visual">
+            <div className="glow" />
 
-            {/* hero person */}
-            <div className="absolute right-[-10px] bottom-0 z-10">
-              <Image
-                src="/experiences/hero-person.png"
-                alt="Professional"
-                width={820}
-                height={980}
-                priority
-                className="w-auto h-[920px] object-contain select-none"
-              />
-            </div>
+            <img
+              src="/experiences/hero-person.png"
+              alt="Professional using Zyprent workspace"
+              className="person"
+            />
 
-            {/* floating cards */}
-            <div className="absolute top-[170px] left-[40px] z-20 rounded-[28px] border border-white/10 bg-white/[0.05] backdrop-blur-2xl px-8 py-6 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-              <div className="flex items-center gap-5">
-                <div className="w-[58px] h-[58px] rounded-2xl bg-gradient-to-br from-[#5B61FF] to-[#6EA8FF] flex items-center justify-center">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <rect
-                      x="4"
-                      y="5"
-                      width="16"
-                      height="14"
-                      rx="2"
-                      stroke="white"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M8 10H16"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </div>
-
-                <div>
-                  <p className="text-white/55 text-[14px] uppercase tracking-[0.15em] font-bold">
-                    Resident Payment
-                  </p>
-
-                  <p className="text-[22px] font-black mt-1">
-                    Receipt saved
-                  </p>
-                </div>
+            <div className="floatCard receipt">
+              <span className="icon">▣</span>
+              <div>
+                <small>Resident payment</small>
+                <strong>Receipt saved</strong>
               </div>
             </div>
 
-            <div className="absolute right-[10px] top-[360px] z-20 rounded-[32px] border border-white/10 bg-white/[0.06] backdrop-blur-2xl px-10 py-8 shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
-              <div className="w-[62px] h-[62px] rounded-2xl bg-gradient-to-br from-[#5B61FF] to-[#6EA8FF] flex items-center justify-center mb-7">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                  <rect
-                    x="4"
-                    y="10"
-                    width="3"
-                    height="8"
-                    rx="1.5"
-                    fill="white"
-                  />
-                  <rect
-                    x="10"
-                    y="6"
-                    width="3"
-                    height="12"
-                    rx="1.5"
-                    fill="white"
-                  />
-                  <rect
-                    x="16"
-                    y="3"
-                    width="3"
-                    height="15"
-                    rx="1.5"
-                    fill="white"
-                  />
-                </svg>
-              </div>
-
-              <p className="text-[62px] font-black leading-none">550+</p>
-
-              <p className="mt-3 text-white/65 text-[18px] uppercase tracking-[0.08em] font-bold">
-                Actions tracked
-              </p>
+            <div className="floatCard metric">
+              <span className="icon">▥</span>
+              <strong>550+</strong>
+              <small>Actions tracked</small>
             </div>
 
-            <div className="absolute left-[40px] bottom-[130px] z-20 rounded-[28px] border border-white/10 bg-white/[0.05] backdrop-blur-2xl px-8 py-6 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-              <div className="flex items-center gap-5">
-                <div className="w-[58px] h-[58px] rounded-2xl bg-gradient-to-br from-[#5B61FF] to-[#6EA8FF] flex items-center justify-center">
-                  <svg
-                    width="25"
-                    height="25"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <circle cx="9" cy="8" r="3" stroke="white" strokeWidth="2" />
-                    <circle
-                      cx="17"
-                      cy="8"
-                      r="3"
-                      stroke="white"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M4 18C4 15.7909 5.79086 14 8 14H10C12.2091 14 14 15.7909 14 18"
-                      stroke="white"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M13 18C13 16.3431 14.3431 15 16 15H18C19.6569 15 21 16.3431 21 18"
-                      stroke="white"
-                      strokeWidth="2"
-                    />
-                  </svg>
-                </div>
-
-                <div>
-                  <p className="text-white/55 text-[14px] uppercase tracking-[0.15em] font-bold">
-                    Team Workflow
-                  </p>
-
-                  <p className="text-[22px] font-black mt-1">
-                    Manager approved
-                  </p>
-                </div>
+            <div className="floatCard workflow">
+              <span className="icon">♙</span>
+              <div>
+                <small>Team workflow</small>
+                <strong>Manager approved</strong>
               </div>
             </div>
           </div>
         </section>
       </div>
+
+      <style jsx>{`
+        .page {
+          min-height: 100vh;
+          overflow: hidden;
+          color: white;
+          background:
+            radial-gradient(circle at 76% 48%, rgba(42, 105, 255, 0.45), transparent 31%),
+            radial-gradient(circle at 92% 12%, rgba(105, 167, 255, 0.16), transparent 24%),
+            linear-gradient(135deg, #030713 0%, #050817 48%, #071327 100%);
+        }
+
+        .shell {
+          width: min(1440px, calc(100% - 70px));
+          height: 100vh;
+          margin: 0 auto;
+        }
+
+        .nav {
+          height: 86px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          position: relative;
+          z-index: 20;
+        }
+
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          color: white;
+          text-decoration: none;
+        }
+
+        .brand span {
+          width: 42px;
+          height: 42px;
+          border-radius: 12px;
+          display: grid;
+          place-items: center;
+          background: white;
+          color: #030713;
+          font-size: 21px;
+          font-weight: 950;
+        }
+
+        .brand strong {
+          font-size: 30px;
+          font-weight: 950;
+          letter-spacing: -0.06em;
+        }
+
+        .links {
+          display: flex;
+          align-items: center;
+          gap: 34px;
+        }
+
+        .links a,
+        .actions a {
+          color: rgba(255, 255, 255, 0.84);
+          text-decoration: none;
+          font-size: 15px;
+          font-weight: 850;
+        }
+
+        .actions {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+        }
+
+        .demo {
+          height: 50px;
+          padding: 0 24px;
+          border-radius: 15px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          color: white !important;
+          background: linear-gradient(135deg, #69a7ff, #4a55ff);
+          box-shadow: 0 18px 42px rgba(75, 88, 255, 0.34);
+        }
+
+        .hero {
+          height: calc(100vh - 86px);
+          display: grid;
+          grid-template-columns: 0.9fr 1.1fr;
+          align-items: center;
+          gap: 24px;
+          position: relative;
+        }
+
+        .copy {
+          position: relative;
+          z-index: 10;
+          padding-bottom: 16px;
+        }
+
+        .eyebrow {
+          margin: 0;
+          color: #69a7ff;
+          font-size: 12px;
+          font-weight: 950;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+        }
+
+        h1 {
+          margin: 24px 0 22px;
+          max-width: 640px;
+          font-size: clamp(54px, 5vw, 82px);
+          line-height: 0.96;
+          letter-spacing: -0.075em;
+        }
+
+        .sub {
+          max-width: 560px;
+          margin: 0;
+          color: rgba(255, 255, 255, 0.74);
+          font-size: 19px;
+          line-height: 1.55;
+        }
+
+        .buttons {
+          display: flex;
+          gap: 18px;
+          margin-top: 32px;
+        }
+
+        .primary,
+        .secondary {
+          height: 56px;
+          padding: 0 32px;
+          border-radius: 18px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          font-size: 16px;
+          font-weight: 950;
+        }
+
+        .primary {
+          color: white;
+          background: linear-gradient(135deg, #69a7ff, #4a55ff);
+          box-shadow: 0 18px 42px rgba(75, 88, 255, 0.36);
+        }
+
+        .secondary {
+          color: white;
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          background: rgba(255, 255, 255, 0.02);
+        }
+
+        .proof {
+          margin-top: 34px;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .people {
+          display: flex;
+        }
+
+        .people span {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          margin-left: -10px;
+          border: 3px solid #040816;
+          display: grid;
+          place-items: center;
+          font-size: 13px;
+          font-weight: 950;
+          color: #071027;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+        }
+
+        .people span:first-child {
+          margin-left: 0;
+          background: linear-gradient(135deg, #f2b574, #bd7540);
+        }
+
+        .people span:nth-child(2) {
+          background: linear-gradient(135deg, #ffffff, #dbe3f4);
+        }
+
+        .people span:nth-child(3) {
+          color: white;
+          background: linear-gradient(135deg, #7eb5ff, #4a55ff);
+        }
+
+        .proof strong,
+        .proof small {
+          display: block;
+        }
+
+        .proof strong {
+          font-size: 15px;
+          font-weight: 950;
+        }
+
+        .proof small {
+          margin-top: 5px;
+          color: rgba(255, 255, 255, 0.68);
+          font-size: 14px;
+        }
+
+        .visual {
+          position: relative;
+          height: 100%;
+          min-height: 560px;
+          overflow: visible;
+        }
+
+        .glow {
+          position: absolute;
+          right: -80px;
+          top: 30px;
+          width: 820px;
+          height: 700px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(63, 124, 255, 0.75), rgba(39, 83, 190, 0.26) 40%, transparent 70%);
+          filter: blur(18px);
+          z-index: 1;
+        }
+
+        .person {
+          position: absolute;
+          right: -82px;
+          bottom: 0;
+          height: 98%;
+          width: auto;
+          object-fit: contain;
+          z-index: 3;
+          filter: drop-shadow(0 34px 78px rgba(0, 0, 0, 0.34));
+          -webkit-mask-image:
+            linear-gradient(to right, transparent 0%, transparent 10%, #000 26%, #000 100%),
+            linear-gradient(to top, transparent 0%, #000 7%, #000 100%);
+          mask-image:
+            linear-gradient(to right, transparent 0%, transparent 10%, #000 26%, #000 100%),
+            linear-gradient(to top, transparent 0%, #000 7%, #000 100%);
+        }
+
+        .visual::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 4;
+          pointer-events: none;
+          background:
+            linear-gradient(to right, #050817 0%, rgba(5, 8, 23, 0.68) 16%, rgba(5, 8, 23, 0.16) 35%, transparent 62%),
+            linear-gradient(to top, #050817 0%, rgba(5, 8, 23, 0.22) 10%, transparent 28%);
+        }
+
+        .floatCard {
+          position: absolute;
+          z-index: 6;
+          display: flex;
+          align-items: center;
+          gap: 13px;
+          padding: 13px 16px;
+          border-radius: 18px;
+          background: rgba(12, 25, 58, 0.72);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          box-shadow: 0 20px 46px rgba(0, 0, 0, 0.26);
+          backdrop-filter: blur(18px);
+        }
+
+        .icon {
+          width: 38px;
+          height: 38px;
+          border-radius: 10px;
+          display: grid;
+          place-items: center;
+          color: white;
+          background: linear-gradient(135deg, #68a6ff, #4a55ff);
+          box-shadow: 0 12px 24px rgba(75, 88, 255, 0.32);
+          flex: 0 0 auto;
+          font-size: 16px;
+          font-weight: 950;
+        }
+
+        .floatCard small {
+          display: block;
+          color: rgba(255, 255, 255, 0.72);
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: 0.09em;
+          text-transform: uppercase;
+        }
+
+        .floatCard strong {
+          display: block;
+          margin-top: 5px;
+          color: white;
+          font-size: 20px;
+          font-weight: 950;
+          line-height: 1.05;
+        }
+
+        .receipt {
+          top: 128px;
+          left: 74px;
+        }
+
+        .metric {
+          top: 258px;
+          right: -20px;
+          display: block;
+          min-width: 172px;
+          padding: 18px 20px;
+        }
+
+        .metric .icon {
+          margin-bottom: 12px;
+        }
+
+        .metric strong {
+          margin-top: 0;
+          font-size: 42px;
+          letter-spacing: -0.06em;
+        }
+
+        .workflow {
+          left: 80px;
+          bottom: 86px;
+        }
+      `}</style>
     </main>
   );
 }
