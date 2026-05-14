@@ -1,6 +1,7 @@
 import {
   PrismaClient,
   Role,
+  UserStatus,
   RentCycle,
   UnitStatus,
   ResidentStatus,
@@ -48,6 +49,7 @@ async function upsertUser(params: {
   role: Role;
   phone?: string;
   password?: string;
+  status?: UserStatus;
 }) {
   const hashed = await hashPassword(params.password ?? 'Password123!');
 
@@ -57,6 +59,7 @@ async function upsertUser(params: {
       name: params.name,
       role: params.role,
       phone: params.phone,
+      status: params.status ?? UserStatus.APPROVED,
     },
     create: {
       name: params.name,
@@ -64,6 +67,7 @@ async function upsertUser(params: {
       role: params.role,
       phone: params.phone,
       password: hashed,
+      status: params.status ?? UserStatus.APPROVED,
     },
   });
 }
@@ -465,6 +469,30 @@ async function main() {
     phone: '+256700000009',
   });
 
+
+  // =====================================================
+  // DPO REVIEW DEMO USERS
+  // Controlled demo accounts for payment-provider review.
+  // Password for both: Demo123!
+  // =====================================================
+  const demoManagerUser = await upsertUser({
+    name: 'Demo Manager',
+    email: 'demo.manager@zyprent.com',
+    role: Role.MANAGER,
+    phone: '+256700000101',
+    password: 'Demo123!',
+    status: UserStatus.APPROVED,
+  });
+
+  const demoResidentUser = await upsertUser({
+    name: 'Demo Resident',
+    email: 'demo.resident@zyprent.com',
+    role: Role.RESIDENT,
+    phone: '+256700000102',
+    password: 'Demo123!',
+    status: UserStatus.APPROVED,
+  });
+
   // =====================================================
   // USER ACCOUNTS + WALLETS
   // =====================================================
@@ -522,6 +550,19 @@ async function main() {
     balance: 0,
   });
 
+
+  const demoManagerAccount = await ensureAccount({
+    userId: demoManagerUser.id,
+    type: AccountType.USER,
+    balance: 0,
+  });
+
+  const demoResidentAccount = await ensureAccount({
+    userId: demoResidentUser.id,
+    type: AccountType.USER,
+    balance: 2500000,
+  });
+
   const johnWallet = await ensureWallet(investorJohn.id, 1145000);
   const maryWallet = await ensureWallet(investorMary.id, 1505000);
   const aliceWallet = await ensureWallet(residentAliceUser.id, 4000000);
@@ -529,6 +570,9 @@ async function main() {
   const providerWallet = await ensureWallet(providerUser.id, 180000);
   await ensureWallet(electricianUser.id, 0);
   await ensureWallet(securityUser.id, 0);
+
+  await ensureWallet(demoManagerUser.id, 0);
+  const demoResidentWallet = await ensureWallet(demoResidentUser.id, 2500000);
 
   // =====================================================
   // KYC
@@ -3506,6 +3550,356 @@ await prisma.notification.create({
   },
 });
 
+
+  // =====================================================
+  // DPO REVIEW DEMO PROPERTY, RESIDENT, INVOICES + PAYMENTS
+  // This adds a clean demo flow without deleting or replacing existing seed data.
+  // =====================================================
+  const dpoDemoProperty = await prisma.property.upsert({
+    where: {
+      title_phase: {
+        title: 'DPO Review Heights',
+        phase: 1,
+      },
+    },
+    update: {
+      slug: 'dpo-review-heights',
+      location: 'Kololo, Kampala',
+      totalUnits: 3,
+      version: 1,
+      isActive: true,
+      ownerId: investorJohn.id,
+      managerId: demoManagerUser.id,
+      serviceChargeAmount: 180000,
+      garbageFeeAmount: 30000,
+      expenseApprovalThreshold: 200000,
+      autoApproveSmallExpenses: true,
+    },
+    create: {
+      title: 'DPO Review Heights',
+      slug: 'dpo-review-heights',
+      location: 'Kololo, Kampala',
+      totalUnits: 3,
+      phase: 1,
+      version: 1,
+      isActive: true,
+      ownerId: investorJohn.id,
+      managerId: demoManagerUser.id,
+      serviceChargeAmount: 180000,
+      garbageFeeAmount: 30000,
+      expenseApprovalThreshold: 200000,
+      autoApproveSmallExpenses: true,
+    },
+  });
+
+  const dpoDemoPropertyAccount = await ensureAccount({
+    propertyId: dpoDemoProperty.id,
+    type: AccountType.PROPERTY,
+    balance: 0,
+  });
+
+  const dpoDemoUnitA01 = await prisma.unit.upsert({
+    where: {
+      propertyId_number: {
+        propertyId: dpoDemoProperty.id,
+        number: 'A01',
+      },
+    },
+    update: {
+      rentAmount: 1800000,
+      rentCycle: RentCycle.MONTHLY,
+      status: UnitStatus.OCCUPIED,
+    },
+    create: {
+      propertyId: dpoDemoProperty.id,
+      number: 'A01',
+      rentAmount: 1800000,
+      rentCycle: RentCycle.MONTHLY,
+      status: UnitStatus.OCCUPIED,
+    },
+  });
+
+  await prisma.unit.upsert({
+    where: {
+      propertyId_number: {
+        propertyId: dpoDemoProperty.id,
+        number: 'A02',
+      },
+    },
+    update: {
+      rentAmount: 1650000,
+      rentCycle: RentCycle.MONTHLY,
+      status: UnitStatus.VACANT,
+    },
+    create: {
+      propertyId: dpoDemoProperty.id,
+      number: 'A02',
+      rentAmount: 1650000,
+      rentCycle: RentCycle.MONTHLY,
+      status: UnitStatus.VACANT,
+    },
+  });
+
+  const dpoDemoResident = await prisma.resident.upsert({
+    where: { userId: demoResidentUser.id },
+    update: {
+      unitId: dpoDemoUnitA01.id,
+      status: ResidentStatus.ACTIVE,
+      createdById: demoManagerUser.id,
+    },
+    create: {
+      userId: demoResidentUser.id,
+      unitId: dpoDemoUnitA01.id,
+      status: ResidentStatus.ACTIVE,
+      createdById: demoManagerUser.id,
+    },
+  });
+
+  let dpoDemoContract = await prisma.rentContract.findFirst({
+    where: {
+      residentId: dpoDemoResident.id,
+      unitId: dpoDemoUnitA01.id,
+      isActive: true,
+    },
+  });
+
+  if (!dpoDemoContract) {
+    dpoDemoContract = await prisma.rentContract.create({
+      data: {
+        residentId: dpoDemoResident.id,
+        unitId: dpoDemoUnitA01.id,
+        rentAmount: 1800000,
+        depositAmount: 1800000,
+        serviceCharge: 180000,
+        garbageFee: 30000,
+        initialTermMonths: 12,
+        startDate: new Date('2026-05-01'),
+        billingAnchorDay: 1,
+        nextBillingDate: new Date('2026-06-01'),
+        isActive: true,
+      },
+    });
+  }
+
+  const dpoDemoRentInvoice = await prisma.rentInvoice.upsert({
+    where: {
+      rentContractId_period_kind: {
+        rentContractId: dpoDemoContract.id,
+        period: '2026-05',
+        kind: InvoiceKind.RENT,
+      },
+    },
+    update: {
+      residentId: dpoDemoResident.id,
+      unitId: dpoDemoUnitA01.id,
+      kind: InvoiceKind.RENT,
+      dueDate: new Date('2026-05-05'),
+      totalAmount: 1800000,
+      paidAmount: 0,
+      status: InvoiceStatus.ISSUED,
+    },
+    create: {
+      rentContractId: dpoDemoContract.id,
+      residentId: dpoDemoResident.id,
+      unitId: dpoDemoUnitA01.id,
+      kind: InvoiceKind.RENT,
+      period: '2026-05',
+      dueDate: new Date('2026-05-05'),
+      totalAmount: 1800000,
+      paidAmount: 0,
+      status: InvoiceStatus.ISSUED,
+    },
+  });
+
+  const dpoDemoServiceInvoice = await prisma.rentInvoice.upsert({
+    where: {
+      rentContractId_period_kind: {
+        rentContractId: dpoDemoContract.id,
+        period: '2026-05',
+        kind: InvoiceKind.SERVICE_CHARGE,
+      },
+    },
+    update: {
+      residentId: dpoDemoResident.id,
+      unitId: dpoDemoUnitA01.id,
+      kind: InvoiceKind.SERVICE_CHARGE,
+      dueDate: new Date('2026-05-05'),
+      totalAmount: 180000,
+      paidAmount: 180000,
+      status: InvoiceStatus.PAID,
+    },
+    create: {
+      rentContractId: dpoDemoContract.id,
+      residentId: dpoDemoResident.id,
+      unitId: dpoDemoUnitA01.id,
+      kind: InvoiceKind.SERVICE_CHARGE,
+      period: '2026-05',
+      dueDate: new Date('2026-05-05'),
+      totalAmount: 180000,
+      paidAmount: 180000,
+      status: InvoiceStatus.PAID,
+    },
+  });
+
+  const dpoDemoGarbageInvoice = await prisma.rentInvoice.upsert({
+    where: {
+      rentContractId_period_kind: {
+        rentContractId: dpoDemoContract.id,
+        period: '2026-05',
+        kind: InvoiceKind.GARBAGE,
+      },
+    },
+    update: {
+      residentId: dpoDemoResident.id,
+      unitId: dpoDemoUnitA01.id,
+      kind: InvoiceKind.GARBAGE,
+      dueDate: new Date('2026-05-05'),
+      totalAmount: 30000,
+      paidAmount: 30000,
+      status: InvoiceStatus.PAID,
+    },
+    create: {
+      rentContractId: dpoDemoContract.id,
+      residentId: dpoDemoResident.id,
+      unitId: dpoDemoUnitA01.id,
+      kind: InvoiceKind.GARBAGE,
+      period: '2026-05',
+      dueDate: new Date('2026-05-05'),
+      totalAmount: 30000,
+      paidAmount: 30000,
+      status: InvoiceStatus.PAID,
+    },
+  });
+
+  const dpoDemoServicePayment = await prisma.payment.upsert({
+    where: { providerRef: 'DPO-DEMO-SERVICE-2026-05' },
+    update: {
+      amount: 180000,
+      channel: PaymentChannel.MOBILE_MONEY,
+      provider: PaymentProvider.MTN,
+      status: PaymentStatus.SUCCESS,
+      invoiceId: dpoDemoServiceInvoice.id,
+    },
+    create: {
+      amount: 180000,
+      channel: PaymentChannel.MOBILE_MONEY,
+      provider: PaymentProvider.MTN,
+      providerRef: 'DPO-DEMO-SERVICE-2026-05',
+      status: PaymentStatus.SUCCESS,
+      invoiceId: dpoDemoServiceInvoice.id,
+    },
+  });
+
+  const dpoDemoGarbagePayment = await prisma.payment.upsert({
+    where: { providerRef: 'DPO-DEMO-GARBAGE-2026-05' },
+    update: {
+      amount: 30000,
+      channel: PaymentChannel.MOBILE_MONEY,
+      provider: PaymentProvider.AIRTEL,
+      status: PaymentStatus.SUCCESS,
+      invoiceId: dpoDemoGarbageInvoice.id,
+    },
+    create: {
+      amount: 30000,
+      channel: PaymentChannel.MOBILE_MONEY,
+      provider: PaymentProvider.AIRTEL,
+      providerRef: 'DPO-DEMO-GARBAGE-2026-05',
+      status: PaymentStatus.SUCCESS,
+      invoiceId: dpoDemoGarbageInvoice.id,
+    },
+  });
+
+  await ensureLedgerEntry({
+    accountId: demoResidentAccount.id,
+    credit: 2500000,
+    source: LedgerSource.EXTERNAL_FUNDING,
+    reference: 'EXT-DEMO-RESIDENT-001',
+  });
+
+  await ensureWalletTransaction({
+    walletId: demoResidentWallet.id,
+    type: WalletTransactionType.DEPOSIT,
+    status: WalletTransactionStatus.COMPLETED,
+    amount: 2500000,
+    reference: 'EXT-DEMO-RESIDENT-001',
+  });
+
+  await ensureLedgerEntry({
+    accountId: demoResidentAccount.id,
+    debit: 180000,
+    source: LedgerSource.SERVICE_CHARGE_PAYMENT,
+    reference: 'DPO-DEMO-SERVICE-2026-05',
+    propertyId: dpoDemoProperty.id,
+    rentInvoiceId: dpoDemoServiceInvoice.id,
+    paymentId: dpoDemoServicePayment.id,
+  });
+
+  await ensureLedgerEntry({
+    accountId: dpoDemoPropertyAccount.id,
+    credit: 180000,
+    source: LedgerSource.SERVICE_CHARGE_PAYMENT,
+    reference: 'DPO-DEMO-SERVICE-2026-05',
+    propertyId: dpoDemoProperty.id,
+    rentInvoiceId: dpoDemoServiceInvoice.id,
+    paymentId: dpoDemoServicePayment.id,
+  });
+
+  await ensureLedgerEntry({
+    accountId: demoResidentAccount.id,
+    debit: 30000,
+    source: LedgerSource.GARBAGE_PAYMENT,
+    reference: 'DPO-DEMO-GARBAGE-2026-05',
+    propertyId: dpoDemoProperty.id,
+    rentInvoiceId: dpoDemoGarbageInvoice.id,
+    paymentId: dpoDemoGarbagePayment.id,
+  });
+
+  await ensureLedgerEntry({
+    accountId: dpoDemoPropertyAccount.id,
+    credit: 30000,
+    source: LedgerSource.GARBAGE_PAYMENT,
+    reference: 'DPO-DEMO-GARBAGE-2026-05',
+    propertyId: dpoDemoProperty.id,
+    rentInvoiceId: dpoDemoGarbageInvoice.id,
+    paymentId: dpoDemoGarbagePayment.id,
+  });
+
+  await ensureWalletTransaction({
+    walletId: demoResidentWallet.id,
+    type: WalletTransactionType.RENT_PAYMENT,
+    status: WalletTransactionStatus.COMPLETED,
+    amount: 180000,
+    reference: 'DPO-DEMO-SERVICE-2026-05',
+  });
+
+  await ensureWalletTransaction({
+    walletId: demoResidentWallet.id,
+    type: WalletTransactionType.RENT_PAYMENT,
+    status: WalletTransactionStatus.COMPLETED,
+    amount: 30000,
+    reference: 'DPO-DEMO-GARBAGE-2026-05',
+  });
+
+  await prisma.notification.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        userId: demoManagerUser.id,
+        title: 'Demo property ready',
+        message: 'DPO Review Heights is configured for payment-provider review.',
+        type: NotificationType.SYSTEM,
+        isRead: false,
+      },
+      {
+        userId: demoResidentUser.id,
+        title: 'Outstanding rent invoice',
+        message: 'Your May 2026 rent invoice is ready for payment review.',
+        type: NotificationType.RENT_PAYMENT,
+        isRead: false,
+      },
+    ],
+  });
+
   // =====================================================
   // FINAL ACCOUNT + WALLET SYNC
   // =====================================================
@@ -3524,6 +3918,8 @@ await prisma.notification.create({
   await syncWalletFromLedger(providerUser.id);
   await syncWalletFromLedger(electricianUser.id);
   await syncWalletFromLedger(securityUser.id);
+  await syncWalletFromLedger(demoManagerUser.id);
+  await syncWalletFromLedger(demoResidentUser.id);
 
   console.log('✅ Seed completed successfully');
   console.log('');
@@ -3537,6 +3933,8 @@ await prisma.notification.create({
   console.log('Provider: provider@zyrent.com / Password123!');
   console.log('Provider: electrician@zyrent.com / Password123!');
   console.log('Provider: security@zyrent.com / Password123!');
+  console.log('DPO Demo Manager: demo.manager@zyprent.com / Demo123!');
+  console.log('DPO Demo Resident: demo.resident@zyprent.com / Demo123!');
   console.log('Provider: painter@zyrent.com / Password123!');
   console.log('Provider: cleaner@zyrent.com / Password123!');
   console.log('Provider: contractor@zyrent.com / Password123!');
