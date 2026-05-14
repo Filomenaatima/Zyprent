@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import AuthHydrator from "@/components/AuthHydrator";
+import SubscriptionGuard from "@/components/SubscriptionGuard";
 
 export default function MainLayout({
   children,
@@ -11,44 +12,48 @@ export default function MainLayout({
   return (
     <>
       <AuthHydrator />
-      <div
-        style={{
-          height: "100vh",
-          background: "#F8FAFC",
-          display: "flex",
-          overflow: "hidden",
-        }}
-      >
-        <Sidebar />
 
+      <SubscriptionGuard>
         <div
           style={{
-            flex: 1,
-            minWidth: 0,
-            minHeight: 0,
+            height: "100vh",
+            background: "#F8FAFC",
             display: "flex",
-            flexDirection: "column",
             overflow: "hidden",
           }}
         >
-          <Topbar />
+          <Sidebar />
 
-          <main
+          <div
             style={{
               flex: 1,
               minWidth: 0,
               minHeight: 0,
-              overflowX: "hidden",
-              overflowY: "auto",
-              padding: "18px",
-              background: "linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%)",
-              scrollbarWidth: "thin",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
             }}
           >
-            {children}
-          </main>
+            <Topbar />
+
+            <main
+              style={{
+                flex: 1,
+                minWidth: 0,
+                minHeight: 0,
+                overflowX: "hidden",
+                overflowY: "auto",
+                padding: "18px",
+                background:
+                  "linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%)",
+                scrollbarWidth: "thin",
+              }}
+            >
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
+      </SubscriptionGuard>
     </>
   );
 }

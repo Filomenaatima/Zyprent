@@ -7,7 +7,12 @@ import { useAuthStore } from "@/store/auth";
 
 type Mode = "login" | "signup";
 
-type Role = "MANAGER" | "INVESTOR" | "RESIDENT" | "SERVICE_PROVIDER";
+type Role =
+  | "ADMIN"
+  | "MANAGER"
+  | "INVESTOR"
+  | "RESIDENT"
+  | "SERVICE_PROVIDER";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,6 +44,7 @@ export default function LoginPage() {
         const res = await api.post("/auth/register", {
           name,
           email,
+          phone,
           role,
           password,
         });
@@ -69,13 +75,22 @@ export default function LoginPage() {
       if (access_token && user) {
         localStorage.setItem("refresh_token", refresh_token || "");
         setAuth(access_token, user);
+
+        const mustSubscribeBeforeDashboard =
+          user.role === "MANAGER" ||
+          user.role === "INVESTOR" ||
+          user.role === "RESIDENT";
+
+        if (mustSubscribeBeforeDashboard) {
+          router.push("/pricing");
+          return;
+        }
+
         router.push("/dashboard");
       }
     } catch (err: any) {
       const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Request failed";
+        err?.response?.data?.message || err?.message || "Request failed";
 
       if (String(message).toLowerCase().includes("pending approval")) {
         router.push(`/pending-approval?email=${encodeURIComponent(email)}`);
@@ -112,12 +127,18 @@ export default function LoginPage() {
               <span>New accounts are reviewed before platform access.</span>
             </div>
             <div>
-              <strong>Clear visibility</strong>
-              <span>Payments, wallets, reports, and records in one place.</span>
+              <strong>Subscription access</strong>
+              <span>
+                Managers, investors, and residents select a plan before entering
+                the workspace.
+              </span>
             </div>
             <div>
-              <strong>Less chasing</strong>
-              <span>Operations stay structured from start to finish.</span>
+              <strong>Provider friendly</strong>
+              <span>
+                Service providers can access jobs without a monthly
+                subscription.
+              </span>
             </div>
           </div>
         </div>
@@ -144,6 +165,7 @@ export default function LoginPage() {
             >
               Sign in
             </button>
+
             <button
               type="button"
               className={mode === "signup" ? "active" : ""}
@@ -250,8 +272,16 @@ export default function LoginPage() {
           justify-content: center;
           padding: 40px 20px;
           background:
-            radial-gradient(circle at 80% 10%, rgba(107, 166, 255, 0.22), transparent 32%),
-            radial-gradient(circle at 15% 80%, rgba(107, 166, 255, 0.14), transparent 34%),
+            radial-gradient(
+              circle at 80% 10%,
+              rgba(107, 166, 255, 0.22),
+              transparent 32%
+            ),
+            radial-gradient(
+              circle at 15% 80%,
+              rgba(107, 166, 255, 0.14),
+              transparent 34%
+            ),
             linear-gradient(135deg, #030107 0%, #07051a 45%, #0b1026 100%);
           color: #ffffff;
         }
