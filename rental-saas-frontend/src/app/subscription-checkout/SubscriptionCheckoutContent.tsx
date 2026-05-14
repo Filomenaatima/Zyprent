@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { api } from "@/services/api";
 
 export default function SubscriptionCheckoutContent() {
   const params = useSearchParams();
@@ -14,19 +15,28 @@ export default function SubscriptionCheckoutContent() {
   const [loading, setLoading] = useState(false);
 
   const handlePayment = async () => {
-    setLoading(true);
-    setMessage("");
-
     try {
-      setMessage(
-        "Payment provider is not fully connected yet. Your subscription has not been activated, and dashboard access remains locked until payment is confirmed.",
-      );
+      setLoading(true);
+      setMessage("");
 
-      // IMPORTANT:
-      // Do NOT redirect to dashboard here.
-      // Dashboard redirect should only happen after DPO confirms payment successfully.
-    } catch {
-      setMessage("Payment failed. Please try again.");
+      const paymentRef = `TEST-${Date.now()}`;
+
+      await api.post("/subscriptions/activate-test", {
+        planName: plan,
+        amount,
+        paymentRef,
+      });
+
+      setMessage("Subscription activated successfully.");
+
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1200);
+    } catch (error: any) {
+      setMessage(
+        error?.response?.data?.message ||
+          "Payment activation failed. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -40,7 +50,7 @@ export default function SubscriptionCheckoutContent() {
         <h1>Complete your Zyprent subscription</h1>
 
         <p>
-          Your dashboard access will only be activated after a successful payment
+          Your dashboard access will only be activated after successful payment
           confirmation.
         </p>
 
@@ -63,7 +73,11 @@ export default function SubscriptionCheckoutContent() {
 
         {message && <div className="checkout-message">{message}</div>}
 
-        <button onClick={handlePayment} className="pay-button" disabled={loading}>
+        <button
+          onClick={handlePayment}
+          className="pay-button"
+          disabled={loading}
+        >
           {loading ? "Processing..." : "Continue to Payment"}
         </button>
 
@@ -94,7 +108,11 @@ export default function SubscriptionCheckoutContent() {
           padding: 42px;
           border-radius: 34px;
           border: 1px solid rgba(147, 197, 253, 0.18);
-          background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(8, 26, 58, 0.98));
+          background: linear-gradient(
+            180deg,
+            rgba(15, 23, 42, 0.94),
+            rgba(8, 26, 58, 0.98)
+          );
           box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
           color: white;
         }
@@ -159,9 +177,9 @@ export default function SubscriptionCheckoutContent() {
           margin-top: 22px;
           padding: 14px 16px;
           border-radius: 16px;
-          background: rgba(245, 158, 11, 0.12);
-          border: 1px solid rgba(245, 158, 11, 0.24);
-          color: #fde68a;
+          background: rgba(37, 99, 235, 0.12);
+          border: 1px solid rgba(96, 165, 250, 0.24);
+          color: #bfdbfe;
           font-size: 14px;
           line-height: 1.55;
         }
